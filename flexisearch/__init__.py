@@ -1,3 +1,3 @@
-from .flexisearch import FlexiSearch
+from .flexisearch import FxSearcher
 
-__all__ = ["FlexiSearch"]
+__all__ = ["FxSearcher"]
