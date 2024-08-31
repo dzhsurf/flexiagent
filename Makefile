@@ -2,6 +2,7 @@
 
 PROJECT_NAME=flexisearch
 PYTHON=python3
+MYPY=mypy
 PIP=$(PYTHON) -m pip
 
 .DEFAULT_GOAL := help
@@ -22,6 +23,9 @@ run: ## Local run
 
 test: ## Run tests.
 	$(PYTHON) -m pytest tests/
+
+mypy: ## Run mypy checker
+	$(MYPY) $(PROJECT_NAME)
 
 format: ## Format project code.
 	$(PYTHON) -m black $(PROJECT_NAME)
