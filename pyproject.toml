@@ -8,12 +8,17 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.11"
+langchain = "^0.2.15"
+langchain-openai = "^0.1.23"
+langchain-community = "^0.2.16"
+sqlparse = "^0.5.1"
 
 
 [tool.poetry.group.dev.dependencies]
 black = "^24.8.0"
 isort = "^5.13.2"
 mypy = "^1.11.2"
+pytest = "^8.3.2"
 
 [build-system]
 requires = ["poetry-core"]
