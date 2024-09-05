@@ -25,6 +25,26 @@ def main():
         ),
     )
 
+    # case 1: not applicable.
+    #searcher.assist(
+    #   "can you help me do the math problem: x, y, z."
+    #)
+    # query understable
+    # accept intention , not accept ....
+    # (## .... example, description: metadata, purpose, ), {QA} 
+
+    # tool chain
+    # searcher.register(tool, description)
+
+    # searcher.match_intention
+    #  prompt
+    #   you have tools:
+    # 1: SQL2Text parser, this tool is good for matching query query to express it in sql format,
+    # 2: Embedding required, ....
+    # 3: # f,dl.af
+    # not application.
+
+    # 
     """
 SQLQuery: SELECT "Location", "Name" FROM stadium WHERE "Capacity" BETWEEN 5000 AND 10000 LIMIT 5;
 Retrieval: []
