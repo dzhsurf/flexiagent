@@ -1,8 +1,7 @@
 from typing import Any, List
 
 from pydantic import BaseModel
-from sqlalchemy import create_engine, text
-from sqlalchemy import MetaData
+from sqlalchemy import MetaData, create_engine, text
 
 
 class DBConfig(BaseModel):
