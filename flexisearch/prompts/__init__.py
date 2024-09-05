@@ -45,6 +45,23 @@ Answer the user's question based on these results.
     user_question_prompt=PROMPT_TEXT_DEFAULT_USER_QUESTION,
 )
 
+PROMPT_TEMPLATE_INTENT_RECOGNITION = PromptTemplate(
+    prompt="""You will be provided with a user question and a list of actions regarding how to proceed. 
+Based on the information from the action list, analyze the user’s question to determine which action should be taken.
+
+Use the following format:
+
+Question: Question here
+IntentionResult: ["result_action1", "result_action2"]
+Answer: Final answer here
+
+Only use the following action items:
+{actions}
+""",
+    stop_prompt="Answer:",
+    user_question_prompt="Question: {input}",
+)
+
 
 __all__ = [
     "PromptTemplate",

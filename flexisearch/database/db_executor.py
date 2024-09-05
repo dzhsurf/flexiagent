@@ -1,4 +1,4 @@
-from typing import Any, List
+from typing import List
 
 from pydantic import BaseModel
 from sqlalchemy import MetaData, create_engine, text
