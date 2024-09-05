@@ -1,11 +1,12 @@
 import os
 import time
 from typing import List, Tuple
-from langchain_openai import ChatOpenAI
-from langchain_community.utilities import SQLDatabase
+
+import sqlparse
 from langchain.chains.sql_database.query import create_sql_query_chain
 from langchain.prompts import PromptTemplate
-import sqlparse
+from langchain_community.utilities import SQLDatabase
+from langchain_openai import ChatOpenAI
 
 llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
 
