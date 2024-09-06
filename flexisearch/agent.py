@@ -1,6 +1,5 @@
 from dataclasses import dataclass
-from typing import (Any, Callable, Dict, Generic, List, Optional, Protocol,
-                    TypeVar)
+from typing import Any, Callable, Dict, Generic, List, Optional, Protocol, TypeVar, cast
 
 from pydantic import BaseModel
 
@@ -9,7 +8,8 @@ from flexisearch.llm import LLM
 
 
 class FxAgentVariable(BaseModel):
-    pass
+    class Config:
+        arbitrary_types_allowed = True
 
 
 class FxAgentInput(FxAgentVariable):
@@ -20,9 +20,9 @@ class FxAgentOutput(FxAgentVariable):
     pass
 
 
-Input = TypeVar("Input", contravariant=True, bound=FxAgentInput)
-Output = TypeVar("Output", covariant=True)
-FxAgentParseOutput = TypeVar("FxAgentParseOutput", covariant=True, bound=FxAgentInput)
+Input = TypeVar("Input", bound=FxAgentInput)
+Output = TypeVar("Output")
+FxAgentParseOutput = TypeVar("FxAgentParseOutput", bound=FxAgentInput)
 
 
 @dataclass
@@ -45,8 +45,11 @@ class FxAgentRunner(Generic[Input, Output], Protocol):
     ) -> FxAgentRunnerResult[Output]:
         pass
 
+    def construct_input(self, input: Any) -> Input:
+        pass
 
-class FxAgent(Generic[Input, Output], FxAgentRunner[Input, Output]):
+
+class FxAgent(FxAgentRunner[Input, Output]):
     def __init__(
         self,
         name: str,
@@ -61,8 +64,14 @@ class FxAgent(Generic[Input, Output], FxAgentRunner[Input, Output]):
         self.description = description
         self.output_parser = output_parser
 
+    def construct_input(self, input: Any) -> Input:
+        if isinstance(input, FxAgentInput):
+            return input  # type: ignore
+        else:
+            raise TypeError(f"input type not match, {type(input)} -> {FxAgentInput}")
 
-class FxAgentChain(Generic[Input, Output], FxAgent[Input, Output]):
+
+class FxAgentChain(FxAgent[Input, Output]):
     def __init__(
         self,
         name: str,
@@ -93,7 +102,9 @@ class FxAgentChain(Generic[Input, Output], FxAgent[Input, Output]):
             result = agent.invoke(configure, pre_result.value)
             # use output parser to convert output result
             if agent.output_parser:
-                result.value = agent.output_parser(configure, input, result.value)
+                result.value = agent.output_parser(
+                    configure, pre_result.value, result.value
+                )
 
             if result.stop:
                 # TODO: type check

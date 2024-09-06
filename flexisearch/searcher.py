@@ -1,6 +1,6 @@
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
-from flexisearch.agent import FxAgent, FxAgentRunnerConfig
+from flexisearch.agent import FxAgent, FxAgentInput, FxAgentRunnerConfig
 from flexisearch.agents.agent_intent_recognizer import (
     FxAgentIntentRecognizer, FxAgentIntentRecognizerInput)
 from flexisearch.indexer import FxIndexer
@@ -8,28 +8,23 @@ from flexisearch.llm import LLM
 
 
 class FxSearcher:
-    llm: LLM
-    indexer: FxIndexer
-    agents: Dict[str, FxAgent]
-
     def __init__(self, indexer: FxIndexer):
         self.llm = LLM()
         self.indexer = indexer
-        self.agents = {}
+        self.agents: Dict[str, FxAgent[FxAgentInput, Any]] = {}
 
-    def register(self, agent: FxAgent):
+    def register(self, agent: FxAgent[Any, Any]):
         self.agents[agent.name] = agent
 
     def assist(self, input: str) -> str:
         # match agent
-        match_agents = self._match_intention(
+        match_agent = self._match_intention(
             input, [item for _, item in self.agents.items()]
         )
-
-        # invoke agent, TODO, only pick one
-        if len(match_agents) > 0:
-            result = match_agents[0].invoke(
-                FxAgentRunnerConfig(self.llm, self.indexer), input
+        if match_agent:
+            result = match_agent.invoke(
+                FxAgentRunnerConfig(self.llm, self.indexer),
+                match_agent.construct_input(input),
             )
             return str(result.value)
 
@@ -37,11 +32,16 @@ class FxSearcher:
 
     def _match_intention(
         self, input: str, agents: List[FxAgent[Any, Any]]
-    ) -> List[FxAgent[Any, Any]]:
+    ) -> Optional[FxAgent[FxAgentInput, Any]]:
         agent = FxAgentIntentRecognizer()
         result = agent.invoke(
             FxAgentRunnerConfig(llm=self.llm, indexer=self.indexer),
             FxAgentIntentRecognizerInput(input=input, agents=agents),
         )
 
-        return result.value
+        print("Match intent:", [agent.name for agent in result.value])
+
+        if len(result.value) > 0:
+            return result.value[0]
+
+        return None

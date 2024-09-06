@@ -1,14 +1,13 @@
-from typing import Callable, Optional, cast
+from typing import Any, Callable, Optional, cast
 
-from flexisearch.agent import (FxAgentChain, FxAgentParseOutput,
-                               FxAgentRunnerConfig)
-from flexisearch.agents.agent_context_qa import (FxAgentContextQA,
-                                                 FxAgentContextQAInput)
-from flexisearch.agents.agent_retriever import (FxAgentRetriever,
-                                                FxAgentRetrieverInput,
-                                                FxAgentRetrieverOutput)
-from flexisearch.agents.agent_text2sql import (FxAgentText2SQL,
-                                               FxAgentText2SQLInput)
+from flexisearch.agent import FxAgentChain, FxAgentParseOutput, FxAgentRunnerConfig
+from flexisearch.agents.agent_context_qa import FxAgentContextQA, FxAgentContextQAInput
+from flexisearch.agents.agent_retriever import (
+    FxAgentRetriever,
+    FxAgentRetrieverInput,
+    FxAgentRetrieverOutput,
+)
+from flexisearch.agents.agent_text2sql import FxAgentText2SQL, FxAgentText2SQLInput
 
 
 class FxAgentText2SqlQA(FxAgentChain[FxAgentText2SQLInput, str]):
@@ -31,6 +30,18 @@ class FxAgentText2SqlQA(FxAgentChain[FxAgentText2SQLInput, str]):
             ],
             output_parser=output_parser,
         )
+
+    def construct_input(self, input: Any) -> FxAgentText2SQLInput:
+        if isinstance(input, str):
+            return FxAgentText2SQLInput(
+                input=input,
+            )
+        elif isinstance(input, FxAgentText2SQLInput):
+            return input
+        else:
+            raise TypeError(
+                f"input type not match, {type(input)} -> {FxAgentText2SQLInput}"
+            )
 
     def _parse_text2sql_output(
         self,

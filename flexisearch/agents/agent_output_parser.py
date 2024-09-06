@@ -1,17 +1,17 @@
-from typing import Callable, Optional, TypeVar
+from typing import Callable, Optional
 
 from flexisearch.agent import (FxAgent, FxAgentInput, FxAgentParseOutput,
                                FxAgentRunnerConfig, FxAgentRunnerResult)
 
-T = TypeVar("T", bound=FxAgentInput)
 
-
-class FxAgentOutputParser(FxAgent[T, T]):
+class FxAgentOutputParser(FxAgent[FxAgentInput, FxAgentInput]):
     def __init__(
         self,
         *,
         output_parser: Optional[
-            Callable[[FxAgentRunnerConfig, T, T], FxAgentParseOutput]
+            Callable[
+                [FxAgentRunnerConfig, FxAgentInput, FxAgentInput], FxAgentParseOutput
+            ]
         ] = None,
     ):
         super().__init__(
@@ -23,6 +23,6 @@ class FxAgentOutputParser(FxAgent[T, T]):
     def invoke(
         self,
         configure: FxAgentRunnerConfig,
-        input: T,
-    ) -> FxAgentRunnerResult[T]:
+        input: FxAgentInput,
+    ) -> FxAgentRunnerResult[FxAgentInput]:
         return FxAgentRunnerResult(stop=False, value=input)

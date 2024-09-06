@@ -1,16 +1,18 @@
+import json
 from typing import Any, List
 
 from flexisearch.agent import (FxAgent, FxAgentInput, FxAgentRunnerConfig,
                                FxAgentRunnerResult)
+from flexisearch.prompts import PROMPT_TEMPLATE_INTENT_RECOGNITION
 
 
 class FxAgentIntentRecognizerInput(FxAgentInput):
     input: str
-    agents: List[FxAgent[Any, Any]]
+    agents: List[FxAgent[FxAgentInput, Any]]
 
 
 class FxAgentIntentRecognizer(
-    FxAgent[FxAgentIntentRecognizerInput, List[FxAgent[Any, Any]]]
+    FxAgent[FxAgentIntentRecognizerInput, List[FxAgent[FxAgentInput, Any]]]
 ):
     def __init__(self):
         super().__init__("AgentIntentRecognition", "")
@@ -19,28 +21,39 @@ class FxAgentIntentRecognizer(
         self,
         configure: FxAgentRunnerConfig,
         input: FxAgentIntentRecognizerInput,
-    ) -> FxAgentRunnerResult[List[FxAgent[Any, Any]]]:
-        # query = ""
-        # knowledge_context = ""
+    ) -> FxAgentRunnerResult[List[FxAgent[FxAgentInput, Any]]]:
+        agent_dict = {}
+        actions = ""
+        for agent in input.agents:
+            actions += f"* {agent.name}: {agent.description}\n"
+            agent_dict[agent.name] = agent
 
-        # if isinstance(input, str):
-        #     query = input
-        # elif isinstance(input, dict):
-        #     query = str(input["input"])
-        #     if "context" in input:
-        #         knowledge_context = input["knowledge_context"]
-        # else:
-        #     raise ValueError("input type not correct")
+        response = configure.llm.query(
+            PROMPT_TEMPLATE_INTENT_RECOGNITION,
+            variables={
+                "input": input.input,
+                "actions": actions,
+            },
+        )
 
-        # response = configure.llm.query(
-        #     PROMPT_TEMPLATE_CONTEXT_QA,
-        #     variables={
-        #         "input": query,
-        #         "knowledge_context": knowledge_context,
-        #     },
-        # )
+        print("Intent:", response)
+        # format result to json
+        if response.startswith("JSONResult:"):
+            response = response[len("JSONResult:") + 1 :].strip()
+        print("Formated:", response)
 
-        return FxAgentRunnerResult[List[FxAgent[Any, Any]]](
+        result = []
+        try:
+            json_obj = json.loads(response)
+            if isinstance(json_obj, list) and len(json_obj) > 0:
+                for item in json_obj:
+                    agent_name = str(item)
+                    if agent_name in agent_dict:
+                        result.append(agent_dict[agent_name])
+        except Exception:
+            pass
+
+        return FxAgentRunnerResult[List[FxAgent[FxAgentInput, Any]]](
             stop=False,
-            value=[],
+            value=result,
         )
