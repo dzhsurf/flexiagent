@@ -13,3 +13,7 @@ export OPENAI_API_KEY=xxxx
 ```shell
 python main.py
 ```
+
+# benchmark 
+
+./benchmark/README.md

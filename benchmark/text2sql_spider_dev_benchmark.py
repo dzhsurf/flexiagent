@@ -9,6 +9,21 @@ from flexisearch.indexer import FxIndexer
 from flexisearch.llm import LLM
 
 
+# spider 1.0 dev
+# evaluation code: https://github.com/taoyds/test-suite-sql-eval
+# run evaluation:
+# python evaluation.py ...
+
+# dataset: https://www.kaggle.com/datasets/jeromeblanchet/yale-universitys-spider-10-nlp-dataset/data
+
+SPIDER_DEV_ROOT = "../../benchmarking/spider"
+SPIDER_DEV_JSON = f"{SPIDER_DEV_ROOT}/dev.json"
+SPIDER_DEV_DATABASE = f"{SPIDER_DEV_ROOT}/database"
+SPIDER_DEV_GOLD = f"{SPIDER_DEV_ROOT}/dev_gold.sql"
+
+# spider 2 github: https://github.com/xlang-ai/Spider2
+
+
 def read_qa_list() -> List[Tuple[str, str]]:
     qa_list: List[Tuple[str, str]] = []
     temp_item: List[str] = []
