@@ -34,12 +34,13 @@ Here are some rules to follow:
     user_question_prompt=PROMPT_TEXT_DEFAULT_USER_QUESTION,
 )
 
-PROMPT_TEMPLATE_RESPONSE_WITH_KNOWLEDGE_CONTEXT = PromptTemplate(
+PROMPT_TEMPLATE_CONTEXT_QA = PromptTemplate(
     prompt="""You are a helpful assistant, follow the instructure, response the question below.
 
 The following are results accurately matched from the database based on the user's question. 
 Answer the user's question based on these results.
-{knowledge_context}
+{context}
+
 """,
     stop_prompt="",
     user_question_prompt=PROMPT_TEXT_DEFAULT_USER_QUESTION,
@@ -52,7 +53,7 @@ Based on the information from the action list, analyze the user’s question to 
 Use the following format:
 
 Question: Question here
-IntentionResult: ["result_action1", "result_action2"]
+JSONResult: ["action1", "action1"]
 Answer: Final answer here
 
 Only use the following action items:

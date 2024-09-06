@@ -4,10 +4,8 @@ from flexisearch.database.db_executor import DBConfig, DBExecutor
 
 
 class FxIndexer:
-    metadb: Optional[DBExecutor]
-
     def __init__(self):
-        self.metadb = None
+        self.metadb: Optional[DBExecutor] = None
 
     def connect_to_metadb(self, db_config: DBConfig):
         if self.metadb:
@@ -31,7 +29,7 @@ class FxIndexer:
 
         return result
 
-    def retrieval_documents(self, query: str) -> List[str]:
+    def retrieve_documents(self, query: str) -> List[str]:
         if self.metadb:
             return self.metadb.query(query)
         return []

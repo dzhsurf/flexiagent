@@ -1,54 +1,57 @@
+from typing import Callable, Optional, TypeVar
+
 import sqlparse
 
-from flexisearch.agent import (
-    FxAgent,
-    FxAgentRunnerConfig,
-    FxAgentRunnerResult,
-    FxAgentRunnerValue,
-)
-
+from flexisearch.agent import (FxAgent, FxAgentInput, FxAgentRunnerConfig,
+                               FxAgentRunnerResult)
 from flexisearch.prompts import PROMPT_TEMPLATE_SQLITE_TEXT2SQL_EXPERT
 
+ParseOutput = TypeVar("ParseOutput", covariant=True)
 
-class FxAgentText2SQL(FxAgent):
-    def __init__(self):
-        super().__init__("AgentText2SQL", "")
+
+class FxAgentText2SQLInput(FxAgentInput):
+    input: str
+    table_info: Optional[str] = None
+    top_k: Optional[int] = None
+
+
+class FxAgentText2SQL(FxAgent[FxAgentText2SQLInput, str]):
+    def __init__(
+        self,
+        *,
+        output_parser: Optional[
+            Callable[[FxAgentRunnerConfig, FxAgentText2SQLInput, str], ParseOutput]
+        ] = None,
+    ):
+        super().__init__(
+            "AgentText2SQL",
+            "",
+            output_parser=output_parser,
+        )
 
     def invoke(
-        self, configure: FxAgentRunnerConfig, input: FxAgentRunnerValue
-    ) -> FxAgentRunnerResult:
-        query = ""
-        table_info = ""
-        top_k = 5
-
-        if isinstance(input, str):
-            query = input
-            table_info = configure.indexer.get_all_schemas_as_text()
-        elif isinstance(input, dict):
-            query = str(input["input"])
-            if "table_info" in input:
-                table_info = input["table_info"]
-            else:
-                table_info = configure.indexer.get_all_schemas_as_text()
-            if "top_k" in input:
-                top_k = int(input["top_k"])
-        else:
-            raise ValueError("input type not correct")
+        self,
+        configure: FxAgentRunnerConfig,
+        input: FxAgentText2SQLInput,
+    ) -> FxAgentRunnerResult[str]:
+        if input.table_info is None:
+            input.table_info = configure.indexer.get_all_schemas_as_text()
+        if input.top_k is None:
+            input.top_k = 5
 
         # llm query
         response = configure.llm.query(
             PROMPT_TEMPLATE_SQLITE_TEXT2SQL_EXPERT,
             variables={
-                "input": query,
-                "table_info": table_info,
-                "top_k": top_k,
+                "input": input.input,
+                "table_info": input.table_info,
+                "top_k": input.top_k,
             },
         )
 
         final_sql = self._structured_output_sql(response)
-        return FxAgentRunnerResult(
+        return FxAgentRunnerResult[str](
             stop=False,
-            error_msg="",
             value=final_sql,
         )
 

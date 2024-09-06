@@ -1,7 +1,15 @@
-from typing import Any, Dict, List, Protocol, Union
 from dataclasses import dataclass
+from typing import (Any, Callable, Dict, Generic, List, Optional, Protocol,
+                    TypeVar)
+
+from pydantic import BaseModel
+
 from flexisearch.indexer import FxIndexer
 from flexisearch.llm import LLM
+
+Input = TypeVar("Input", contravariant=True)
+Output = TypeVar("Output", covariant=True)
+ParseOutput = TypeVar("ParseOutput", covariant=True)
 
 
 @dataclass
@@ -10,58 +18,93 @@ class FxAgentRunnerConfig:
     indexer: FxIndexer
 
 
-FxAgentRunnerValue = Union[str, Dict[str, Any]]
-
-
 @dataclass
-class FxAgentRunnerResult:
+class FxAgentRunnerResult(Generic[Output]):
     stop: bool
-    error_msg: str
-    value: FxAgentRunnerValue
+    value: Output
 
 
-class FxAgentRunner(Protocol):
+class FxAgentRunner(Generic[Input, Output], Protocol):
     def invoke(
         self,
         configure: FxAgentRunnerConfig,
-        input: FxAgentRunnerValue,
-    ) -> FxAgentRunnerResult:
+        input: Input,
+    ) -> FxAgentRunnerResult[Output]:
         pass
 
 
-class FxAgent(FxAgentRunner):
-    name: str
-    description: str
+class FxAgentVariable(BaseModel):
+    pass
 
-    def __init__(self, name: str, description: str):
+
+class FxAgentInput(FxAgentVariable):
+    addition: Optional[Dict[str, Any]] = None
+
+
+class FxAgentOutput(FxAgentVariable):
+    pass
+
+
+class FxAgent(Generic[Input, Output], FxAgentRunner[Input, Output]):
+    def __init__(
+        self,
+        name: str,
+        description: str,
+        *,
+        output_parser: Optional[
+            Callable[[FxAgentRunnerConfig, Input, Output], ParseOutput]
+        ] = None,
+    ):
         super().__init__()
         self.name = name
         self.description = description
+        self.output_parser = output_parser
 
 
-class FxAgentChain(FxAgent):
-    agents: List[FxAgent]
-
-    def __init__(self, name: str, description: str, agents: List[FxAgent]) -> None:
-        super().__init__(name, description)
+class FxAgentChain(Generic[Input, Output], FxAgent[Input, Output]):
+    def __init__(
+        self,
+        name: str,
+        description: str,
+        *,
+        agents: List[FxAgent[Any, Any]],
+        output_parser: Optional[
+            Callable[[FxAgentRunnerConfig, Input, Output], ParseOutput]
+        ] = None,
+    ) -> None:
+        super().__init__(name, description, output_parser=output_parser)
         self.agents = agents
 
     def invoke(
         self,
         configure: FxAgentRunnerConfig,
-        input: FxAgentRunnerValue,
-    ) -> FxAgentRunnerResult:
-        pre_result = FxAgentRunnerResult(
+        input: Input,
+    ) -> FxAgentRunnerResult[Output]:
+        # Convert first input to RunnerResult
+        pre_result = FxAgentRunnerResult[Any](
             stop=False,
-            error_msg="No agents",
             value=input,
         )
 
         # invoke chain
         for agent in self.agents:
+            # invoke agent
             result = agent.invoke(configure, pre_result.value)
+            # use output parser to convert output result
+            if agent.output_parser:
+                result.value = agent.output_parser(configure, input, result.value)
+
             if result.stop:
+                # TODO: type check
                 return result
+
             pre_result = result
 
-        return pre_result
+        # TODO: type check
+        # if not isinstance(pre_result.value, Output):
+        #     raise TypeError(f"Output type not match. {type(pre_result.value)} -> {Output}")
+
+        return FxAgentRunnerResult[Output](
+            stop=pre_result.stop,
+            value=pre_result.value,
+        )

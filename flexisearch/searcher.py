@@ -1,9 +1,10 @@
-from typing import Dict, List
+from typing import Any, Dict, List
 
-from flexisearch.agent import FxAgent, FxAgentRunnerConfig, FxAgentRunnerValue
+from flexisearch.agent import FxAgent, FxAgentRunnerConfig
+from flexisearch.agents.agent_intent_recognition import \
+    FxAgentIntentRecognition
 from flexisearch.indexer import FxIndexer
 from flexisearch.llm import LLM
-from flexisearch.prompts import PROMPT_TEMPLATE_INTENT_RECOGNITION
 
 
 class FxSearcher:
@@ -19,7 +20,7 @@ class FxSearcher:
     def register(self, agent: FxAgent):
         self.agents[agent.name] = agent
 
-    def assist(self, input: FxAgentRunnerValue) -> FxAgentRunnerValue:
+    def assist(self, input: str) -> str:
         # match intention
         match_intentions = self._match_intention(
             input, [item for _, item in self.agents.items()]
@@ -41,33 +42,21 @@ class FxSearcher:
 
         return ""
 
-        # # step 2: text2sql, retrieval context data
-        # # if structured_input.prompt_template_name == "text2sql":
-        # sql_query = self._text2sql(query, self.indexer)
-        # print("SQLQuery:", sql_query)
-        # documents = self.indexer.retrieval_documents(sql_query)
-        # print("Retrieval:", documents)
-        # if len(documents) == 0:
-        #     knowledge_context = "No search record."
-        # else:
-        #     knowledge_context = "\n".join(documents)
-        # knowledge_context = f"SQL: {sql_query}\n---\n{knowledge_context}\n"
-
-        # # step 3: construct response
-        # return self._response_with_knowledge(query, knowledge_context)
-
     def _match_intention(
-        self, input: FxAgentRunnerValue, agent: List[FxAgent]
-    ) -> List[FxAgent]:
+        self, input: str, agents: List[FxAgent[Any, Any]]
+    ) -> List[FxAgent[Any, Any]]:
         # TODO: intent
 
-        self.llm.query(
-            PROMPT_TEMPLATE_INTENT_RECOGNITION,
-            variables={
-                "input": str(input),
-                "actions": "",
-            },
-        )
+        agent = FxAgentIntentRecognition()
+        agent.invoke(FxAgentRunnerConfig(llm=self.llm, indexer=self.indexer), agents)
+
+        # self.llm.query(
+        #     PROMPT_TEMPLATE_INTENT_RECOGNITION,
+        #     variables={
+        #         "input": str(input),
+        #         "actions": "",
+        #     },
+        # )
 
         return []
 

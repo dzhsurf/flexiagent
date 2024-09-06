@@ -3,12 +3,11 @@ import time
 from typing import List, Tuple
 
 import sqlparse
-from langchain.chains.sql_database.query import create_sql_query_chain
-from langchain.prompts import PromptTemplate
-from langchain_community.utilities import SQLDatabase
-from langchain_openai import ChatOpenAI
-
-llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
+# from langchain.chains.sql_database.query import create_sql_query_chain
+# from langchain.prompts import PromptTemplate
+# from langchain_community.utilities import SQLDatabase
+# from langchain_openai import ChatOpenAI
+# llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
 
 
 def read_qa_list() -> List[Tuple[str, str]]:

@@ -25,7 +25,7 @@ test: ## Run tests.
 	$(PYTHON) -m pytest tests/
 
 mypy: ## Run mypy checker
-	$(MYPY) $(PROJECT_NAME)
+	$(MYPY) --check-untyped-defs --ignore-missing-imports $(PROJECT_NAME)
 
 format: ## Format project code.
 	$(PYTHON) -m black $(PROJECT_NAME)

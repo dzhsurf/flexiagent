@@ -17,10 +17,6 @@ class HistoryTracker:
 
 
 class LLM:
-    client: OpenAI
-    model: str
-    history_tracker: HistoryTracker
-
     def __init__(self):
         self.client = OpenAI()
         self.model = "gpt-4o-mini"
