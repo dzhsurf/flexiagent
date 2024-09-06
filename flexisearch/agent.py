@@ -1,15 +1,27 @@
 from dataclasses import dataclass
-from typing import (Any, Callable, Dict, Generic, List, Optional, Protocol,
-                    TypeVar)
+from typing import Any, Callable, Dict, Generic, List, Optional, Protocol, TypeVar
 
 from pydantic import BaseModel
 
 from flexisearch.indexer import FxIndexer
 from flexisearch.llm import LLM
 
-Input = TypeVar("Input", contravariant=True)
+
+class FxAgentVariable(BaseModel):
+    pass
+
+
+class FxAgentInput(FxAgentVariable):
+    addition: Optional[Dict[str, Any]] = None
+
+
+class FxAgentOutput(FxAgentVariable):
+    pass
+
+
+Input = TypeVar("Input", contravariant=True, bound=FxAgentInput)
 Output = TypeVar("Output", covariant=True)
-ParseOutput = TypeVar("ParseOutput", covariant=True)
+ParseOutput = TypeVar("ParseOutput", covariant=True, bound=FxAgentInput)
 
 
 @dataclass
@@ -31,18 +43,6 @@ class FxAgentRunner(Generic[Input, Output], Protocol):
         input: Input,
     ) -> FxAgentRunnerResult[Output]:
         pass
-
-
-class FxAgentVariable(BaseModel):
-    pass
-
-
-class FxAgentInput(FxAgentVariable):
-    addition: Optional[Dict[str, Any]] = None
-
-
-class FxAgentOutput(FxAgentVariable):
-    pass
 
 
 class FxAgent(Generic[Input, Output], FxAgentRunner[Input, Output]):

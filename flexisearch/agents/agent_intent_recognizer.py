@@ -1,10 +1,20 @@
 from typing import Any, List
 
-from flexisearch.agent import FxAgent, FxAgentRunnerConfig, FxAgentRunnerResult
+from flexisearch.agent import (
+    FxAgent,
+    FxAgentInput,
+    FxAgentRunnerConfig,
+    FxAgentRunnerResult,
+)
 
 
-class FxAgentIntentRecognition(
-    FxAgent[List[FxAgent[Any, Any]], List[FxAgent[Any, Any]]]
+class FxAgentIntentRecognizerInput(FxAgentInput):
+    input: str
+    agents: List[FxAgent[Any, Any]]
+
+
+class FxAgentIntentRecognizer(
+    FxAgent[FxAgentIntentRecognizerInput, List[FxAgent[Any, Any]]]
 ):
     def __init__(self):
         super().__init__("AgentIntentRecognition", "")
@@ -12,7 +22,7 @@ class FxAgentIntentRecognition(
     def invoke(
         self,
         configure: FxAgentRunnerConfig,
-        input: List[FxAgent[Any, Any]],
+        input: FxAgentIntentRecognizerInput,
     ) -> FxAgentRunnerResult[List[FxAgent[Any, Any]]]:
         # query = ""
         # knowledge_context = ""
