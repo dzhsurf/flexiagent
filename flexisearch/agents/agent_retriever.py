@@ -2,7 +2,6 @@ from typing import Callable, List, Optional, TypeVar
 
 from flexisearch.agent import (FxAgent, FxAgentInput, FxAgentOutput,
                                FxAgentRunnerConfig, FxAgentRunnerResult)
-from flexisearch.agents.types import TypeDict
 
 ParseOutput = TypeVar("ParseOutput", covariant=True)
 

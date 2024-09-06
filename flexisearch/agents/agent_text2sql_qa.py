@@ -8,7 +8,6 @@ from flexisearch.agents.agent_retriever import (FxAgentRetriever,
                                                 FxAgentRetrieverOutput)
 from flexisearch.agents.agent_text2sql import (FxAgentText2SQL,
                                                FxAgentText2SQLInput)
-from flexisearch.agents.types import TypeDict
 
 ParseOutput = TypeVar("ParseOutput", covariant=True)
 
