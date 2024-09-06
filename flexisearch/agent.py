@@ -1,5 +1,6 @@
 from dataclasses import dataclass
-from typing import Any, Callable, Dict, Generic, List, Optional, Protocol, TypeVar
+from typing import (Any, Callable, Dict, Generic, List, Optional, Protocol,
+                    TypeVar)
 
 from pydantic import BaseModel
 
@@ -21,7 +22,7 @@ class FxAgentOutput(FxAgentVariable):
 
 Input = TypeVar("Input", contravariant=True, bound=FxAgentInput)
 Output = TypeVar("Output", covariant=True)
-ParseOutput = TypeVar("ParseOutput", covariant=True, bound=FxAgentInput)
+FxAgentParseOutput = TypeVar("FxAgentParseOutput", covariant=True, bound=FxAgentInput)
 
 
 @dataclass
@@ -52,7 +53,7 @@ class FxAgent(Generic[Input, Output], FxAgentRunner[Input, Output]):
         description: str,
         *,
         output_parser: Optional[
-            Callable[[FxAgentRunnerConfig, Input, Output], ParseOutput]
+            Callable[[FxAgentRunnerConfig, Input, Output], FxAgentParseOutput]
         ] = None,
     ):
         super().__init__()
@@ -69,7 +70,7 @@ class FxAgentChain(Generic[Input, Output], FxAgent[Input, Output]):
         *,
         agents: List[FxAgent[Any, Any]],
         output_parser: Optional[
-            Callable[[FxAgentRunnerConfig, Input, Output], ParseOutput]
+            Callable[[FxAgentRunnerConfig, Input, Output], FxAgentParseOutput]
         ] = None,
     ) -> None:
         super().__init__(name, description, output_parser=output_parser)

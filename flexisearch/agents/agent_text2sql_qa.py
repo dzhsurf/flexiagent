@@ -1,6 +1,7 @@
-from typing import Callable, Optional, TypeVar, cast
+from typing import Callable, Optional, cast
 
-from flexisearch.agent import FxAgentChain, FxAgentRunnerConfig
+from flexisearch.agent import (FxAgentChain, FxAgentParseOutput,
+                               FxAgentRunnerConfig)
 from flexisearch.agents.agent_context_qa import (FxAgentContextQA,
                                                  FxAgentContextQAInput)
 from flexisearch.agents.agent_retriever import (FxAgentRetriever,
@@ -9,15 +10,15 @@ from flexisearch.agents.agent_retriever import (FxAgentRetriever,
 from flexisearch.agents.agent_text2sql import (FxAgentText2SQL,
                                                FxAgentText2SQLInput)
 
-ParseOutput = TypeVar("ParseOutput", covariant=True)
-
 
 class FxAgentText2SqlQA(FxAgentChain[FxAgentText2SQLInput, str]):
     def __init__(
         self,
         *,
         output_parser: Optional[
-            Callable[[FxAgentRunnerConfig, FxAgentText2SQLInput, str], ParseOutput]
+            Callable[
+                [FxAgentRunnerConfig, FxAgentText2SQLInput, str], FxAgentParseOutput
+            ]
         ] = None,
     ):
         super().__init__(

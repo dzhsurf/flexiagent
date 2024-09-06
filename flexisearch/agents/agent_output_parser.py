@@ -1,9 +1,8 @@
 from typing import Callable, Optional, TypeVar
 
-from flexisearch.agent import (FxAgent, FxAgentInput, FxAgentRunnerConfig,
-                               FxAgentRunnerResult)
+from flexisearch.agent import (FxAgent, FxAgentInput, FxAgentParseOutput,
+                               FxAgentRunnerConfig, FxAgentRunnerResult)
 
-ParseOutput = TypeVar("ParseOutput", covariant=True, bound=FxAgentInput)
 T = TypeVar("T", bound=FxAgentInput)
 
 
@@ -12,7 +11,7 @@ class FxAgentOutputParser(FxAgent[T, T]):
         self,
         *,
         output_parser: Optional[
-            Callable[[FxAgentRunnerConfig, T, T], ParseOutput]
+            Callable[[FxAgentRunnerConfig, T, T], FxAgentParseOutput]
         ] = None,
     ):
         super().__init__(

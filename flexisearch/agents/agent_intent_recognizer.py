@@ -1,11 +1,7 @@
 from typing import Any, List
 
-from flexisearch.agent import (
-    FxAgent,
-    FxAgentInput,
-    FxAgentRunnerConfig,
-    FxAgentRunnerResult,
-)
+from flexisearch.agent import (FxAgent, FxAgentInput, FxAgentRunnerConfig,
+                               FxAgentRunnerResult)
 
 
 class FxAgentIntentRecognizerInput(FxAgentInput):

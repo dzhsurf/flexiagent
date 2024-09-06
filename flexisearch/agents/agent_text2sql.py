@@ -1,12 +1,10 @@
-from typing import Callable, Optional, TypeVar
+from typing import Callable, Optional
 
 import sqlparse
 
-from flexisearch.agent import (FxAgent, FxAgentInput, FxAgentRunnerConfig,
-                               FxAgentRunnerResult)
+from flexisearch.agent import (FxAgent, FxAgentInput, FxAgentParseOutput,
+                               FxAgentRunnerConfig, FxAgentRunnerResult)
 from flexisearch.prompts import PROMPT_TEMPLATE_SQLITE_TEXT2SQL_EXPERT
-
-ParseOutput = TypeVar("ParseOutput", covariant=True)
 
 
 class FxAgentText2SQLInput(FxAgentInput):
@@ -20,7 +18,9 @@ class FxAgentText2SQL(FxAgent[FxAgentText2SQLInput, str]):
         self,
         *,
         output_parser: Optional[
-            Callable[[FxAgentRunnerConfig, FxAgentText2SQLInput, str], ParseOutput]
+            Callable[
+                [FxAgentRunnerConfig, FxAgentText2SQLInput, str], FxAgentParseOutput
+            ]
         ] = None,
     ):
         super().__init__(
