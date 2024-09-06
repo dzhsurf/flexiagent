@@ -1,8 +1,13 @@
 from typing import Callable, List, Optional, TypeVar
 
-from flexisearch.agent import (FxAgent, FxAgentInput, FxAgentOutput,
-                               FxAgentParseOutput, FxAgentRunnerConfig,
-                               FxAgentRunnerResult)
+from flexisearch.agent import (
+    FxAgent,
+    FxAgentInput,
+    FxAgentOutput,
+    FxAgentParseOutput,
+    FxAgentRunnerConfig,
+    FxAgentRunnerResult,
+)
 
 
 class FxAgentRetrieverInput(FxAgentInput):
@@ -25,7 +30,11 @@ class FxAgentRetriever(FxAgent[FxAgentRetrieverInput, FxAgentRetrieverOutput]):
             ]
         ] = None,
     ):
-        super().__init__("AgentRetriever", "", output_parser=output_parser)
+        super().__init__(
+            "AgentRetriever",
+            "An LLM agent for retrieve documents by the input SQL.",
+            output_parser=output_parser,
+        )
 
     def invoke(
         self,

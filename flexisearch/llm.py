@@ -44,6 +44,6 @@ class LLM:
         )
 
         if len(response.choices) > 0 and response.choices[0].message.content:
-            return response.choices[0].message.content
+            return response.choices[0].message.content.strip()
 
         return ""

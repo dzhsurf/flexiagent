@@ -22,7 +22,7 @@ class FxAgentText2SqlQA(FxAgentChain[FxAgentText2SQLInput, str]):
     ):
         super().__init__(
             "AgentText2SqlQA",
-            "",
+            "An LLM agent for context-based question answering integrates capabilities from a retriever agent to automatically gather relevant contextual information and a text2SQL agent to transform user queries into SQL commands, ensuring precise and efficient data retrieval.",
             agents=[
                 FxAgentText2SQL(output_parser=self._parse_text2sql_output),
                 FxAgentRetriever(output_parser=self._parse_retriever_output),

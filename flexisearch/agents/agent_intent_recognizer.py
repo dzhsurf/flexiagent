@@ -1,8 +1,12 @@
 import json
 from typing import Any, List
 
-from flexisearch.agent import (FxAgent, FxAgentInput, FxAgentRunnerConfig,
-                               FxAgentRunnerResult)
+from flexisearch.agent import (
+    FxAgent,
+    FxAgentInput,
+    FxAgentRunnerConfig,
+    FxAgentRunnerResult,
+)
 from flexisearch.prompts import PROMPT_TEMPLATE_INTENT_RECOGNITION
 
 
@@ -15,7 +19,10 @@ class FxAgentIntentRecognizer(
     FxAgent[FxAgentIntentRecognizerInput, List[FxAgent[FxAgentInput, Any]]]
 ):
     def __init__(self):
-        super().__init__("AgentIntentRecognition", "")
+        super().__init__(
+            "AgentIntentRecognition",
+            "An LLM agent for intent recognition analyzes user inputs to identify the underlying goals or purposes, enabling it to respond appropriately and facilitate effective interactions.",
+        )
 
     def invoke(
         self,

@@ -25,7 +25,7 @@ class FxAgentText2SQL(FxAgent[FxAgentText2SQLInput, str]):
     ):
         super().__init__(
             "AgentText2SQL",
-            "",
+            "An LLM agent for translates natural language queries into structured SQL queries",
             output_parser=output_parser,
         )
 
@@ -70,4 +70,4 @@ class FxAgentText2SQL(FxAgent[FxAgentText2SQLInput, str]):
         if sql[0] == '"' and sql[-1] == '"':
             sql = sql[1:-1]
 
-        return sql
+        return sql.strip()

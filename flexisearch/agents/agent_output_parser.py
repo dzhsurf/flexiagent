@@ -1,7 +1,12 @@
 from typing import Callable, Optional
 
-from flexisearch.agent import (FxAgent, FxAgentInput, FxAgentParseOutput,
-                               FxAgentRunnerConfig, FxAgentRunnerResult)
+from flexisearch.agent import (
+    FxAgent,
+    FxAgentInput,
+    FxAgentParseOutput,
+    FxAgentRunnerConfig,
+    FxAgentRunnerResult,
+)
 
 
 class FxAgentOutputParser(FxAgent[FxAgentInput, FxAgentInput]):
@@ -16,7 +21,7 @@ class FxAgentOutputParser(FxAgent[FxAgentInput, FxAgentInput]):
     ):
         super().__init__(
             "AgentOutputParser",
-            "",
+            "An LLM agent for parse output to another agent's input.",
             output_parser=output_parser,
         )
 

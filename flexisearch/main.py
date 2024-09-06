@@ -1,5 +1,7 @@
 import os
 
+from flexisearch.agents.agent_intent_recognizer import FxAgentIntentRecognizer
+from flexisearch.agents.agent_output_parser import FxAgentOutputParser
 from flexisearch.agents.agent_text2sql_qa import FxAgentText2SqlQA
 from flexisearch.database.db_executor import DBConfig
 from flexisearch.indexer import FxIndexer
@@ -14,8 +16,9 @@ def main():
     indexer.connect_to_metadb(DBConfig(name="concert_singer", db_uri=db_uri))
 
     searcher = FxSearcher(indexer)
+    searcher.register(FxAgentOutputParser())
+    searcher.register(FxAgentIntentRecognizer())
     searcher.register(FxAgentText2SqlQA())
-    # searcher.register(FxAgentGraphQA())
 
     print(
         "QA:",
