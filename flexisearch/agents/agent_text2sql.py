@@ -63,14 +63,16 @@ class FxAgentText2SQL(FxAgent[FxAgentText2SQLInput, str]):
     def _structured_output_sql(self, input: str) -> str:
         ### TODO: structured sql output, SQLChcker
         sql = input
+
         content_tags = [("SQLQuery:", None), ("```sql", "```")]
         for content_tag in content_tags:
             p1 = sql.find(content_tag[0])
-            if content_tag[1]:
-                p2 = sql.find(content_tag[0], p1 + len(content_tag[0]))
-                sql = sql[p1 + len(content_tag[0]) : p2]
-            else:
-                sql = sql[p1 + len(content_tag[0]) :]
+            if p1 >= 0:
+                if content_tag[1]:
+                    p2 = sql.find(content_tag[0], p1 + len(content_tag[0]))
+                    sql = sql[p1 + len(content_tag[0]) : p2]
+                else:
+                    sql = sql[p1 + len(content_tag[0]) :]
 
         sql = sqlparse.format(
             sql, reindent=True, keyword_case="upper", strip_comments=True
