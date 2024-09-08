@@ -1,11 +1,16 @@
+import logging
 from typing import Any, Dict, List, Optional
 
 from flexisearch.agent import FxAgent, FxAgentInput, FxAgentRunnerConfig
 from flexisearch.agents.agent_intent_recognizer import (
-    FxAgentIntentRecognizer, FxAgentIntentRecognizerInput)
+    FxAgentIntentRecognizer,
+    FxAgentIntentRecognizerInput,
+)
 from flexisearch.indexer import FxIndexer
 from flexisearch.llm.config import LLMConfig
 from flexisearch.llm.llm import LLM
+
+logger = logging.getLogger(__name__)
 
 
 class FxSearcher:
@@ -39,8 +44,6 @@ class FxSearcher:
             FxAgentRunnerConfig(llm=self.llm, indexer=self.indexer),
             FxAgentIntentRecognizerInput(input=input, agents=agents),
         )
-
-        print("Match intent:", [agent.name for agent in result.value])
 
         if len(result.value) > 0:
             return result.value[0]

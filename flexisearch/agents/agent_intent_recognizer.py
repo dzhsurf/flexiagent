@@ -1,5 +1,6 @@
 import json
-from typing import Any, List
+import logging
+from typing import Any, Dict, List
 
 from flexisearch.agent import (
     FxAgent,
@@ -8,6 +9,9 @@ from flexisearch.agent import (
     FxAgentRunnerResult,
 )
 from flexisearch.prompts import PROMPT_TEMPLATE_INTENT_RECOGNITION
+
+
+logger = logging.getLogger(__name__)
 
 
 class FxAgentIntentRecognizerInput(FxAgentInput):
@@ -29,7 +33,8 @@ class FxAgentIntentRecognizer(
         configure: FxAgentRunnerConfig,
         input: FxAgentIntentRecognizerInput,
     ) -> FxAgentRunnerResult[List[FxAgent[FxAgentInput, Any]]]:
-        agent_dict = {}
+        agent_dict: Dict[str, FxAgent[FxAgentInput, Any]] = {}
+
         actions = ""
         for agent in input.agents:
             actions += f"* {agent.name}: {agent.description}\n"
@@ -44,13 +49,12 @@ class FxAgentIntentRecognizer(
         )
 
         # format result to json
-        print("LLM response:", response)
+        logger.info("\n====LLM Response====\n%s", response)
         p = response.find("JSONResult:")
         if p >= 0:
             response = response[p + len("JSONResult:") :].strip()
-        print("Intent:", response)
 
-        result = []
+        result: List[FxAgent[FxAgentInput, Any]] = []
         try:
             json_obj = json.loads(response)
             if isinstance(json_obj, list) and len(json_obj) > 0:
@@ -60,6 +64,8 @@ class FxAgentIntentRecognizer(
                         result.append(agent_dict[agent_name])
         except Exception:
             pass
+
+        logger.info("Matches: %s", [item.name for item in result])
 
         return FxAgentRunnerResult[List[FxAgent[FxAgentInput, Any]]](
             stop=False,
