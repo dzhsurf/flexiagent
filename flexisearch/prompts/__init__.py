@@ -47,16 +47,15 @@ Answer the user's question based on these results.
 )
 
 PROMPT_TEMPLATE_INTENT_RECOGNITION = PromptTemplate(
-    prompt="""You will be provided with a user question and a list of actions regarding how to proceed. 
-Based on the information from the action list, analyze the user’s question to determine which action should be taken.
-
-Use the following format:
+    prompt="""You are a classification expert.
+Based on the context, select the option that best matches the user's question from the given category options.
+You must use the following format:
 
 Question: Question here
 JSONResult: ["action1", "action1"]
 Answer: Final answer here
 
-Only use the following action items:
+The JSONResult must be one of the option from the context:
 {actions}
 """,
     stop_prompt="Answer:",

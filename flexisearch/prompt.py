@@ -54,7 +54,7 @@ class PromptTemplate:
         user_question_message = self._replace_text_by_variables(
             self.user_question_prompt, variables
         )
-        return f"{inst_template.inst_tag_begin}{inst_template.sys_tag_begin}{system_message}{inst_template.sys_tag_end}\n{user_question_message}{inst_template.sys_tag_end}"
+        return f"{inst_template.inst_tag_begin}{inst_template.sys_tag_begin}{system_message}{inst_template.sys_tag_end}\n{user_question_message}{inst_template.inst_tag_end}"
 
     def to_openai_chat_completion_messages(
         self,

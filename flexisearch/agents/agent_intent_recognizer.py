@@ -1,8 +1,12 @@
 import json
 from typing import Any, List
 
-from flexisearch.agent import (FxAgent, FxAgentInput, FxAgentRunnerConfig,
-                               FxAgentRunnerResult)
+from flexisearch.agent import (
+    FxAgent,
+    FxAgentInput,
+    FxAgentRunnerConfig,
+    FxAgentRunnerResult,
+)
 from flexisearch.prompts import PROMPT_TEMPLATE_INTENT_RECOGNITION
 
 
@@ -39,11 +43,12 @@ class FxAgentIntentRecognizer(
             },
         )
 
-        print("Intent:", response)
         # format result to json
-        if response.startswith("JSONResult:"):
-            response = response[len("JSONResult:") + 1 :].strip()
-        print("Formated:", response)
+        print("LLM response:", response)
+        p = response.find("JSONResult:")
+        if p >= 0:
+            response = response[p + len("JSONResult:") :].strip()
+        print("Intent:", response)
 
         result = []
         try:

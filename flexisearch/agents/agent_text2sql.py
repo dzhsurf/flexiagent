@@ -2,8 +2,13 @@ from typing import Callable, Optional
 
 import sqlparse
 
-from flexisearch.agent import (FxAgent, FxAgentInput, FxAgentParseOutput,
-                               FxAgentRunnerConfig, FxAgentRunnerResult)
+from flexisearch.agent import (
+    FxAgent,
+    FxAgentInput,
+    FxAgentParseOutput,
+    FxAgentRunnerConfig,
+    FxAgentRunnerResult,
+)
 from flexisearch.prompts import PROMPT_TEMPLATE_SQLITE_TEXT2SQL_EXPERT
 
 
@@ -58,10 +63,14 @@ class FxAgentText2SQL(FxAgent[FxAgentText2SQLInput, str]):
     def _structured_output_sql(self, input: str) -> str:
         ### TODO: structured sql output, SQLChcker
         sql = input
-        if sql.find("SQLQuery:") >= 0:
-            sql = sql[len("SQLQuery:") :]
-        if sql.find("```sql") >= 0:
-            sql = sql[len("```sql") + 1 : -3]
+        content_tags = [("SQLQuery:", None), ("```sql", "```")]
+        for content_tag in content_tags:
+            p1 = sql.find(content_tag[0])
+            if content_tag[1]:
+                p2 = sql.find(content_tag[0], p1 + len(content_tag[0]))
+                sql = sql[p1 + len(content_tag[0]) : p2]
+            else:
+                sql = sql[p1 + len(content_tag[0]) :]
 
         sql = sqlparse.format(
             sql, reindent=True, keyword_case="upper", strip_comments=True

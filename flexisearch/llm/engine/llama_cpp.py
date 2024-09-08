@@ -1,4 +1,4 @@
-from typing import Dict, Iterable, Optional, Type, cast
+from typing import Dict, Optional, Type, cast
 
 from llama_cpp import CreateCompletionResponse, Llama
 
@@ -44,7 +44,9 @@ class LLMEngineLlamaCpp(LLMEngineImpl[LLMConfigLlamaCpp]):
         *,
         variables: Dict[str, PromptValue] = {},
     ) -> str:
-        whole_prompt = prompt.to_text(PromptInstTemplate(), variables)
+        inst_template = PromptInstTemplate()
+
+        whole_prompt = prompt.to_text(inst_template, variables)
 
         response = self.llm(
             whole_prompt,
@@ -54,6 +56,12 @@ class LLMEngineLlamaCpp(LLMEngineImpl[LLMConfigLlamaCpp]):
             echo=self.config.echo,
             stream=False,
         )
-
         res = cast(CreateCompletionResponse, response)
-        return res["choices"][0]["text"].strip()
+
+        res_text = res["choices"][0]["text"]
+        p1 = res_text.find(inst_template.inst_tag_begin)
+        p2 = res_text.find(inst_template.inst_tag_end)
+        if p2 > p1 and p1 >= 0:
+            res_text = res_text[p2 + len(inst_template.inst_tag_end) :]
+
+        return res_text.strip()
