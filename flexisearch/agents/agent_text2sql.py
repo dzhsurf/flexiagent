@@ -1,3 +1,4 @@
+import logging
 from typing import Callable, Optional
 
 import sqlparse
@@ -10,6 +11,8 @@ from flexisearch.agent import (
     FxAgentRunnerResult,
 )
 from flexisearch.prompts import PROMPT_TEMPLATE_SQLITE_TEXT2SQL_EXPERT
+
+logger = logging.getLogger(__name__)
 
 
 class FxAgentText2SQLInput(FxAgentInput):
@@ -63,6 +66,7 @@ class FxAgentText2SQL(FxAgent[FxAgentText2SQLInput, str]):
     def _structured_output_sql(self, input: str) -> str:
         ### TODO: structured sql output, SQLChcker
         sql = input
+        logger.debug(f"\n====before====\n{sql}")
 
         content_tags = [("SQLQuery:", None), ("```sql", "```")]
         for content_tag in content_tags:
@@ -74,11 +78,18 @@ class FxAgentText2SQL(FxAgent[FxAgentText2SQLInput, str]):
                 else:
                     sql = sql[p1 + len(content_tag[0]) :]
 
+        logger.debug(f"\n====after====\n{sql}")
+
         sql = sqlparse.format(
             sql, reindent=True, keyword_case="upper", strip_comments=True
         )
         sql = " ".join(sql.split())
         if sql[0] == '"' and sql[-1] == '"':
             sql = sql[1:-1]
+
+        if logger.level == logging.DEBUG:
+            logger.debug(f"\n====final====\n{sql}")
+        else:
+            logger.info(f"\n====SQL====\n{sql}")
 
         return sql.strip()

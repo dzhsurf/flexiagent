@@ -1,3 +1,4 @@
+import logging
 import os
 
 from flexisearch.agents.agent_intent_recognizer import FxAgentIntentRecognizer
@@ -7,6 +8,8 @@ from flexisearch.database.db_executor import DBConfig
 from flexisearch.indexer import FxIndexer
 from flexisearch.llm.config import LLMConfig
 from flexisearch.searcher import FxSearcher
+
+logging.basicConfig(level=logging.INFO)
 
 
 def main():
@@ -18,18 +21,18 @@ def main():
     indexer = FxIndexer()
     indexer.connect_to_metadb(DBConfig(name="concert_singer", db_uri=db_uri))
 
-    llm_config = LLMConfig(
-        engine="LlamaCpp",
-        engine_config={
-            "repo_id_or_model_path": "TheBloke/Llama-2-7B-Chat-GGUF",
-            "repo_filename": "*Q4_K_M.gguf",
-            "n_ctx": 4096,
-        },
-    )
-
+    # repo_id = "TheBloke/Llama-2-7B-Chat-GGUF"
+    # repo_filename = "*Q4_K_M.gguf"
     # llm_config = LLMConfig(
-    #     engine="OpenAI", engine_config={"openai_model": "gpt-4o-mini"}
+    #     engine="LlamaCpp",
+    #     engine_config={
+    #         "repo_id_or_model_path": repo_id,
+    #         "repo_filename": repo_filename,
+    #         "n_ctx": 4096,
+    #     },
     # )
+
+    llm_config = LLMConfig(engine="OpenAI", engine_config={"openai_model": "gpt-4o"})
 
     searcher = FxSearcher(llm_config, indexer)
     searcher.register(FxAgentOutputParser())

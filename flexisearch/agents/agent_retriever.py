@@ -1,8 +1,17 @@
+import logging
 from typing import Callable, List, Optional, TypeVar
 
-from flexisearch.agent import (FxAgent, FxAgentInput, FxAgentOutput,
-                               FxAgentParseOutput, FxAgentRunnerConfig,
-                               FxAgentRunnerResult)
+from flexisearch.agent import (
+    FxAgent,
+    FxAgentInput,
+    FxAgentOutput,
+    FxAgentParseOutput,
+    FxAgentRunnerConfig,
+    FxAgentRunnerResult,
+)
+
+
+logger = logging.getLogger(__name__)
 
 
 class FxAgentRetrieverInput(FxAgentInput):
@@ -37,6 +46,9 @@ class FxAgentRetriever(FxAgent[FxAgentRetrieverInput, FxAgentRetrieverOutput]):
         input: FxAgentRetrieverInput,
     ) -> FxAgentRunnerResult[FxAgentRetrieverOutput]:
         documents = configure.indexer.retrieve_documents(input.input)
+
+        msg = "\n".join(documents)
+        logger.info(f"\n====Data====\n{msg}")
 
         return FxAgentRunnerResult[FxAgentRetrieverOutput](
             stop=False,
