@@ -69,7 +69,7 @@ class FxAgentText2SQL(FxAgent[FxAgentText2SQLInput, str]):
             p1 = sql.find(content_tag[0])
             if p1 >= 0:
                 if content_tag[1]:
-                    p2 = sql.find(content_tag[0], p1 + len(content_tag[0]))
+                    p2 = sql.find(content_tag[1], p1 + len(content_tag[0]))
                     sql = sql[p1 + len(content_tag[0]) : p2]
                 else:
                     sql = sql[p1 + len(content_tag[0]) :]
