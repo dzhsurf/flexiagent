@@ -83,13 +83,16 @@ class FxAgentText2SQL(FxAgent[FxAgentText2SQLInput, str]):
         sql = sqlparse.format(
             sql, reindent=True, keyword_case="upper", strip_comments=True
         )
-        sql = " ".join(sql.split())
-        if sql[0] == '"' and sql[-1] == '"':
-            sql = sql[1:-1]
+        sql = " ".join(sql.split()).strip()
+        if len(sql) > 0 and sql[0] == '"' and sql[-1] == '"':
+            sql = sql[1:-1].strip()
 
         if logger.level == logging.DEBUG:
             logger.debug(f"\n====final====\n{sql}")
         else:
             logger.info(f"\n====SQL====\n{sql}")
 
-        return sql.strip()
+        sql_valid = sqlparse.parse(sql)
+        logger.info("SQL Valid: %s", True if sql_valid else False)
+
+        return sql if sql_valid else ""

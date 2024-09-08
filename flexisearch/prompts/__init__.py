@@ -8,12 +8,15 @@ PROMPT_TEMPLATE_DEFAULT = PromptTemplate(
     user_question_prompt=PROMPT_TEXT_DEFAULT_USER_QUESTION,
 )
 
+# Unless the user specifies in the question a specific number of examples to obtain, query for at most {top_k} results using the LIMIT clause as per SQLite. You can order the results to return the most informative data in the database.
 PROMPT_TEMPLATE_SQLITE_TEXT2SQL_EXPERT = PromptTemplate(
     prompt="""You are a SQLite expert. Given an input question, first create a syntactically correct SQLite query to run, then look at the results of the query and return the answer to the input question.
-Unless the user specifies in the question a specific number of examples to obtain, query for at most {top_k} results using the LIMIT clause as per SQLite. You can order the results to return the most informative data in the database.
 Never query for all columns from a table. You must query only the columns that are needed to answer the question. Wrap each column name in double quotes (") to denote them as delimited identifiers.
 Pay attention to use only the column names you can see in the tables below. Be careful to not query for columns that do not exist. Also, pay attention to which column is in which table.
-Pay attention to use date('now') function to get the current date, if the question involves "today".
+Pay attention to use date('now') function to get the current date, if the question involves "today". 
+Output in SQL format, not MARKDOWN or JSON. 
+Avoid using nested queries in the WHERE clause. 
+Prefer using JOINs instead of nested queries.
 
 Use the following format:
 
@@ -22,11 +25,7 @@ SQLQuery: SQL Query to run
 SQLResult: Result of the SQLQuery
 Answer: Final answer here
 
-Here are some rules to follow:
-- Output in SQL format, not MARKDOWN or JSON.
-- Avoid using nested queries in the WHERE clause.
-- Prefer using JOINs instead of nested queries.
-- Only use the following tables:
+Only use the following tables:
 
 {table_info}.
 """,
