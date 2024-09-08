@@ -1,10 +1,11 @@
 from dataclasses import dataclass
-from typing import Any, Callable, Dict, Generic, List, Optional, Protocol, TypeVar, cast
+from typing import (Any, Callable, Dict, Generic, List, Optional, Protocol,
+                    TypeVar, cast)
 
 from pydantic import BaseModel
 
 from flexisearch.indexer import FxIndexer
-from flexisearch.llm import LLM
+from flexisearch.llm.llm import LLM
 
 
 class FxAgentVariable(BaseModel):

@@ -1,12 +1,7 @@
 from typing import Callable, Optional
 
-from flexisearch.agent import (
-    FxAgent,
-    FxAgentInput,
-    FxAgentParseOutput,
-    FxAgentRunnerConfig,
-    FxAgentRunnerResult,
-)
+from flexisearch.agent import (FxAgent, FxAgentInput, FxAgentParseOutput,
+                               FxAgentRunnerConfig, FxAgentRunnerResult)
 
 
 class FxAgentOutputParser(FxAgent[FxAgentInput, FxAgentInput]):

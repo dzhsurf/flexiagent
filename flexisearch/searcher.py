@@ -4,12 +4,13 @@ from flexisearch.agent import FxAgent, FxAgentInput, FxAgentRunnerConfig
 from flexisearch.agents.agent_intent_recognizer import (
     FxAgentIntentRecognizer, FxAgentIntentRecognizerInput)
 from flexisearch.indexer import FxIndexer
-from flexisearch.llm import LLM
+from flexisearch.llm.config import LLMConfig
+from flexisearch.llm.llm import LLM
 
 
 class FxSearcher:
-    def __init__(self, indexer: FxIndexer):
-        self.llm = LLM()
+    def __init__(self, llm_config: LLMConfig, indexer: FxIndexer):
+        self.llm = LLM(llm_config)
         self.indexer = indexer
         self.agents: Dict[str, FxAgent[FxAgentInput, Any]] = {}
 

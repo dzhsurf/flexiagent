@@ -1,13 +1,14 @@
 from typing import Any, Callable, Optional, cast
 
-from flexisearch.agent import FxAgentChain, FxAgentParseOutput, FxAgentRunnerConfig
-from flexisearch.agents.agent_context_qa import FxAgentContextQA, FxAgentContextQAInput
-from flexisearch.agents.agent_retriever import (
-    FxAgentRetriever,
-    FxAgentRetrieverInput,
-    FxAgentRetrieverOutput,
-)
-from flexisearch.agents.agent_text2sql import FxAgentText2SQL, FxAgentText2SQLInput
+from flexisearch.agent import (FxAgentChain, FxAgentParseOutput,
+                               FxAgentRunnerConfig)
+from flexisearch.agents.agent_context_qa import (FxAgentContextQA,
+                                                 FxAgentContextQAInput)
+from flexisearch.agents.agent_retriever import (FxAgentRetriever,
+                                                FxAgentRetrieverInput,
+                                                FxAgentRetrieverOutput)
+from flexisearch.agents.agent_text2sql import (FxAgentText2SQL,
+                                               FxAgentText2SQLInput)
 
 
 class FxAgentText2SqlQA(FxAgentChain[FxAgentText2SQLInput, str]):

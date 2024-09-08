@@ -1,13 +1,8 @@
 from typing import Callable, List, Optional, TypeVar
 
-from flexisearch.agent import (
-    FxAgent,
-    FxAgentInput,
-    FxAgentOutput,
-    FxAgentParseOutput,
-    FxAgentRunnerConfig,
-    FxAgentRunnerResult,
-)
+from flexisearch.agent import (FxAgent, FxAgentInput, FxAgentOutput,
+                               FxAgentParseOutput, FxAgentRunnerConfig,
+                               FxAgentRunnerResult)
 
 
 class FxAgentRetrieverInput(FxAgentInput):

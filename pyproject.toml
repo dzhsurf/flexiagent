@@ -12,6 +12,8 @@ sqlparse = "^0.5.1"
 openai = "^1.43.0"
 pydantic = "^2.9.0"
 sqlalchemy = "^2.0.34"
+llama-cpp-python = "^0.2.90"
+huggingface-hub = "^0.24.6"
 
 
 [tool.poetry.group.dev.dependencies]

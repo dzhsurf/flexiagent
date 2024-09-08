@@ -6,6 +6,7 @@ from openai.types.chat import (ChatCompletionAssistantMessageParam,
                                ChatCompletionMessageParam,
                                ChatCompletionSystemMessageParam,
                                ChatCompletionUserMessageParam)
+from pydantic import BaseModel
 
 PromptValue = Union[str, int]
 
@@ -14,6 +15,13 @@ PromptValue = Union[str, int]
 class PromptFewshotSample:
     user: str
     assistant: str
+
+
+class PromptInstTemplate(BaseModel):
+    inst_tag_begin: str = "[INST]"
+    inst_tag_end: str = "[/INST]"
+    sys_tag_begin: str = "<<SYS>>"
+    sys_tag_end: str = "<</SYS>>"
 
 
 class PromptTemplate:
@@ -39,7 +47,16 @@ class PromptTemplate:
     def add_fetshot_samples(self, samples: List[PromptFewshotSample]):
         self.fewshot_samples += samples
 
-    def to_messages(
+    def to_text(
+        self, inst_template: PromptInstTemplate, variables: Dict[str, PromptValue] = {}
+    ) -> str:
+        system_message = self._replace_text_by_variables(self.prompt, variables)
+        user_question_message = self._replace_text_by_variables(
+            self.user_question_prompt, variables
+        )
+        return f"{inst_template.inst_tag_begin}{inst_template.sys_tag_begin}{system_message}{inst_template.sys_tag_end}\n{user_question_message}{inst_template.sys_tag_end}"
+
+    def to_openai_chat_completion_messages(
         self,
         variables: Dict[str, PromptValue] = {},
     ) -> Iterable[ChatCompletionMessageParam]:

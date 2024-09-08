@@ -1,12 +1,8 @@
 import json
 from typing import Any, List
 
-from flexisearch.agent import (
-    FxAgent,
-    FxAgentInput,
-    FxAgentRunnerConfig,
-    FxAgentRunnerResult,
-)
+from flexisearch.agent import (FxAgent, FxAgentInput, FxAgentRunnerConfig,
+                               FxAgentRunnerResult)
 from flexisearch.prompts import PROMPT_TEMPLATE_INTENT_RECOGNITION
 
 
