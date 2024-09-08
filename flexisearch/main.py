@@ -19,7 +19,7 @@ def main():
     indexer.connect_to_metadb(DBConfig(name="concert_singer", db_uri=db_uri))
 
     huggingface_cache_path = os.path.abspath("/Users/hiramdeng/.cache/huggingface/hub/")
-    llm_llamacpp = LLMConfig(
+    llm_config = LLMConfig(
         engine="LlamaCpp",
         engine_config={
             "path_or_name": f"{huggingface_cache_path}/models--TheBloke--Llama-2-7B-Chat-GGUF/snapshots/191239b3e26b2882fb562ffccdd1cf0f65402adb/llama-2-7b-chat.Q4_K_M.gguf",
@@ -27,11 +27,11 @@ def main():
         },
     )
 
-    llm_openai = LLMConfig(
-        engine="OpenAI", engine_config={"openai_model": "gpt-4o-mini"}
-    )
+    # llm_config = LLMConfig(
+    #     engine="OpenAI", engine_config={"openai_model": "gpt-4o-mini"}
+    # )
 
-    searcher = FxSearcher(llm_openai, indexer)
+    searcher = FxSearcher(llm_config, indexer)
     searcher.register(FxAgentOutputParser())
     searcher.register(FxAgentIntentRecognizer())
     searcher.register(FxAgentText2SqlQA())
