@@ -10,7 +10,6 @@ from flexisearch.agent import (
 )
 from flexisearch.prompts import PROMPT_TEMPLATE_INTENT_RECOGNITION
 
-
 logger = logging.getLogger(__name__)
 
 

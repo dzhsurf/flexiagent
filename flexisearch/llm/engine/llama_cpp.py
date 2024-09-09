@@ -1,11 +1,8 @@
 import logging
-from typing import Dict, Optional, Type, cast
 import os
-from llama_cpp import (
-    ChatCompletionRequestMessage,
-    CreateChatCompletionResponse,
-    Llama,
-)
+from typing import Dict, Optional, Type, cast
+
+from llama_cpp import ChatCompletionRequestMessage, CreateChatCompletionResponse, Llama
 
 from flexisearch.llm.engine.engine_base import LLMEngineConfig, LLMEngineImpl
 from flexisearch.prompt import PromptTemplate, PromptValue

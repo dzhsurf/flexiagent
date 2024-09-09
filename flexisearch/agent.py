@@ -1,6 +1,5 @@
 from dataclasses import dataclass
-from typing import (Any, Callable, Dict, Generic, List, Optional, Protocol,
-                    TypeVar, cast)
+from typing import Any, Callable, Dict, Generic, List, Optional, Protocol, TypeVar, cast
 
 from pydantic import BaseModel
 

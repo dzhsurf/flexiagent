@@ -10,7 +10,6 @@ from flexisearch.agent import (
     FxAgentRunnerResult,
 )
 
-
 logger = logging.getLogger(__name__)
 
 
