@@ -1,5 +1,5 @@
 import logging
-from typing import Callable, List, Optional, TypeVar
+from typing import Callable, List, Optional
 
 from flexisearch.agent import (
     FxAgent,
