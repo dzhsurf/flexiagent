@@ -14,12 +14,12 @@ logging.basicConfig(level=logging.INFO)
 
 def main():
     db_path = os.path.abspath(
-        "../../../benchmark/spider/database/concert_singer/concert_singer.sqlite"
+        "../../../benchmark/spider/database/singer/singer.sqlite"
     )
     db_uri = f"sqlite:///{db_path}"
 
     indexer = FxIndexer()
-    indexer.connect_to_metadb(DBConfig(name="concert_singer", db_uri=db_uri))
+    indexer.connect_to_metadb(DBConfig(name="singer", db_uri=db_uri))
 
     # repo_id = "TheBloke/Llama-2-7B-Chat-GGUF"
     # repo_filename = "*Q4_K_M.gguf"
@@ -32,7 +32,7 @@ def main():
     #     },
     # )
 
-    llm_config = LLMConfig(engine="OpenAI", engine_config={"openai_model": "gpt-4o"})
+    llm_config = LLMConfig(engine="OpenAI", engine_config={"openai_model": "gpt-4o-mini"})
 
     searcher = FxSearcher(llm_config, indexer)
     searcher.register(FxAgentOutputParser())
@@ -48,7 +48,7 @@ def main():
     print(
         "QA:",
         searcher.assist(
-            "Show the stadium name and capacity with most number of concerts in year 2014 or after."
+            "What is the sname of every sing that does not have any song?"
         ),
     )
 
