@@ -9,14 +9,24 @@
 # code copy from bird-bench/mini_dev/llm/src/evaluation_ex.py
 
 import argparse
+import os
 import sys
 import json
 import sqlite3
 import multiprocessing as mp
-from typing import Any, Dict, Tuple
+from typing import Any, Dict, List, Optional, Tuple, cast
 from func_timeout import func_timeout, FunctionTimedOut
+from dataclasses import dataclass
 
+from flexisearch.agent import FxAgentRunnerConfig
+from flexisearch.agents.agent_text2sql import FxAgentText2SQL, FxAgentText2SQLInput
+from flexisearch.database.db_executor import DBConfig
+from flexisearch.indexer import FxIndexer
+from flexisearch.llm.config import LLMConfig
+from flexisearch.llm.llm import LLM
 #### utils
+
+exec_result: List[Any] = []
 
 
 def load_json(dir: str) -> Any:
@@ -52,11 +62,7 @@ def execute_sql(predicted_sql, ground_truth, db_path, sql_dialect, calculate_fun
     return res
 
 
-def package_sqls(
-    sql_path: str,
-    db_root_path: str,
-    sql_dialect: str = "SQLite",
-) -> Tuple[Any, Any]:
+def package_sqls(sql_path: str, db_root_path: str) -> Tuple[Any, Any]:
     clean_sqls = []
     db_path_list = []
 
@@ -97,6 +103,7 @@ def print_data(score_lists, count_lists, metric="F1 Score"):
 
 
 def result_callback(result):
+    global exec_result
     exec_result.append(result)
     print(result)
 
@@ -191,60 +198,122 @@ def compute_acc_by_diff(exec_results, diff_json_path):
     )
 
 
-if __name__ == "__main__":
-    args_parser = argparse.ArgumentParser()
-    args_parser.add_argument(
-        "--predicted_sql_path", type=str, required=True, default=""
-    )
-    args_parser.add_argument("--ground_truth_path", type=str, required=True, default="")
-    # args_parser.add_argument("--data_mode", type=str, required=True, default="dev")
-    args_parser.add_argument("--db_root_path", type=str, required=True, default="")
-    args_parser.add_argument("--diff_json_path", type=str, required=True, default="")
-    args_parser.add_argument("--num_cpus", type=int, default=1)
-    args_parser.add_argument("--meta_time_out", type=float, default=30.0)
-    args_parser.add_argument("--sql_dialect", type=str, default="SQLite")
-    # args_parser.add_argument("--mode_gt", type=str, default="gt")
-    # args_parser.add_argument("--mode_predict", type=str, default="gpt")
-    # args_parser.add_argument("--difficulty", type=str, default="simple")
-    # args_parser.add_argument("--engine", type=str, default="")
-    args = args_parser.parse_args()
+class InputParams(argparse.Namespace):
+    mode: str
+    db_root_path: str
+    dataset_json: str
+    pred_sql: Optional[str]
+    gold_sql: Optional[str]
 
-    ####
-    exec_result = []
+
+def run_evaluation(input: InputParams):
+    print("Input:", input)
+    global exec_result
 
     # predict sqls
-    pred_queries, db_paths = package_sqls(
-        args.predicted_sql_path,
-        args.db_root_path,
-        sql_dialect=args.sql_dialect,
-    )
+    pred_queries, db_paths = package_sqls(str(input.pred_sql), input.db_root_path)
     # generate ground truth sqls:
-    gt_queries, db_paths_gt = package_sqls(
-        args.ground_truth_path,
-        args.db_root_path,
-        sql_dialect=args.sql_dialect,
-    )
+    gt_queries, _ = package_sqls(str(input.gold_sql), input.db_root_path)
 
     query_pairs = list(zip(pred_queries, gt_queries))
 
     run_sqls_parallel(
         query_pairs,
         db_places=db_paths,
-        num_cpus=args.num_cpus,
-        meta_time_out=args.meta_time_out,
-        sql_dialect=args.sql_dialect,
+        num_cpus=8,
+        meta_time_out=30,
     )
     exec_result = sort_results(exec_result)
     print("start calculate")
     simple_acc, moderate_acc, challenging_acc, acc, count_lists = compute_acc_by_diff(
-        exec_result, args.diff_json_path
+        exec_result, input.dataset_json
     )
     score_lists = [simple_acc, moderate_acc, challenging_acc, acc]
-    print(f"EX on {args.sql_dialect} set")
+    print("EX on set")
     print("start calculate")
     print_data(score_lists, count_lists, metric="EX")
     print(
         "==========================================================================================="
     )
-    print(f"Finished EX evaluation on {args.sql_dialect} set")
+    print("Finished EX evaluation on set")
     print("\n\n")
+
+
+@dataclass
+class InputDatasetItem:
+    question_id: int
+    db_id: str
+    question: str
+    evidence: str
+    difficulty: str
+    SQL: str
+
+
+def run_gen_sql(config: InputParams, item: InputDatasetItem) -> str:
+    db_full_path = config.db_root_path + "/" + item.db_id + "/" + item.db_id + ".sqlite"
+    db_full_path = os.path.abspath(db_full_path)
+    db_uri = f"sqlite:///{db_full_path}"
+
+    indexer = FxIndexer()
+    indexer.connect_to_metadb(DBConfig(name=item.db_id, db_uri=db_uri))
+
+    llm = LLM(LLMConfig(engine="OpenAI", engine_config={"openai_model": "gpt-4o-mini"}))
+
+    agent = FxAgentText2SQL()
+    result_sql = agent.invoke(
+        configure=FxAgentRunnerConfig(llm, indexer),
+        input=FxAgentText2SQLInput(input=item.question),
+    ).value
+
+    print("==============================")
+    print(item.question_id, item.question)
+    print("Pred:", result_sql)
+    print("Gold:", item.SQL)
+    print("")
+    return result_sql
+
+
+def dump_result(input: List[Tuple[str, str]], outfile: str):
+    with open(outfile, "w", encoding="utf-8") as fout:
+        for item in input:
+            fout.write(f"{item[0]}\t{item[1]}\n")
+
+
+def run_genereate_goal(input: InputParams):
+    print("Input:", input)
+
+    result_sqls: List[Tuple[str, str]] = []
+
+    # read dataset from json
+    with open(input.dataset_json, "r", encoding="utf-8") as fin:
+        json_text = fin.read()
+        json_data = json.loads(json_text)
+        total = len(json_data)
+        for json_item in json_data:
+            item = InputDatasetItem(**json_item)
+            print(item.question_id, "/", total)
+            result_sql = run_gen_sql(input, item)
+            result_sqls.append((result_sql, item.db_id))
+
+    dump_result(result_sqls, "pred.sql")
+
+
+def main():
+    args_parser = argparse.ArgumentParser()
+    args_parser.add_argument("--mode", type=str, required=True, default="benchmark")
+    args_parser.add_argument("--db_root_path", type=str, required=True, default="")
+    args_parser.add_argument("--dataset_json", type=str, required=True, default="")
+    args_parser.add_argument("--pred_sql", type=str, required=False)
+    args_parser.add_argument("--gold_sql", type=str, required=False)
+    args = cast(InputParams, args_parser.parse_args())
+
+    if args.mode == "benchmark":
+        if args.pred_sql is None or args.gold_sql is None:
+            raise ValueError(f"Must input pred_sql and gold_sql.\n{args}")
+        run_evaluation(args)
+    elif args.mode == "gensql":
+        run_genereate_goal(args)
+
+
+if __name__ == "__main__":
+    main()
