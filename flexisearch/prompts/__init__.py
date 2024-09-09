@@ -26,8 +26,9 @@ SQLResult: Result of the SQLQuery
 Answer: Final answer here
 
 Only use the following tables:
+{table_info}
 
-{table_info}.
+{addition_desc}
 """,
     stop_prompt="SQLResult:",
     user_question_prompt=PROMPT_TEXT_DEFAULT_USER_QUESTION,

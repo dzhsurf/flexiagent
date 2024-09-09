@@ -6,6 +6,7 @@ from flexisearch.database.db_executor import DBConfig, DBExecutor
 class FxIndexer:
     def __init__(self):
         self.metadb: Optional[DBExecutor] = None
+        self.knowledges: List[str] = []
 
     def connect_to_metadb(self, db_config: DBConfig):
         if self.metadb:
@@ -33,3 +34,12 @@ class FxIndexer:
         if self.metadb:
             return self.metadb.query(query)
         return []
+
+    def add_knowledge(self, content: str):
+        self.knowledges.append(content)
+
+    def clear_knowledge(self):
+        self.knowledges.clear()
+
+    def get_all_knowledges_as_text(self) -> str:
+        return "\n".join(self.knowledges)

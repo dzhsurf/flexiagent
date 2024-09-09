@@ -35,6 +35,7 @@ class FxAgentText2SqlQA(FxAgentChain[FxAgentText2SQLInput, str]):
         if isinstance(input, str):
             return FxAgentText2SQLInput(
                 input=input,
+                use_indexer_knowledge=True,
             )
         elif isinstance(input, FxAgentText2SQLInput):
             return input

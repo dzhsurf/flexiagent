@@ -19,6 +19,7 @@ class FxAgentText2SQLInput(FxAgentInput):
     input: str
     table_info: Optional[str] = None
     top_k: Optional[int] = None
+    use_indexer_knowledge: bool = False
 
 
 class FxAgentText2SQL(FxAgent[FxAgentText2SQLInput, str]):
@@ -47,6 +48,10 @@ class FxAgentText2SQL(FxAgent[FxAgentText2SQLInput, str]):
         if input.top_k is None:
             input.top_k = 5
 
+        addition_desc = ""
+        if input.use_indexer_knowledge:
+            addition_desc = configure.indexer.get_all_knowledges_as_text()
+
         # llm query
         response = configure.llm.query(
             PROMPT_TEMPLATE_SQLITE_TEXT2SQL_EXPERT,
@@ -54,6 +59,7 @@ class FxAgentText2SQL(FxAgent[FxAgentText2SQLInput, str]):
                 "input": input.input,
                 "table_info": input.table_info,
                 "top_k": input.top_k,
+                "addition_desc": addition_desc,
             },
         )
 
