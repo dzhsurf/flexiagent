@@ -45,7 +45,11 @@ class FxAgentRetriever(FxAgent[FxAgentRetrieverInput, FxAgentRetrieverOutput]):
         configure: FxAgentRunnerConfig,
         input: FxAgentRetrieverInput,
     ) -> FxAgentRunnerResult[FxAgentRetrieverOutput]:
-        documents = configure.indexer.retrieve_documents(input.input)
+        try:
+            documents = configure.indexer.retrieve_documents(input.input)
+        except Exception as e:
+            logger.error(e)
+            documents = []
 
         msg = "\n".join(documents)
         logger.info(f"\n====Data====\n{msg}")
