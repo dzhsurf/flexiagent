@@ -48,7 +48,7 @@ def main():
     print(
         "QA:",
         searcher.assist(
-            "What is the sname of every sing that does not have any song?"
+            "What is the names of every sing that does not have any song?"
         ),
     )
 
