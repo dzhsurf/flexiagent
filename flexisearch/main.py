@@ -1,6 +1,7 @@
 import logging
 import os
 
+from flexisearch.agents.agent_context_qa import FxAgentContextQA
 from flexisearch.agents.agent_intent_recognizer import FxAgentIntentRecognizer
 from flexisearch.agents.agent_output_parser import FxAgentOutputParser
 from flexisearch.agents.agent_text2sql_qa import FxAgentText2SqlQA
@@ -13,9 +14,7 @@ logging.basicConfig(level=logging.INFO)
 
 
 def main():
-    db_path = os.path.abspath(
-        "../../../benchmark/spider/database/singer/singer.sqlite"
-    )
+    db_path = os.path.abspath("../../../benchmark/spider/database/singer/singer.sqlite")
     db_uri = f"sqlite:///{db_path}"
 
     indexer = FxIndexer()
@@ -32,12 +31,15 @@ def main():
     #     },
     # )
 
-    llm_config = LLMConfig(engine="OpenAI", engine_config={"openai_model": "gpt-4o-mini"})
+    llm_config = LLMConfig(
+        engine="OpenAI", engine_config={"openai_model": "gpt-4o-mini"}
+    )
 
     searcher = FxSearcher(llm_config, indexer)
     searcher.register(FxAgentOutputParser())
     searcher.register(FxAgentIntentRecognizer())
     searcher.register(FxAgentText2SqlQA())
+    searcher.register(FxAgentContextQA())
 
     # print(
     #     "QA:",
@@ -47,9 +49,7 @@ def main():
     # )
     print(
         "QA:",
-        searcher.assist(
-            "What is the names of every sing that does not have any song?"
-        ),
+        searcher.assist("What is the names of every sing that does not have any song?"),
     )
 
 

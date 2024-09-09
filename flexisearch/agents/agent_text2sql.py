@@ -33,7 +33,7 @@ class FxAgentText2SQL(FxAgent[FxAgentText2SQLInput, str]):
     ):
         super().__init__(
             "AgentText2SQL",
-            "An LLM agent for translates natural language queries into structured SQL queries",
+            "Can convert queries in human language into SQL.",
             output_parser=output_parser,
         )
 

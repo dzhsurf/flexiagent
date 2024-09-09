@@ -36,7 +36,7 @@ class FxAgentRetriever(FxAgent[FxAgentRetrieverInput, FxAgentRetrieverOutput]):
     ):
         super().__init__(
             "AgentRetriever",
-            "An LLM agent for retrieve documents by the input SQL.",
+            "Can retrieve results from the database based on the input SQL.",
             output_parser=output_parser,
         )
 

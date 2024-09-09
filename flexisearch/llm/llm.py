@@ -1,9 +1,13 @@
+import logging
 from typing import Dict
 
 from flexisearch.llm.config import LLMConfig
 from flexisearch.llm.engine_factory import LLMEngineLoader
+
 # from flexisearch.llm.histroy_tracker import HistoryTracker
 from flexisearch.prompt import PromptTemplate, PromptValue
+
+logger = logging.getLogger(__name__)
 
 
 class LLM:

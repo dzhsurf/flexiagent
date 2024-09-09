@@ -1,3 +1,4 @@
+import logging
 from typing import Dict, Optional, Type, cast
 import os
 from llama_cpp import (
@@ -8,6 +9,8 @@ from llama_cpp import (
 
 from flexisearch.llm.engine.engine_base import LLMEngineConfig, LLMEngineImpl
 from flexisearch.prompt import PromptTemplate, PromptValue
+
+logger = logging.getLogger(__name__)
 
 
 class LLMConfigLlamaCpp(LLMEngineConfig):
@@ -72,12 +75,15 @@ class LLMEngineLlamaCpp(LLMEngineImpl[LLMConfigLlamaCpp]):
         #     res_text = res_text[p2 + len(inst_template.inst_tag_end) :]
 
         # For ChatCompletion
+        messages = [
+            cast(ChatCompletionRequestMessage, msg)
+            for msg in prompt.to_openai_chat_completion_messages(variables)
+        ]
+        logger.debug(messages)
+
         response = self.llm.create_chat_completion(
             temperature=0,
-            messages=[
-                cast(ChatCompletionRequestMessage, msg)
-                for msg in prompt.to_openai_chat_completion_messages(variables)
-            ],
+            messages=messages,
             stop=prompt.stop_prompt,
         )
         res = cast(CreateChatCompletionResponse, response)

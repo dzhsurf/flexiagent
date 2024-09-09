@@ -20,22 +20,12 @@ class DBExecutor:
         return self.engine.dialect.name
 
     def get_schemas_as_text(self) -> str:
-        result = ""
-
         metadata = MetaData()
         # Reflect the database schema
         metadata.reflect(bind=self.engine)
-        # Iterate through tables and print their columns
-        for table_name in metadata.tables:
-            result += "Table: " + table_name + "\n"
-            table = metadata.tables[table_name]
-            for column in table.columns:
-                result += (
-                    "\tColumn: " + column.name + ", Type: " + str(column.type) + "\n"
-                )
-            result += "\n"
 
-        return result
+        # Iterate through tables and print their columns
+        return self._pretty_print_schema(metadata)
 
     def query(self, sql_query: str) -> List[str]:
         query = text(sql_query)
@@ -48,3 +38,16 @@ class DBExecutor:
                 ans.append(str(row))
 
         return ans
+
+    def _pretty_print_schema(self, metadata: MetaData) -> str:
+        result = ""
+        for table_name, table in metadata.tables.items():
+            result += f"Table: {table_name}\n"
+            result += f"{'Column Name':<30} {'Type':<30} {'Nullable':<15} {'Primary Key':<10}\n"
+            result += "=" * 100 + "\n"
+
+            for column in table.columns:
+                result += f"{column.name:<30} {str(column.type):<30} {str(column.nullable):<15} {str(column.primary_key):<10}\n"
+
+            result += "\n" + "-" * 100 + "\n"
+        return result

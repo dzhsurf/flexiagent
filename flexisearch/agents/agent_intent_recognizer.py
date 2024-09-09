@@ -25,7 +25,7 @@ class FxAgentIntentRecognizer(
     def __init__(self):
         super().__init__(
             "AgentIntentRecognition",
-            "An LLM agent for intent recognition analyzes user inputs to identify the underlying goals or purposes, enabling it to respond appropriately and facilitate effective interactions.",
+            "Can be used to pickup the option that best matches the user's question intention based on the option's description.",
         )
 
     def invoke(
@@ -35,16 +35,20 @@ class FxAgentIntentRecognizer(
     ) -> FxAgentRunnerResult[List[FxAgent[FxAgentInput, Any]]]:
         agent_dict: Dict[str, FxAgent[FxAgentInput, Any]] = {}
 
-        actions = ""
+        options: List[str] = []
+        description = ""
         for agent in input.agents:
-            actions += f"* {agent.name}: {agent.description}\n"
+            options.append(f'"{agent.name}"')
+            description += f"* {agent.name}: {agent.description}\n"
             agent_dict[agent.name] = agent
+        options_text = ",".join(options)
 
         response = configure.llm.query(
             PROMPT_TEMPLATE_INTENT_RECOGNITION,
             variables={
                 "input": input.input,
-                "actions": actions,
+                "options": f"[{options_text}]",
+                "description": description,
             },
         )
 

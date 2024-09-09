@@ -46,18 +46,20 @@ Answer the user's question based on these results.
 )
 
 PROMPT_TEMPLATE_INTENT_RECOGNITION = PromptTemplate(
-    prompt="""You are a classification expert.
-Based on the context, select the option that best matches the user's question from the given category options.
+    prompt="""You are a classification expert. Select the option that best matches the user's question from the given JSON options.
+
 You must use the following format:
 
 Question: Question here
-JSONResult: ["action1", "action1"]
-Answer: Final answer here
+JSONResult: ["JSON result here"]
+Analyse: Final answer here
 
-The JSONResult must be one of the option from the context:
-{actions}
+---
+JSONOptions: {options}
+Option description:
+{description}
 """,
-    stop_prompt="Answer:",
+    stop_prompt="Analyse:",
     user_question_prompt="Question: {input}",
 )
 
