@@ -3,7 +3,9 @@ from typing import Any, Dict, List, Optional
 
 from flexisearch.agent import FxAgent, FxAgentInput, FxAgentRunnerConfig
 from flexisearch.agents.agent_intent_recognizer import (
-    FxAgentIntentRecognizer, FxAgentIntentRecognizerInput)
+    FxAgentIntentRecognizer,
+    FxAgentIntentRecognizerInput,
+)
 from flexisearch.indexer import FxIndexer
 from flexisearch.llm.config import LLMConfig
 from flexisearch.llm.llm import LLM

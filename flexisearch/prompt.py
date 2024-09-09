@@ -2,10 +2,12 @@ import re
 from dataclasses import dataclass
 from typing import Dict, Iterable, List, Set, Union
 
-from openai.types.chat import (ChatCompletionAssistantMessageParam,
-                               ChatCompletionMessageParam,
-                               ChatCompletionSystemMessageParam,
-                               ChatCompletionUserMessageParam)
+from openai.types.chat import (
+    ChatCompletionAssistantMessageParam,
+    ChatCompletionMessageParam,
+    ChatCompletionSystemMessageParam,
+    ChatCompletionUserMessageParam,
+)
 from pydantic import BaseModel
 
 PromptValue = Union[str, int]
