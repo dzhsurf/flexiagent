@@ -1,7 +1,7 @@
 import logging
 import os
 
-from flexisearch.agents.agent_context_qa import FxAgentContextQA
+# from flexisearch.agents.agent_context_qa import FxAgentContextQA
 from flexisearch.agents.agent_intent_recognizer import FxAgentIntentRecognizer
 from flexisearch.agents.agent_output_parser import FxAgentOutputParser
 from flexisearch.agents.agent_text2sql_qa import FxAgentText2SqlQA

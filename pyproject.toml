@@ -20,7 +20,18 @@ huggingface-hub = "^0.24.6"
 mypy = "^1.11.2"
 pytest = "^8.3.2"
 ruff = "^0.6.4"
+isort = "^5.13.2"
 
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.ruff]
+line-length = 88
+
+[tool.isort]
+line_length = 88
+multi_line_output = 3  # Consider using 3 for Vertical Hanging Indent
+include_trailing_comma = true
+force_grid_wrap = 0  # No forced grid wrap
+use_parentheses = true

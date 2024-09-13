@@ -9,14 +9,15 @@
 # code copy from bird-bench/mini_dev/llm/src/evaluation_ex.py
 
 import argparse
-import os
-import sys
 import json
-import sqlite3
 import multiprocessing as mp
-from typing import Any, Dict, List, Optional, Tuple, cast
-from func_timeout import func_timeout, FunctionTimedOut
+import os
+import sqlite3
+import sys
 from dataclasses import dataclass
+from typing import Any, Dict, List, Optional, Tuple, cast
+
+from func_timeout import FunctionTimedOut, func_timeout
 
 from flexisearch.agent import FxAgentRunnerConfig
 from flexisearch.agents.agent_text2sql import FxAgentText2SQL, FxAgentText2SQLInput
@@ -24,6 +25,7 @@ from flexisearch.database.db_executor import DBConfig
 from flexisearch.indexer import FxIndexer
 from flexisearch.llm.config import LLMConfig
 from flexisearch.llm.llm import LLM
+
 #### utils
 
 exec_result: List[Any] = []

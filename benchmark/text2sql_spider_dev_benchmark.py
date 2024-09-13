@@ -8,7 +8,6 @@ from flexisearch.database.db_executor import DBConfig
 from flexisearch.indexer import FxIndexer
 from flexisearch.llm import LLM
 
-
 # spider 1.0 dev: https://yale-lily.github.io/spider
 # evaluation suite: https://github.com/taoyds/test-suite-sql-eval
 # run evaluation:
