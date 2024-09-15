@@ -17,17 +17,17 @@ class LLMEngineLoader:
 
     @classmethod
     def load_engine(cls, config: LLMConfig) -> LLMEngine:
-        if isinstance(config.engine_config, (str, dict)):
-            if isinstance(config.engine_config, dict):
-                config_dict = config.engine_config
+        if isinstance(config.params, (str, dict)):
+            if isinstance(config.params, dict):
+                config_dict = config.params
             else:
-                config_dict = dict(json.loads(config.engine_config))
+                config_dict = dict(json.loads(config.params))
             for engine in LLMEngineLoader.get_support_engines():
                 if config.engine == engine.engine_name():
                     return engine(engine.config_cls()(**config_dict))
         else:
             for engine in LLMEngineLoader.get_support_engines():
-                if isinstance(config.engine_config, engine.config_cls()):
-                    return engine(config.engine_config)
+                if isinstance(config.params, engine.config_cls()):
+                    return engine(config.params)
 
         raise TypeError(f"Engine not support. Config: {config}")

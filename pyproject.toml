@@ -26,6 +26,9 @@ isort = "^5.13.2"
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
+[tool.pytest.ini_options]
+log_cli = "True"
+
 [tool.ruff]
 line-length = 88
 

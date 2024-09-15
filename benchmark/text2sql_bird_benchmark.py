@@ -259,7 +259,7 @@ def run_gen_sql(config: InputParams, item: InputDatasetItem) -> str:
     indexer = FxIndexer()
     indexer.connect_to_metadb(DBConfig(name=item.db_id, db_uri=db_uri))
 
-    llm = LLM(LLMConfig(engine="OpenAI", engine_config={"openai_model": "gpt-4o-mini"}))
+    llm = LLM(LLMConfig(engine="OpenAI", params={"openai_model": "gpt-4o-mini"}))
 
     agent = FxAgentText2SQL()
     result_sql = agent.invoke(

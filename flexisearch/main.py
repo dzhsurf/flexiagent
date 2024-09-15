@@ -30,7 +30,7 @@ def main():
     # repo_filename = "*Q4_K_M.gguf"
     # llm_config = LLMConfig(
     #     engine="LlamaCpp",
-    #     engine_config={
+    #     params={
     #         "repo_id_or_model_path": repo_id,
     #         "repo_filename": repo_filename,
     #         "n_ctx": 4096,
@@ -38,7 +38,7 @@ def main():
     # )
 
     llm_config = LLMConfig(
-        engine="OpenAI", engine_config={"openai_model": "gpt-4o-mini"}
+        engine="OpenAI", params={"openai_model": "gpt-4o-mini"}
     )
 
     searcher = FxSearcher(llm_config, indexer)

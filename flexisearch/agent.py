@@ -1,15 +1,14 @@
 from dataclasses import dataclass
 from typing import Any, Callable, Dict, Generic, List, Optional, Protocol, TypeVar
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 from flexisearch.indexer import FxIndexer
 from flexisearch.llm.llm import LLM
 
 
 class FxAgentVariable(BaseModel):
-    class Config:
-        arbitrary_types_allowed = True
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
 
 class FxAgentInput(FxAgentVariable):
