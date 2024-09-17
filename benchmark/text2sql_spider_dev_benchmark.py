@@ -78,7 +78,7 @@ def main():
         db_uri = f"sqlite:///{db_path}"
 
         indexer = FxIndexer()
-        indexer.connect_to_metadb(DBConfig(name=db_name, db_uri=db_uri))
+        indexer.add_metadb(DBConfig(name=db_name, db_uri=db_uri))
         result = agent.invoke(
             configure=FxAgentRunnerConfig(llm, indexer),
             input=FxAgentText2SQLInput(input=query),
