@@ -1,38 +1,37 @@
-from typing import List, Optional
+from typing import Dict, List, Optional
 
 from flexisearch.database.db_executor import DBConfig, DBExecutor
 
 
 class FxIndexer:
     def __init__(self):
-        self.metadb: Optional[DBExecutor] = None
         self.knowledges: List[str] = []
+        self.metadbs: Dict[str, DBExecutor] = {}
 
-    def connect_to_metadb(self, db_config: DBConfig):
-        if self.metadb:
-            self.disconnect_metadb()
-        self.metadb = DBExecutor(db_config)
+    def add_metadb(self, db_config: DBConfig):
+        self.metadbs[db_config.name] = DBExecutor(db_config)
 
-    def disconnect_metadb(self):
-        self.metadb = None
+    def remove_metadb(self, db_name: str):
+        if db_name in self.metadbs:
+            del self.metadbs[db_name]
 
     def dialect(self) -> str:
-        if self.metadb:
-            return self.metadb.dialect
+        # if self.metadb:
+        #     return self.metadb.dialect
         return ""
 
     def get_all_schemas_as_text(self) -> str:
         result = ""
 
-        if self.metadb:
-            schemas = self.metadb.get_schemas_as_text()
-            result += "DB: " + self.metadb.config.name + "\n" + schemas
+        for db_name, db in self.metadbs.items():
+            schemas = db.get_schemas_as_text()
+            result += "DB: " + db_name + "\n" + schemas + "\n\n"
 
         return result
 
-    def retrieve_documents(self, query: str) -> List[str]:
-        if self.metadb:
-            return self.metadb.query(query)
+    def retrieve_documents(self, db_name: str, query: str) -> List[str]:
+        if db_name in self.metadbs:
+            return self.metadbs[db_name].query(query)
         return []
 
     def add_knowledge(self, content: str):

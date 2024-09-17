@@ -21,7 +21,7 @@ def main():
     db_uri = f"sqlite:///{db_path}"
 
     indexer = FxIndexer()
-    indexer.connect_to_metadb(DBConfig(name=db_name, db_uri=db_uri))
+    indexer.add_metadb(DBConfig(name=db_name, db_uri=db_uri))
     indexer.add_knowledge("""Table real_estate_properties property_type_code must be one of this values:
 "Apartment", "Field", "House", "Other", "Shop"
 """)
