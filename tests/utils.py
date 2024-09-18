@@ -65,6 +65,12 @@ def execution_accuracy(
         pred_res = _db_execute(pred.db_uri, pred.sql)
         gold_res = _db_execute(gold.db_uri, gold.sql)
         total_res.append((pred_res, gold_res))
+        # logger.info("===pred===")
+        # logger.info("uri: %s sql: %s", pred.db_uri, pred.sql)
+        # logger.info(pred_res)
+        # logger.info("===gold===")
+        # logger.info("uri: %s sql: %s", gold.db_uri, gold.sql)
+        # logger.info(gold_res)
 
     # compute accuracy
     passed = 0
@@ -78,5 +84,5 @@ def execution_accuracy(
         else:
             failed += 1
     acc = passed / (passed + failed)
-    print(f"pass: {passed}\tfail: {failed}\tacc: {acc:.2f}")
+    logger.info(f"\n[====\tpass: {passed}\tfail: {failed}\tacc: {acc:.2f}====]\n")
     return ans

@@ -1,29 +1,37 @@
 import logging
-from typing import Any, Dict, List
+import os
+from typing import Any, Dict, List, Literal
 import unittest
 from unittest import mock
 
-import pytest
+from tqdm import tqdm
 
 from flexisearch.agent import FxAgentRunnerConfig
 from flexisearch.agents.agent_text2sql import FxAgentText2SQL, FxAgentText2SQLInput
 from flexisearch.database.db_executor import DBConfig
 from flexisearch.llm.config import LLMConfig
 from flexisearch.indexer import FxIndexer
+from flexisearch.llm.engine.engine_base import LLMEngineConfig
+from flexisearch.llm.engine.openai import LLMConfigOpenAI, LLMEngineOpenAI
 from flexisearch.llm.llm import LLM
 from .bird_utils import BirdDatasetProvider
 from .utils import DatasetItem, SQLExecuteParams, execution_accuracy
 
-
+# disable some module log
+logging.getLogger("httpx").setLevel(logging.WARNING)
+logging.getLogger("flexisearch").setLevel(logging.WARNING)
 logger = logging.getLogger(__name__)
 
 
-TEST_CONFIG: Dict[str, Any] = {
-    "bird_dataset_path": "",
-}
+ENV_KEYS = Literal["BIRD_DATASET_PATH", "SPIDER_V1_PATH"]
+
+
+def get_env_value(key: ENV_KEYS) -> str:
+    return os.environ.get(key, "")
 
 
 class TestText2Sql(unittest.TestCase):
+    @mock.patch.dict(os.environ, {"LLM_HTTP_API_TIMEOUT": "30"}, clear=False)
     def setUp(self):
         self.agent = FxAgentText2SQL()
         llm_config = LLMConfig(engine="OpenAI", params={"openai_model": "gpt-4o-mini"})
@@ -32,30 +40,41 @@ class TestText2Sql(unittest.TestCase):
         self.configure = FxAgentRunnerConfig(self.llm, self.indexer)
 
     def tearDown(self):
-        logger.info("tearDown")
+        pass
 
     @mock.patch.dict(
-        TEST_CONFIG, {"bird_dataset_path": "../../benchmark/bird/dev_20240627/"}
+        os.environ,
+        {
+            "BIRD_DATASET_PATH": "../../benchmark/bird/dev_20240627/",
+        },
+        clear=True,
     )
     def test_bird(self):
         pred_sqls: List[str] = []
 
+        logger.info("Initialize BIRD dataset...")
         bird_utils = BirdDatasetProvider()
-        bird_utils.setup(TEST_CONFIG["bird_dataset_path"])
+        bird_utils.setup(get_env_value("BIRD_DATASET_PATH"))
         items = bird_utils.get_all_dataset_items()
 
         # prepare indexer metadb
         for item in items:
             self.indexer.add_metadb(DBConfig(name=item.db_id, db_uri=item.db_uri))
 
-        for item in items:
+        logger.info("Start run cases...")
+        for i in tqdm(range(len(items))):
+            item = items[i]
             pred_sql = self._run_predict(item.question)
             pred_sqls.append(pred_sql)
 
+        logger.info("Start evaluation...")
         self._do_evaluation(items, pred_sqls)
 
-    # def test_spider_1(self):
-    #     pass
+    def test_bird_mock_db_selector(self):
+        assert True
+
+    def test_spider_1(self):
+        assert True
 
     def _run_predict(self, question: str) -> str:
         input = FxAgentText2SQLInput(input=question)
@@ -81,36 +100,6 @@ class TestText2Sql(unittest.TestCase):
 
         acc_res = execution_accuracy(pred_queries, gold_queries)
         assert len(acc_res) == len(items)
-
-
-# @pytest.mark.parametrize("question_id,question,sql,db_id,db_path", setup_testcases())
-# def test_text2sql_bird(
-#     setup_target: Tuple[FxAgentText2SQL, LLM, FxIndexer],
-#     question_id: int,
-#     question: str,
-#     sql: str,
-#     db_id: str,
-#     db_path: str,
-# ):
-#     agent = setup_target[0]
-#     llm = setup_target[1]
-#     indexer = setup_target[2]
-
-#     result = agent.invoke(
-#         configure=FxAgentRunnerConfig(llm, indexer),
-#         input=FxAgentText2SQLInput(
-#             input=question,
-#         ),
-#     )
-#     pred_sql = result.value
-
-#     # assert pred_sql == sql
-#     db = DBExecutor(
-#         DBConfig(name=db_id, db_uri=f"sqlite:///{db_path}/{db_id}/{db_id}.sqlite")
-#     )
-#     evaluation = db.query(pred_sql)
-#     expected = db.query(sql)
-#     assert evaluation == expected
 
 
 if __name__ == "__main__":

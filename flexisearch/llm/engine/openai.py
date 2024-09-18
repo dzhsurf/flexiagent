@@ -1,3 +1,4 @@
+import logging
 from typing import Type
 
 from llama_cpp import Dict
@@ -5,6 +6,8 @@ from openai import OpenAI
 
 from flexisearch.llm.engine.engine_base import LLMEngineConfig, LLMEngineImpl
 from flexisearch.prompt import PromptTemplate, PromptValue
+
+logger = logging.getLogger(__name__)
 
 
 class LLMConfigOpenAI(LLMEngineConfig):
@@ -35,6 +38,7 @@ class LLMEngineOpenAI(LLMEngineImpl[LLMConfigOpenAI]):
             model=self.config.openai_model,
             messages=prompt.to_openai_chat_completion_messages(variables),
             stop=prompt.stop_prompt,
+            timeout=self.config.timeout,
         )
 
         if len(response.choices) > 0 and response.choices[0].message.content:

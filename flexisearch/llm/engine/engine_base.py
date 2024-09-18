@@ -1,13 +1,21 @@
+import os
 from abc import ABC, abstractmethod
-from typing import Dict, Generic, Type, TypeVar
+from typing import Dict, Generic, Optional, Type, TypeVar
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
+from flexisearch.config_keys import LLM_HTTP_API_TIMEOUT
 from flexisearch.prompt import PromptTemplate, PromptValue
 
 
+def get_env_variable(var_name: str, default: str = "") -> str:
+    return os.environ.get(var_name, default)
+
+
 class LLMEngineConfig(BaseModel):
-    pass
+    timeout: Optional[float] = Field(
+        default_factory=lambda: float(get_env_variable(LLM_HTTP_API_TIMEOUT, "5"))
+    )
 
 
 T = TypeVar("T", bound=LLMEngineConfig)
