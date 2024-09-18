@@ -77,9 +77,6 @@ class TestText2Sql(unittest.TestCase):
         logger.info("Start evaluation...")
         self._do_evaluation(items, pred_sqls)
 
-    def test_bird_mock_db_selector(self):
-        assert True
-
     def test_spider_1(self):
         assert True
 

@@ -1,3 +1,4 @@
+from abc import ABC, abstractmethod
 import logging
 from typing import Any, List, Literal, Tuple
 from pydantic import BaseModel
@@ -19,6 +20,16 @@ class DatasetItem(BaseModel):
     sql: str
     db_id: str
     db_uri: str  # currently only support SQLite
+
+
+class DatasetProvider(ABC):
+    @abstractmethod
+    def setup(self, dataset_path: str):
+        pass
+
+    @abstractmethod
+    def get_all_dataset_items(self) -> List[DatasetItem]:
+        pass
 
 
 def get_dialect_from_uri(db_uri: str) -> DBDialect:
@@ -84,5 +95,5 @@ def execution_accuracy(
         else:
             failed += 1
     acc = passed / (passed + failed)
-    logger.info(f"\n[====\tpass: {passed}\tfail: {failed}\tacc: {acc:.2f}====]\n")
+    logger.info(f"\n[====\tpass: {passed}\tfail: {failed}\tacc: {acc:.2f}\t====]\n")
     return ans

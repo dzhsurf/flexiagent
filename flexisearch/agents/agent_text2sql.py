@@ -18,7 +18,6 @@ logger = logging.getLogger(__name__)
 class FxAgentText2SQLInput(FxAgentInput):
     input: str
     table_info: Optional[str] = None
-    top_k: Optional[int] = None
     use_indexer_knowledge: bool = False
 
 
@@ -45,8 +44,6 @@ class FxAgentText2SQL(FxAgent[FxAgentText2SQLInput, str]):
     ) -> FxAgentRunnerResult[str]:
         if input.table_info is None:
             input.table_info = configure.indexer.get_all_schemas_as_text()
-        if input.top_k is None:
-            input.top_k = 5
 
         addition_desc = ""
         if input.use_indexer_knowledge:
@@ -58,7 +55,6 @@ class FxAgentText2SQL(FxAgent[FxAgentText2SQLInput, str]):
             variables={
                 "input": input.input,
                 "table_info": input.table_info,
-                "top_k": input.top_k,
                 "addition_desc": addition_desc,
             },
         )

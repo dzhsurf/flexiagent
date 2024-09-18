@@ -2,7 +2,7 @@ import json
 import os
 from typing import List
 from pydantic import BaseModel
-from .utils import DatasetItem
+from .utils import DatasetItem, DatasetProvider
 
 
 class BirdDatasetItem(BaseModel):
@@ -12,7 +12,7 @@ class BirdDatasetItem(BaseModel):
     db_id: str
 
 
-class BirdDatasetProvider:
+class BirdDatasetProvider(DatasetProvider):
     def __init__(self) -> None:
         self.dataset_items: List[DatasetItem] = []
 
