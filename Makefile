@@ -1,4 +1,4 @@
-.PHONE: install run test mypy ruff format clean 
+.PHONE: install run test mypy ruff format isort clean 
 
 PROJECT_NAME=flexisearch
 PYTHON=python3
@@ -22,7 +22,7 @@ run: ## Local run
 	$(PYTHON) $(PROJECT_NAME)/main.py
 
 test: ## Run tests.
-	$(PYTHON) -m pytest tests/
+	$(PYTHON) -m pytest -s tests/
 
 mypy: ## Run mypy checker
 	$(MYPY) --check-untyped-defs --ignore-missing-imports $(PROJECT_NAME)
@@ -32,7 +32,10 @@ ruff: ## Run ruff check
 
 format: ## Format project code.
 	$(PYTHON) -m ruff format $(PROJECT_NAME)
-# $(PYTHON) -m isort $(PROJECT_NAME)
+
+isort: ## Format imports
+	$(PYTHON) -m isort $(PROJECT_NAME)
+	$(PYTHON) -m ruff format $(PROJECT_NAME)
 
 clean: ## Clean up build files.
 	@echo "Cleaning up..."

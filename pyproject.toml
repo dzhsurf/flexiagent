@@ -28,6 +28,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.pytest.ini_options]
 log_cli = "True"
+log_cli_level = "INFO"
 
 [tool.ruff]
 line-length = 88
