@@ -23,7 +23,11 @@ logging.getLogger("flexisearch").setLevel(logging.WARNING)
 logger = logging.getLogger(__name__)
 
 
-ENV_KEYS = Literal["BIRD_DATASET_PATH", "SPIDER_V1_PATH"]
+ENV_KEYS = Literal[
+    "BIRD_DATASET_PATH",
+    "SPIDER_V1_PATH",
+    "DATASET_NUM_TO_TAKE",
+]
 
 
 def get_env_value(key: ENV_KEYS) -> str:
@@ -47,7 +51,7 @@ class TestText2Sql(unittest.TestCase):
         {
             "BIRD_DATASET_PATH": "../../benchmark/bird/dev_20240627/",
         },
-        clear=True,
+        clear=False,
     )
     def test_bird(self):
         pred_sqls: List[str] = []
@@ -56,6 +60,9 @@ class TestText2Sql(unittest.TestCase):
         bird_utils = BirdDatasetProvider()
         bird_utils.setup(get_env_value("BIRD_DATASET_PATH"))
         items = bird_utils.get_all_dataset_items()
+        if "DATASET_NUM_TO_TAKE" in os.environ:
+            num = int(get_env_value("DATASET_NUM_TO_TAKE"))
+            items = items[0:num]
 
         # prepare indexer metadb
         for item in items:

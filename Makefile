@@ -24,6 +24,9 @@ run: ## Local run
 test: ## Run tests.
 	$(PYTHON) -m pytest -s tests/
 
+test_small: ## Run small tests.
+	DATASET_NUM_TO_TAKE="20" $(PYTHON) -m pytest -s tests/
+
 mypy: ## Run mypy checker
 	$(MYPY) --check-untyped-defs --ignore-missing-imports $(PROJECT_NAME)
 

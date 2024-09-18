@@ -42,4 +42,4 @@ class BirdDatasetProvider:
         self.dataset_items = dataset_items
 
     def get_all_dataset_items(self) -> List[DatasetItem]:
-        return self.dataset_items[0:10]
+        return self.dataset_items
