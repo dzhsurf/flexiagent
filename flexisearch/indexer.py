@@ -20,6 +20,15 @@ class FxIndexer:
         #     return self.metadb.dialect
         return ""
 
+    def get_all_dbnames(self) -> List[str]:
+        return [key for key, _ in self.metadbs.items()]
+
+    def get_db_uri(self, db_name: str) -> str:
+        return self.metadbs[db_name].config.db_uri
+
+    def get_db_schema(self, db_name: str) -> str:
+        return self.metadbs[db_name].get_schemas_as_text()
+
     def get_all_schemas_as_text(self) -> str:
         result = ""
 

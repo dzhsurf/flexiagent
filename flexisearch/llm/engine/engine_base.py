@@ -5,6 +5,7 @@ from typing import Dict, Generic, Optional, Type, TypeVar
 from pydantic import BaseModel, Field
 
 from flexisearch.config_keys import LLM_HTTP_API_TIMEOUT
+from flexisearch.llm.structured_schema import FxLLMStructuredSchema
 from flexisearch.prompt import PromptTemplate, PromptValue
 
 
@@ -36,12 +37,22 @@ class LLMEngine(ABC, Generic[T]):
         pass
 
     @abstractmethod
-    def query(
+    def chat_completion(
         self,
         prompt: PromptTemplate,
         *,
         variables: Dict[str, PromptValue] = {},
     ) -> str:
+        pass
+
+    @abstractmethod
+    def chat_completion_with_structured_output(
+        self,
+        prompt: PromptTemplate,
+        *,
+        variables: Dict[str, PromptValue] = {},
+        response_format: Type[FxLLMStructuredSchema] = FxLLMStructuredSchema,
+    ) -> FxLLMStructuredSchema:
         pass
 
 

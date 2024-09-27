@@ -1,19 +1,24 @@
 import logging
 import os
-from typing import Any, Dict, List, Literal
+from typing import Any, Callable, Dict, List, Literal, Tuple
 import unittest
 from unittest import mock
 
 from tqdm import tqdm
 
-from flexisearch.agent import FxAgentRunnerConfig
-from flexisearch.agents.agent_text2sql import FxAgentText2SQL, FxAgentText2SQLInput
+from flexisearch.agents.agent_db_recognition import (
+    AllDatabasesMetaInfo,
+    DatabaseMetaInfo,
+)
+from flexisearch.agents.agent_text2sql import (
+    Text2SQLOutput,
+    create_text2sql_agent_with_db_recognition,
+)
 from flexisearch.database.db_executor import DBConfig
 from flexisearch.llm.config import LLMConfig
 from flexisearch.indexer import FxIndexer
-from flexisearch.llm.engine.engine_base import LLMEngineConfig
-from flexisearch.llm.engine.openai import LLMConfigOpenAI, LLMEngineOpenAI
-from flexisearch.llm.llm import LLM
+
+# from flexisearch.llm.llm import LLM
 from .bird_utils import BirdDatasetProvider
 from .utils import DatasetItem, SQLExecuteParams, execution_accuracy
 
@@ -34,14 +39,32 @@ def get_env_value(key: ENV_KEYS) -> str:
     return os.environ.get(key, "")
 
 
+def create_fetch_all_databases_metainfo_func(
+    indexer: FxIndexer,
+) -> Callable[[Dict[str, Any]], AllDatabasesMetaInfo]:
+    def func(input: Dict[str, Any]) -> AllDatabasesMetaInfo:
+        metainfo_list: List[DatabaseMetaInfo] = []
+        for db_name in indexer.get_all_dbnames():
+            metainfo_list.append(
+                DatabaseMetaInfo(
+                    db_id=db_name,
+                    db_uri=indexer.get_db_uri(db_name),
+                    db_metainfo=indexer.get_db_schema(db_name),
+                )
+            )
+        return AllDatabasesMetaInfo(db_metainfo_list=metainfo_list)
+
+    return func
+
+
 class TestText2Sql(unittest.TestCase):
     @mock.patch.dict(os.environ, {"LLM_HTTP_API_TIMEOUT": "30"}, clear=False)
     def setUp(self):
-        self.agent = FxAgentText2SQL()
         llm_config = LLMConfig(engine="OpenAI", params={"openai_model": "gpt-4o-mini"})
-        self.llm = LLM(llm_config)
         self.indexer = FxIndexer()
-        self.configure = FxAgentRunnerConfig(self.llm, self.indexer)
+        self.agent = create_text2sql_agent_with_db_recognition(
+            llm_config, create_fetch_all_databases_metainfo_func(self.indexer)
+        )
 
     def tearDown(self):
         pass
@@ -50,11 +73,12 @@ class TestText2Sql(unittest.TestCase):
         os.environ,
         {
             "BIRD_DATASET_PATH": "../../benchmark/bird/dev_20240627/",
+            # "DATASET_NUM_TO_TAKE": "5",
         },
         clear=False,
     )
     def test_bird(self):
-        pred_sqls: List[str] = []
+        pred_sqls: List[SQLExecuteParams] = []
 
         logger.info("Initialize BIRD dataset...")
         bird_utils = BirdDatasetProvider()
@@ -80,12 +104,16 @@ class TestText2Sql(unittest.TestCase):
     def test_spider_1(self):
         assert True
 
-    def _run_predict(self, question: str) -> str:
-        input = FxAgentText2SQLInput(input=question)
-        result = self.agent.invoke(self.configure, input)
-        return result.value
+    def _run_predict(self, question: str) -> SQLExecuteParams:
+        result: Text2SQLOutput = self.agent.invoke(question)
+        return SQLExecuteParams(
+            db_uri=result.metainfo.db_uri,
+            sql=result.sql,
+        )
 
-    def _do_evaluation(self, items: List[DatasetItem], pred_sqls: List[str]):
+    def _do_evaluation(
+        self, items: List[DatasetItem], pred_sqls: List[SQLExecuteParams]
+    ):
         if len(items) != len(pred_sqls):
             raise ValueError(
                 f"items ({len(items)}) count not match pred_sqls ({len(pred_sqls)})."
@@ -94,10 +122,7 @@ class TestText2Sql(unittest.TestCase):
         pred_queries: List[SQLExecuteParams] = []
         gold_queries: List[SQLExecuteParams] = []
         for item, pred_sql in zip(items, pred_sqls):
-            pred_query = SQLExecuteParams(
-                db_uri=item.db_uri,
-                sql=pred_sql,
-            )
+            pred_query = pred_sql
             gold_query = SQLExecuteParams(db_uri=item.db_uri, sql=item.sql)
             pred_queries.append(pred_query)
             gold_queries.append(gold_query)

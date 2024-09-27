@@ -5,6 +5,7 @@ from typing import Dict, Optional, Type, cast
 from llama_cpp import ChatCompletionRequestMessage, CreateChatCompletionResponse, Llama
 
 from flexisearch.llm.engine.engine_base import LLMEngineConfig, LLMEngineImpl
+from flexisearch.llm.structured_schema import FxLLMStructuredSchema
 from flexisearch.prompt import PromptTemplate, PromptValue
 
 logger = logging.getLogger(__name__)
@@ -46,7 +47,7 @@ class LLMEngineLlamaCpp(LLMEngineImpl[LLMConfigLlamaCpp]):
     def config_cls(cls) -> Type[LLMConfigLlamaCpp]:
         return LLMConfigLlamaCpp
 
-    def query(
+    def chat_completion(
         self,
         prompt: PromptTemplate,
         *,
@@ -89,3 +90,12 @@ class LLMEngineLlamaCpp(LLMEngineImpl[LLMConfigLlamaCpp]):
             return res["choices"][0]["message"]["content"].strip()
 
         return ""
+
+    def chat_completion_with_structured_output(
+        self,
+        prompt: PromptTemplate,
+        *,
+        variables: Dict[str, PromptValue] = {},
+        response_format: Type[FxLLMStructuredSchema] = FxLLMStructuredSchema,
+    ) -> FxLLMStructuredSchema:
+        raise ValueError("llama.cpp not support structured output.")

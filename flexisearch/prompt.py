@@ -1,6 +1,6 @@
 import re
 from dataclasses import dataclass
-from typing import Dict, Iterable, List, Set, Union
+from typing import Any, Dict, Iterable, List, Set, Union
 
 from openai.types.chat import (
     ChatCompletionAssistantMessageParam,
@@ -10,7 +10,7 @@ from openai.types.chat import (
 )
 from pydantic import BaseModel
 
-PromptValue = Union[str, int]
+PromptValue = Any
 
 
 @dataclass
@@ -27,23 +27,17 @@ class PromptInstTemplate(BaseModel):
 
 
 class PromptTemplate:
-    prompt: str
-    user_question_prompt: str
-    stop_prompt: str
-    vaild_variables: Set[str]
-    fewshot_samples: List[PromptFewshotSample]
-
     def __init__(
         self,
         prompt: str,
         stop_prompt: str = "",
         user_question_prompt: str = "Question: {input}",
     ):
-        self.prompt = prompt
-        self.user_question_prompt = user_question_prompt
-        self.stop_prompt = stop_prompt
-        self.vaild_variables = set()
-        self.fewshot_samples = []
+        self.prompt: str = prompt
+        self.user_question_prompt: str = user_question_prompt
+        self.stop_prompt: str = stop_prompt
+        self.template_variables: Set[str] = set()
+        self.fewshot_samples: List[PromptFewshotSample] = []
         self._build_template()
 
     def add_fetshot_samples(self, samples: List[PromptFewshotSample]):
@@ -102,17 +96,22 @@ class PromptTemplate:
         variables = re.findall(extract_variable_pattern, self.prompt)
 
         for variable in variables:
-            self.vaild_variables.add(variable)
+            self.template_variables.add(variable)
         variables = re.findall(extract_variable_pattern, self.user_question_prompt)
 
         for variable in variables:
-            self.vaild_variables.add(variable)
+            self.template_variables.add(variable)
 
     def _replace_text_by_variables(
         self, text: str, variables: Dict[str, PromptValue]
     ) -> str:
-        for key, value in variables.items():
-            if key not in self.vaild_variables:
-                continue
-            text = text.replace("{" + key + "}", str(value))
+        for full_key in self.template_variables:
+            obj = variables
+            keys = full_key.split(".")
+            for k in keys:
+                if isinstance(obj, dict):
+                    obj = obj[k]
+                else:
+                    obj = getattr(obj, k)
+            text = text.replace("{" + full_key + "}", str(obj))
         return text
