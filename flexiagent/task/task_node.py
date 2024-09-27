@@ -64,7 +64,7 @@ class FxTaskNode(FxTask):
 
     def _require_input(
         self,
-        kwargs: dict[str, Any],
+        kwargs: Dict[str, Any],
         key: str,
         message: Optional[str] = None,
         value_type: Optional[Type[Any]] = None,
