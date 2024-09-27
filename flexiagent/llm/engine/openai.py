@@ -3,11 +3,13 @@ from typing import Type
 
 from llama_cpp import Dict
 from openai import OpenAI
-from openai.types.chat import ChatCompletion
 
 from flexiagent.llm.engine.engine_base import LLMEngineConfig, LLMEngineImpl
 from flexiagent.llm.structured_schema import FxLLMStructuredSchema
-from flexiagent.prompt import PromptTemplate, PromptValue
+from flexiagent.prompts.prompt import PromptTemplate, PromptValue
+
+# from openai.types.chat import ChatCompletion
+
 
 logger = logging.getLogger(__name__)
 

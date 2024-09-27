@@ -6,7 +6,7 @@ from llama_cpp import ChatCompletionRequestMessage, CreateChatCompletionResponse
 
 from flexiagent.llm.engine.engine_base import LLMEngineConfig, LLMEngineImpl
 from flexiagent.llm.structured_schema import FxLLMStructuredSchema
-from flexiagent.prompt import PromptTemplate, PromptValue
+from flexiagent.prompts.prompt import PromptTemplate, PromptValue
 
 logger = logging.getLogger(__name__)
 

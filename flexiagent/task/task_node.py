@@ -6,7 +6,7 @@ from pydantic import BaseModel, ConfigDict
 from flexiagent.llm.config import LLMConfig
 from flexiagent.llm.llm import LLM
 from flexiagent.llm.structured_schema import FxLLMStructuredSchema
-from flexiagent.prompt import PromptTemplate
+from flexiagent.prompts.prompt import PromptTemplate
 from flexiagent.task.base import FxTask
 
 logger = logging.getLogger(__name__)
