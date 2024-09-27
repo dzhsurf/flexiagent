@@ -2,11 +2,11 @@ import os
 import time
 from typing import List, Tuple
 
-from flexisearch.agent import FxAgentRunnerConfig
-from flexisearch.agents.agent_text2sql import FxAgentText2SQL, FxAgentText2SQLInput
-from flexisearch.database.db_executor import DBConfig
-from flexisearch.indexer import FxIndexer
-from flexisearch.llm import LLM
+from flexiagent.agent import FxAgentRunnerConfig
+from flexiagent.agents.agent_text2sql import FxAgentText2SQL, FxAgentText2SQLInput
+from flexiagent.database.db_executor import DBConfig
+from flexiagent.indexer import FxIndexer
+from flexiagent.llm import LLM
 
 # spider 1.0 dev: https://yale-lily.github.io/spider
 # evaluation suite: https://github.com/taoyds/test-suite-sql-eval

@@ -4,9 +4,9 @@ from typing import Dict, Generic, Optional, Type, TypeVar
 
 from pydantic import BaseModel, Field
 
-from flexisearch.config_keys import LLM_HTTP_API_TIMEOUT
-from flexisearch.llm.structured_schema import FxLLMStructuredSchema
-from flexisearch.prompt import PromptTemplate, PromptValue
+from flexiagent.config_keys import LLM_HTTP_API_TIMEOUT
+from flexiagent.llm.structured_schema import FxLLMStructuredSchema
+from flexiagent.prompt import PromptTemplate, PromptValue
 
 
 def get_env_variable(var_name: str, default: str = "") -> str:

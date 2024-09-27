@@ -1,4 +1,4 @@
-from flexisearch.prompt import PromptTemplate
+from flexiagent.prompt import PromptTemplate
 
 PROMPT_TEXT_DEFAULT_USER_QUESTION = "Question: {input}"
 

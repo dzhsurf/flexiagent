@@ -1,9 +1,9 @@
 from typing import Any, Callable, Dict, List, Optional
 
-from flexisearch.llm.config import LLMConfig
-from flexisearch.task import (
+from flexiagent.llm.config import LLMConfig
+from flexiagent.task.task_node import (
     FxTaskAction,
-    FxTaskActionLLMParams,
+    FxTaskActionLLM,
     FxTaskAgent,
     FxTaskConfig,
     FxTaskEntity,
@@ -63,12 +63,12 @@ class DBRecognitionAgentLogic:
 
 def create_db_recognition_agent(
     llm_config: LLMConfig,
-    fetch_all_databases_metainfo_func: Callable[[Dict[str, Any]], AllDatabasesMetaInfo],
+    fetch_all_databases_metainfo_func: Callable[[Any], AllDatabasesMetaInfo],
     preprocess_hook: Optional[Callable[[Dict[str, Any]], Dict[str, Any]]] = None,
     postprocess_hook: Optional[Callable[[Dict[str, Any]], Dict[str, Any]]] = None,
 ) -> FxTaskAgent:
     agent = FxTaskAgent(
-        [
+        task_graph=[
             # step 1: fetch all database metainfo
             FxTaskConfig(
                 task_key="fetch_all_databases_metainfo",
@@ -76,7 +76,7 @@ def create_db_recognition_agent(
                 output_schema=AllDatabasesMetaInfo,
                 action=FxTaskAction(
                     type="function",
-                    params=fetch_all_databases_metainfo_func,
+                    act=fetch_all_databases_metainfo_func,
                 ),
             ),
             # step 2: generate metainfo into text
@@ -86,7 +86,7 @@ def create_db_recognition_agent(
                 output_schema=str,
                 action=FxTaskAction(
                     type="function",
-                    params=DBRecognitionAgentLogic.generate_all_databases_metainfo_as_text,
+                    act=DBRecognitionAgentLogic.generate_all_databases_metainfo_as_text,
                 ),
             ),
             # step 3: llm recognition
@@ -99,7 +99,7 @@ def create_db_recognition_agent(
                 output_schema=_DBRecognitionTaskOutput,
                 action=FxTaskAction(
                     type="llm",
-                    params=FxTaskActionLLMParams(
+                    act=FxTaskActionLLM(
                         llm_config=llm_config,
                         instruction="""
 Match the user's questions with the corresponding database from the knowledge base based on the user's inquiries.
@@ -121,7 +121,7 @@ Databases metainfo:
                 output_schema=DBRecognitionAgentOutput,
                 action=FxTaskAction(
                     type="function",
-                    params=DBRecognitionAgentLogic.generate_output,
+                    act=DBRecognitionAgentLogic.generate_output,
                 ),
             ),
         ],

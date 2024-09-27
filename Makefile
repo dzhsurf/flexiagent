@@ -1,6 +1,6 @@
-.PHONE: install run test mypy ruff format isort clean 
+.PHONE: install run test unittest mypy ruff format isort clean 
 
-PROJECT_NAME=flexisearch
+PROJECT_NAME=flexiagent
 PYTHON=python3
 MYPY=mypy
 PIP=$(PYTHON) -m pip
@@ -24,8 +24,8 @@ run: ## Local run
 test: ## Run tests.
 	$(PYTHON) -m pytest -s tests/
 
-test_small: ## Run small tests.
-	DATASET_NUM_TO_TAKE="20" $(PYTHON) -m pytest -s tests/
+unittest: ## Run unittest.
+	$(PYTHON) -s tests/test_text2sql_unittest.py
 
 mypy: ## Run mypy checker
 	$(MYPY) --check-untyped-defs --ignore-missing-imports $(PROJECT_NAME)

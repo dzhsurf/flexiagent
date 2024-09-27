@@ -1,10 +1,10 @@
 import json
 from typing import List, Type
 
-from flexisearch.llm.config import LLMConfig
-from flexisearch.llm.engine.engine_base import LLMEngine
-from flexisearch.llm.engine.llama_cpp import LLMEngineLlamaCpp
-from flexisearch.llm.engine.openai import LLMEngineOpenAI
+from flexiagent.llm.config import LLMConfig
+from flexiagent.llm.engine.engine_base import LLMEngine
+from flexiagent.llm.engine.llama_cpp import LLMEngineLlamaCpp
+from flexiagent.llm.engine.openai import LLMEngineOpenAI
 
 
 class LLMEngineLoader:

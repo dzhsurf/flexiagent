@@ -2,8 +2,8 @@ from typing import Any, Dict, Literal, Union
 
 from pydantic import BaseModel
 
-from flexisearch.llm.engine.llama_cpp import LLMConfigLlamaCpp
-from flexisearch.llm.engine.openai import LLMConfigOpenAI
+from flexiagent.llm.engine.llama_cpp import LLMConfigLlamaCpp
+from flexiagent.llm.engine.openai import LLMConfigOpenAI
 
 LLMEngineConfigALL = Union[LLMConfigOpenAI, LLMConfigLlamaCpp]
 

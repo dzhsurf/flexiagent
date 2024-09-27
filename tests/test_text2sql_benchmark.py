@@ -1,30 +1,29 @@
 import logging
 import os
-from typing import Any, Callable, Dict, List, Literal, Tuple
+from typing import Any, Callable, Dict, List, Literal
 import unittest
 from unittest import mock
 
 from tqdm import tqdm
 
-from flexisearch.agents.agent_db_recognition import (
+from flexiagent.agents.agent_db_recognition import (
     AllDatabasesMetaInfo,
     DatabaseMetaInfo,
 )
-from flexisearch.agents.agent_text2sql import (
+from flexiagent.agents.agent_text2sql import (
     Text2SQLOutput,
     create_text2sql_agent_with_db_recognition,
 )
-from flexisearch.database.db_executor import DBConfig
-from flexisearch.llm.config import LLMConfig
-from flexisearch.indexer import FxIndexer
+from flexiagent.database.db_executor import DBConfig
+from flexiagent.llm.config import LLMConfig
+from flexiagent.indexer import FxIndexer
 
-# from flexisearch.llm.llm import LLM
 from .bird_utils import BirdDatasetProvider
 from .utils import DatasetItem, SQLExecuteParams, execution_accuracy
 
 # disable some module log
 logging.getLogger("httpx").setLevel(logging.WARNING)
-logging.getLogger("flexisearch").setLevel(logging.WARNING)
+logging.getLogger("flexiagent").setLevel(logging.WARNING)
 logger = logging.getLogger(__name__)
 
 
@@ -57,7 +56,7 @@ def create_fetch_all_databases_metainfo_func(
     return func
 
 
-class TestText2Sql(unittest.TestCase):
+class TestText2SqlBenchmark(unittest.TestCase):
     @mock.patch.dict(os.environ, {"LLM_HTTP_API_TIMEOUT": "30"}, clear=False)
     def setUp(self):
         llm_config = LLMConfig(engine="OpenAI", params={"openai_model": "gpt-4o-mini"})

@@ -1,10 +1,10 @@
 import logging
 from typing import Dict, Type
 
-from flexisearch.llm.config import LLMConfig
-from flexisearch.llm.engine_factory import LLMEngineLoader
-from flexisearch.llm.structured_schema import FxLLMStructuredSchema
-from flexisearch.prompt import PromptTemplate, PromptValue
+from flexiagent.llm.config import LLMConfig
+from flexiagent.llm.engine_factory import LLMEngineLoader
+from flexiagent.llm.structured_schema import FxLLMStructuredSchema
+from flexiagent.prompt import PromptTemplate, PromptValue
 
 logger = logging.getLogger(__name__)
 

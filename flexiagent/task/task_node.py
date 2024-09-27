@@ -1,15 +1,34 @@
 import logging
-from abc import ABC, abstractmethod
 from typing import Any, Callable, Dict, List, Literal, Optional, Set, Type, Union
 
 from pydantic import BaseModel, ConfigDict
 
-from flexisearch.llm.config import LLMConfig
-from flexisearch.llm.llm import LLM
-from flexisearch.llm.structured_schema import FxLLMStructuredSchema
-from flexisearch.prompt import PromptTemplate
+from flexiagent.llm.config import LLMConfig
+from flexiagent.llm.llm import LLM
+from flexiagent.llm.structured_schema import FxLLMStructuredSchema
+from flexiagent.prompt import PromptTemplate
+from flexiagent.task.base import FxTask
 
 logger = logging.getLogger(__name__)
+
+
+class FxTaskActionLLM(BaseModel):
+    llm_config: LLMConfig
+    instruction: str
+
+
+FxTaskActionFunction = Callable[[Dict[str, Any]], Any]
+
+
+class FxTaskAction(BaseModel):
+    type: Literal["llm", "function", "agent"]
+    act: Union[
+        FxTaskActionLLM,
+        FxTaskActionFunction,
+        "FxTaskAgent",
+    ]
+
+    model_config = ConfigDict(arbitrary_types_allowed=True)
 
 
 class FxTaskEntity(FxLLMStructuredSchema):
@@ -18,74 +37,11 @@ class FxTaskEntity(FxLLMStructuredSchema):
         return "\n".join(field_strings)
 
 
-class FxTaskNodeInputTaken(FxTaskEntity):
-    input: str
-
-
-class FxTaskActionLLMParams(BaseModel):
-    llm_config: LLMConfig
-    instruction: str
-
-
-def get_simple_gpt_4o_mini_action(instruction: str) -> FxTaskActionLLMParams:
-    return FxTaskActionLLMParams(
-        llm_config=LLMConfig(engine="OpenAI", params={"openai_model": "gpt-4o-mini"}),
-        instruction=instruction,
-    )
-
-
-FxTaskActionFunction = Callable[[Dict[str, Any]], Any]
-
-
-class FxTaskAction(BaseModel):
-    type: Literal["llm", "function", "agent"]
-    params: Union[
-        Dict[str, Any], FxTaskActionLLMParams, FxTaskActionFunction, "FxTaskAgent"
-    ]
-
-    model_config = ConfigDict(arbitrary_types_allowed=True)
-
-
 class FxTaskConfig(BaseModel):
     task_key: str
     input_schema: Dict[str, Type[Union[FxTaskEntity, str]]]
     output_schema: Type[Union[FxTaskEntity, str]]
-    action: Union[Dict[str, Any], FxTaskAction]
-    print_details: bool = False
-
-
-class FxTask(ABC):
-    def __init__(
-        self,
-        *,
-        preprocess_hook: Optional[Callable] = None,
-        postprocess_hook: Optional[Callable] = None,
-    ):
-        super().__init__()
-        self.preprocess_hook = preprocess_hook
-        self.postprocess_hook = postprocess_hook
-
-    @abstractmethod
-    def process(self, *args: Any, **kwds: Any) -> Any:
-        pass
-
-    def should_process(self, *args: Any, **kwds: Any) -> bool:
-        return True
-
-    def fallback_process(self, *args: Any, **kwds: Any) -> Any:
-        return None
-
-    def invoke(self, *args: Any, **kwds: Any):
-        if self.preprocess_hook:
-            args, kwds = self.preprocess_hook(*args, **kwds)
-
-        if self.should_process(*args, **kwds):
-            result = self.process(*args, **kwds)
-            if self.postprocess_hook:
-                result = self.postprocess_hook(result)
-            return result
-        else:
-            return self.fallback_process(*args, **kwds)
+    action: FxTaskAction
 
 
 class FxTaskNode(FxTask):
@@ -121,12 +77,10 @@ class FxTaskNode(FxTask):
         return kwargs[key]
 
     def _process_llm(self, _action: FxTaskAction, _inputs: Dict[str, Any]) -> Any:
-        if isinstance(_action.params, FxTaskActionLLMParams):
-            params = _action.params
-        elif isinstance(_action.params, dict):
-            params = FxTaskActionLLMParams(**_action.params)
+        if isinstance(_action.act, FxTaskActionLLM):
+            params = _action.act
         else:
-            raise TypeError(f"action params type not match. {_action.params}")
+            raise TypeError(f"action params type not match. {_action.act}")
 
         llm = LLM(params.llm_config)
         if issubclass(self.config.output_schema, FxTaskEntity):
@@ -148,18 +102,18 @@ class FxTaskNode(FxTask):
         return response
 
     def _process_function(self, _action: FxTaskAction, _inputs: Dict[str, Any]) -> Any:
-        if callable(_action.params):
-            func = _action.params
+        if callable(_action.act):
+            fn = _action.act
         else:
-            raise TypeError(f"action params type not match. {_action.params}")
-        return func(_inputs)
+            raise TypeError(f"action params type not match. {_action.act}")
+        return fn(_inputs)
 
     def _process_agent(self, _action: FxTaskAction, _inputs: Dict[str, Any]) -> Any:
-        if isinstance(_action.params, FxTaskAgent):
-            task = _action.params
+        if isinstance(_action.act, FxTaskAgent):
+            agent = _action.act
         else:
-            raise TypeError(f"action params type not match. {_action.params}")
-        return task.invoke(**_inputs)
+            raise TypeError(f"action params type not match. {_action.act}")
+        return agent.invoke(**_inputs)
 
     def process(self, *args: Any, **kwds: Any) -> Any:
         processor_mapping = {
@@ -175,16 +129,14 @@ class FxTaskNode(FxTask):
         else:
             raise TypeError(f"action type not match. {action}")
 
+        # setup inputs from context
         inputs = {}
         for key, _type in self.config.input_schema.items():
             inputs[key] = self._require_input(kwargs=kwds, key=key, value_type=_type)
 
+        # execute task with inputs
         if action.type in processor_mapping:
-            if self.config.print_details:
-                logger.info(f"\nInput:\n{inputs}")
             response = processor_mapping[action.type](action, inputs)
-            if self.config.print_details:
-                logger.info(f"\nOutput:\n{response}")
         else:
             raise ValueError(f"action not support. f{self.config.action}")
 
@@ -194,8 +146,8 @@ class FxTaskNode(FxTask):
 class FxTaskAgent:
     def __init__(
         self,
-        task_graph: List[FxTaskConfig],
         *,
+        task_graph: List[Union[FxTaskConfig, FxTaskNode]],
         preprocess_hook: Optional[Callable[[Dict[str, Any]], Dict[str, Any]]] = None,
         postprocess_hook: Optional[Callable[[Dict[str, Any]], Dict[str, Any]]] = None,
     ):
@@ -203,41 +155,48 @@ class FxTaskAgent:
         self.preprocess_hook = preprocess_hook
         self.postprocess_hook = postprocess_hook
 
-    def _build_task_graph(self, task_graph: List[FxTaskConfig]) -> List[FxTaskNode]:
-        def build_graph(config_list: List[FxTaskConfig]) -> Dict[str, FxTaskNode]:
-            graph_dict: Dict[str, FxTaskNode] = {}
-            for config in config_list:
-                graph_dict[config.task_key] = FxTaskNode(config)
-            return graph_dict
+    def _build_graph(
+        self, item_list: List[Union[FxTaskConfig, FxTaskNode]]
+    ) -> Dict[str, FxTaskNode]:
+        graph_dict: Dict[str, FxTaskNode] = {}
+        for item in item_list:
+            if isinstance(item, FxTaskConfig):
+                graph_dict[item.task_key] = FxTaskNode(item)
+            elif isinstance(item, FxTaskNode):
+                graph_dict[item.config.task_key] = item
+        return graph_dict
 
-        def topo_sort(node_graph: Dict[str, FxTaskNode]) -> List[FxTaskNode]:
-            visited: Set[str] = set()
-            temp_marked: Set[str] = set()
-            stack: List[FxTaskNode] = []
+    def _topo_sort(self, node_graph: Dict[str, FxTaskNode]) -> List[FxTaskNode]:
+        visited: Set[str] = set()
+        temp_marked: Set[str] = set()
+        stack: List[FxTaskNode] = []
 
-            def dfs(node: FxTaskNode):
-                if node.config.task_key in temp_marked:
-                    raise ValueError("Graph is not a DAG")
+        def dfs(node: FxTaskNode):
+            if node.config.task_key in temp_marked:
+                raise ValueError("Graph is not a DAG")
 
-                if node.config.task_key in visited:
-                    return
+            if node.config.task_key in visited:
+                return
 
-                temp_marked.add(node.config.task_key)
-                for neighbor_key, _ in node.config.input_schema.items():
-                    if neighbor_key in node_graph:
-                        neighbor = node_graph[neighbor_key]
-                        dfs(neighbor)
-                temp_marked.remove(node.config.task_key)
-                visited.add(node.config.task_key)
-                stack.append(node)
+            temp_marked.add(node.config.task_key)
+            for neighbor_key, _ in node.config.input_schema.items():
+                if neighbor_key in node_graph:
+                    neighbor = node_graph[neighbor_key]
+                    dfs(neighbor)
+            temp_marked.remove(node.config.task_key)
+            visited.add(node.config.task_key)
+            stack.append(node)
 
-            for _, node in node_graph.items():
-                dfs(node)
+        for _, node in node_graph.items():
+            dfs(node)
 
-            return stack
+        return stack
 
-        node_graph = build_graph(task_graph)
-        sorted_nodes = topo_sort(node_graph)
+    def _build_task_graph(
+        self, config_items: List[Union[FxTaskConfig, FxTaskNode]]
+    ) -> List[FxTaskNode]:
+        node_graph = self._build_graph(config_items)
+        sorted_nodes = self._topo_sort(node_graph)
         logger.info([(idx, n.config.task_key) for idx, n in enumerate(sorted_nodes)])
         return sorted_nodes
 
@@ -256,8 +215,7 @@ class FxTaskAgent:
 
         # run task dag
         for task in self.tasks:
-            if task.config.print_details:
-                logger.info(f"Step: {task.config.task_key}")
+            logger.debug(f"Step: {task.config.task_key}")
             output = task.invoke(**context)
             context[task.config.task_key] = output
 

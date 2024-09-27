@@ -19,12 +19,12 @@ from typing import Any, Dict, List, Optional, Tuple, cast
 
 from func_timeout import FunctionTimedOut, func_timeout
 
-from flexisearch.agent import FxAgentRunnerConfig
-from flexisearch.agents.agent_text2sql import FxAgentText2SQL, FxAgentText2SQLInput
-from flexisearch.database.db_executor import DBConfig
-from flexisearch.indexer import FxIndexer
-from flexisearch.llm.config import LLMConfig
-from flexisearch.llm.llm import LLM
+from flexiagent.agent import FxAgentRunnerConfig
+from flexiagent.agents.agent_text2sql import FxAgentText2SQL, FxAgentText2SQLInput
+from flexiagent.database.db_executor import DBConfig
+from flexiagent.indexer import FxIndexer
+from flexiagent.llm.config import LLMConfig
+from flexiagent.llm.llm import LLM
 
 #### utils
 

@@ -1,6 +1,6 @@
-from typing import Dict, List, Optional
+from typing import Dict, List
 
-from flexisearch.database.db_executor import DBConfig, DBExecutor
+from flexiagent.database.db_executor import DBConfig, DBExecutor
 
 
 class FxIndexer:

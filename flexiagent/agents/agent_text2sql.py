@@ -3,17 +3,17 @@ from typing import Any, Callable, Dict, Optional
 
 import sqlparse
 
-from flexisearch.agents.agent_db_recognition import (
+from flexiagent.agents.agent_db_recognition import (
     AllDatabasesMetaInfo,
     DatabaseMetaInfo,
     DBRecognitionAgentInput,
     DBRecognitionAgentOutput,
     create_db_recognition_agent,
 )
-from flexisearch.llm.config import LLMConfig
-from flexisearch.task import (
+from flexiagent.llm.config import LLMConfig
+from flexiagent.task.task_node import (
     FxTaskAction,
-    FxTaskActionLLMParams,
+    FxTaskActionLLM,
     FxTaskAgent,
     FxTaskConfig,
     FxTaskEntity,
@@ -62,7 +62,7 @@ def create_raw_text2sql_agent(
                 output_schema=RawText2SQLAgentOutput,
                 action=FxTaskAction(
                     type="llm",
-                    params=FxTaskActionLLMParams(
+                    act=FxTaskActionLLM(
                         llm_config=llm_config,
                         instruction="""You are a SQLite expert. Given an input question, create a syntactically correct SQLite query to the input question.
 Never query for all columns from a table. You must query only the columns that are needed to answer the question. Wrap each column name in double quotes (") to denote them as delimited identifiers.
@@ -87,7 +87,7 @@ Question: {input.question}
                 output_schema=RawText2SQLAgentOutput,
                 action=FxTaskAction(
                     type="function",
-                    params=_sql_format_and_output,
+                    act=_sql_format_and_output,
                 ),
             ),
         ],
@@ -156,7 +156,7 @@ def create_text2sql_agent_with_db_recognition(
     postprocess_hook: Optional[Callable[[Dict[str, Any]], Dict[str, Any]]] = None,
 ) -> FxTaskAgent:
     agent = FxTaskAgent(
-        [
+        task_graph=[
             # step 1: llm db recognition agent
             FxTaskConfig(
                 task_key="db_recognition_agent",
@@ -164,7 +164,7 @@ def create_text2sql_agent_with_db_recognition(
                 output_schema=DBRecognitionAgentOutput,
                 action=FxTaskAction(
                     type="agent",
-                    params=create_db_recognition_agent(
+                    act=create_db_recognition_agent(
                         llm_config,
                         fetch_all_databases_metainfo_func,
                         preprocess_hook=Text2SQLAgentLogic.convert_db_recognition_agent_input,
@@ -181,13 +181,13 @@ def create_text2sql_agent_with_db_recognition(
                 output_schema=RawText2SQLAgentOutput,
                 action=FxTaskAction(
                     type="agent",
-                    params=create_raw_text2sql_agent(
+                    act=create_raw_text2sql_agent(
                         llm_config,
                         preprocess_hook=Text2SQLAgentLogic.convert_text2sql_agent_input,
                     ),
                 ),
             ),
-            # step 4: output
+            # step 3: output
             FxTaskConfig(
                 task_key="output",
                 input_schema={
@@ -197,7 +197,7 @@ def create_text2sql_agent_with_db_recognition(
                 output_schema=Text2SQLOutput,
                 action=FxTaskAction(
                     type="function",
-                    params=Text2SQLAgentLogic.generate_output,
+                    act=Text2SQLAgentLogic.generate_output,
                 ),
             ),
         ],
