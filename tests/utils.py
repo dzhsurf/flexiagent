@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 import logging
-from typing import Any, List, Literal, Tuple
+from typing import Any, Dict, List, Literal, Tuple
 from pydantic import BaseModel
 from sqlalchemy import create_engine, text
 
@@ -97,3 +97,51 @@ def execution_accuracy(
     acc = passed / (passed + failed)
     logger.info(f"\n[====\tpass: {passed}\tfail: {failed}\tacc: {acc:.2f}\t====]\n")
     return ans
+
+
+def config_logger_level():
+    logging.getLogger("httpx").setLevel(logging.WARNING)
+    logging.getLogger("flexiagent").setLevel(logging.WARNING)
+    logging.basicConfig(
+        format="%(asctime)s - %(levelname)s - %(funcName)s - %(message)s",
+        level=logging.INFO,
+    )
+
+
+def pretty_log(msg: str) -> str:
+    msg = f"\n--------\n{msg}\n--------"
+    return msg
+
+
+def trace_dag_context(context: Dict[str, List[str]]) -> str:
+    # traverse trace path
+    results: List[str] = []
+
+    def dfs(node_key: str, input_paths: List[str]):
+        input_paths += [node_key]
+        if node_key in context:
+            for neighbor_k in context[node_key]:
+                dfs(neighbor_k, input_paths)
+        else:
+            results.append(" -> ".join(input_paths[::-1]))
+        input_paths.pop(-1)
+
+    for k, _ in context.items():
+        dfs(k, [])
+
+    # remove dup
+    remove_items: List[str] = []
+    results = sorted(results)
+    for i in range(len(results)):
+        item1 = results[i]
+        for j in range(i + 1, len(results)):
+            item2 = results[j]
+            if item2.startswith(item1):
+                remove_items.append(item1)
+                break
+    final_results = set(results)
+    for item in remove_items:
+        final_results.remove(item)
+
+    # output trace path
+    return "\n".join(sorted(list(final_results)))
