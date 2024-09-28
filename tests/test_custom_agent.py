@@ -75,7 +75,7 @@ Question: {input}
     return agent
 
 
-class TestText2SqlBenchmark(unittest.TestCase):
+class TestCustomAgentWithStructuredOutput(unittest.TestCase):
     def setUp(self):
         pass
 
