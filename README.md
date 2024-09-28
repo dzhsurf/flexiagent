@@ -1,18 +1,20 @@
 FlexiAgent
------------
+----------
 
-FlexiAgent is an open-source project on GitHub that provides a simple and easy-to-use interface for creating agents based on Directed Acyclic Graphs (DAGs). The agent supports formatted output and includes built-in practical agents such as a text2sql agent, allowing for quick deployment in applications.
+FlexiAgent is an open-source project on GitHub that provides a simple and easy-to-use interface for creating agents based on `Directed Acyclic Graphs (DAGs)`. The agent supports structured output and includes built-in practical agents such as a `text2sql` agent, allowing for quick deployment in applications.
 
 
 
 Features
 --------
 
-- **DAG-Based Agent Creation**: Easily construct agents using a DAG structure to orchestrate multiple tasks.
+- **Efficient and Simple Agent Interface Design**: Supports structured output, making it easier to utilize in practical applications.
 
-- **Formatted Output**: FlexiAgent supports generating structured and formatted output to meet specific application needs.
+- **DAG-Based Task Implementation**: The agent's tasks are built on DAGs, supporting distributed concurrent scheduling.
 
-- **Built-In Agents**: Includes useful agents like text2sql for fast deployment and reduced development time.
+- **Configuration-Driven Agent Creation**: Offers high flexibility and extensibility through comprehensive configuration support.
+
+- **Built-In Practical Agents**: Includes useful agents like `text2sql`, `llm_chat`, and `api_call` for fast deployment and reduced development time.
 
 
 
@@ -128,8 +130,15 @@ output = agent.invoke("Compute: 3 + 5 =")
 
 
 
+Quickstart
+----------
+
+To get started quickly with FlexiAgent, please refer to the [Quickstart](https://github.com/dzhsurf/flexiagent/Quickstart.md) Guide for example usage.
+
+
+
 Using Local Deployment Model (Llama.cpp)
-------------------------
+----------------------------------------
 
 FlexiAgent utilizes llama-cpp-python, allowing the LLM to support not only OpenAI but also Llama.cpp. 
 The above code example can load a local model using Llama.cpp by changing the configuration.
@@ -156,12 +165,10 @@ llm_config = LLMConfig(
 ````
 
 
-
 Contributing
 ------------
 
 Contributions are welcome! Please fork the repository and use a branch for your feature or bug fix. Submitting a pull request is the best way to see your feature merged.
-
 
 
 License
