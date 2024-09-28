@@ -21,10 +21,18 @@ Features
 Installation
 ------------
 
-To begin using FlexiAgent, clone the repository from GitHub:
+To begin using FlexiAgent, you can install from pypi
+```shell
+pip install flexiagent
+```
+
+Or clone the repository from GitHub:
 ```shell
 git clone https://github.com/dzhsurf/flexiagent.git
 cd flexiagent
+pip install -e .
+# or use poetry
+# poetry install
 ```
 
 Ensure you have Python installed and set up a virtual environment(conda recommand):
@@ -33,14 +41,8 @@ Ensure you have Python installed and set up a virtual environment(conda recomman
 conda create -n proj python=3.11 
 ```
 
-Install the necessary dependencies:
-```shell
-pip install -e .
-# or poetry
-# poetry install
-```
-
 If you encounter issues compiling llama-cpp-python during the dependency installation process, please visit https://github.com/abetlen/llama-cpp-python for documentation to help resolve the issue.
+
 
 Usage
 -----
