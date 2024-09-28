@@ -1,3 +1,234 @@
 Quickstart
 ----------
 
+
+
+**Objects to Import**
+
+```
+from flexiagent.llm.config import LLMConfig
+from flexiagent.task.task_node import (
+    FxTaskAction,
+    FxTaskActionLLM,
+    FxTaskAgent,
+    FxTaskConfig,
+    FxTaskEntity,
+)
+```
+
+
+
+**Three Types of Agents Supported Currently**
+
+- LLM
+- Function
+- Agent 
+
+
+
+**Input and Output of an Agent**
+
+When the agent is called using `invoke`, the key `"input"` is passed as a parameter to the agent’s task. The type of input must be consistent with the type used in the `invoke` call. The `task_key` set for the agent is `"output"`, and the type set in `output_schema` will be used as the return type of the agent. You can choose not to set an output, in which case the agent returns None.
+
+
+
+**Input and Output of an Agent's Task**
+
+Through the configuration of `input_schema`, an agent can use the key of an upstream task's `task_key` to obtain the output of the upstream task. The `output_schema` of the upstream task needs to be consistent with the type of the `input_schema` of the downstream task; otherwise, a TypeError will be raised. Tasks can use `input_schema` and `output_schema` to build a task DAG. If the DAG has loops, an exception will be raised.
+
+
+
+**Creating an LLM Type Agent**
+
+```python
+class ChatOutput(FxTaskEntity):
+  response: str 
+
+agent = FxTaskAgent(
+  task_graph=[
+    FxTaskConfig(
+      task_key="output",
+      input_schema={"input": str},
+      output_schema=ChatOutput,
+      action=FxTaskAction(
+        type="llm",
+        act=FxTaskActionLLM(
+          llm_config=self.llm_config,
+          instruction=instruction,
+        ),
+      ),
+    ),
+  ],
+)
+output = agent.invoke("Who are you?")
+```
+
+
+
+**Creating a Function Type Agent**
+
+```python
+def agent_fn(input: Dict[str, Any]) -> str:
+  result = str(input)
+  return result
+
+agent = FxTaskAgent(
+  task_graph=[
+    FxTaskConfig(
+      task_key="output",
+      input_schema={"input": str},
+      output_schema=str,
+      action=FxTaskAction(
+        type="function",
+        act=agent_fn,
+      ),
+    ),
+  ],
+)
+
+output = agent.invoke("Call function")
+```
+
+
+
+**Creating an Agent Type Agent (Supports Nested Sub-Agents)**
+
+```python
+instruction = """You are an expert responsible for answering users' questions.
+User: {input}
+"""
+llm_agent = FxTaskAgent(
+  task_graph=[
+    FxTaskConfig(
+      task_key="output",
+      input_schema={"input": str},
+      output_schema=ChatOutput,
+      action=FxTaskAction(
+        type="llm",
+        act=FxTaskActionLLM(
+          llm_config=self.llm_config,
+          instruction=instruction,
+        ),
+      ),
+    ),
+  ],
+)
+
+agent = FxTaskAgent(
+  task_graph=[
+    FxTaskConfig(
+      task_key="output",
+      input_schema={"input": str},
+      output_schema=ChatOutput,
+      action=FxTaskAction(
+        type="agent",
+        act=llm_agent,
+      ),
+    ),
+  ],
+)
+
+output = agent.invoke("Who are you?")
+```
+
+
+
+**Building a Complex DAG**
+
+```python
+context: Dict[str, List[str]] = collections.defaultdict(list)
+counter: int = 0
+  
+# Record the call stack to trace the DAG path
+def create_trace_step_fn(name: str) -> Callable[[Dict[str, Any]], str]:
+    def trace_step(input: Dict[str, Any]) -> str:
+      nonlocal counter
+      for item_k, _ in input.items():
+        context[name].append(item_k)
+        context[name + "_call"] = [str(counter)]
+        counter += 1
+        return name
+    return trace_step
+
+agent = FxTaskAgent(
+  task_graph=[
+    FxTaskConfig(
+      task_key="step_1",
+      input_schema={
+        "input": str,
+      },
+      output_schema=str,
+      action=FxTaskAction(
+        type="function",
+        act=create_trace_step_fn("step_1"),
+      ),
+    ),
+    FxTaskConfig(
+      task_key="step_2",
+      input_schema={
+        "step_1": str,
+      },
+      output_schema=str,
+      action=FxTaskAction(
+        type="function",
+        act=create_trace_step_fn("step_2"),
+      ),
+    ),
+    FxTaskConfig(
+      task_key="step_3",
+      input_schema={
+        "step_2": str,
+      },
+      output_schema=str,
+      action=FxTaskAction(
+        type="function",
+        act=create_trace_step_fn("step_3"),
+      ),
+    ),
+    FxTaskConfig(
+      task_key="step_4",
+      input_schema={
+        "step_2": str,
+      },
+      output_schema=str,
+      action=FxTaskAction(
+        type="function",
+        act=create_trace_step_fn("step_4"),
+      ),
+    ),
+    FxTaskConfig(
+      task_key="step_5",
+      input_schema={
+        "step_1": str,
+      },
+      output_schema=str,
+      action=FxTaskAction(
+        type="function",
+        act=create_trace_step_fn("step_5"),
+      ),
+    ),
+    FxTaskConfig(
+      task_key="output",
+      input_schema={
+        "step_4": str,
+        "step_5": str,
+      },
+      output_schema=str,
+      action=FxTaskAction(
+        type="function",
+        act=create_trace_step_fn("output"),
+      ),
+    ),
+  ],
+)
+
+output = agent.invoke("Hello")
+```
+
+```plaintext
+# DAG Trace Path
+input -> step_1 (0) -> step_2 (1) -> step_3 (2)
+input -> step_1 (0) -> step_2 (1) -> step_4 (3) -> output (5)
+input -> step_1 (0) -> step_5 (4) -> output (5)
+```
+
