@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "flexiagent"
-version = "0.1.0"
+version = "0.1.0a2"
 description = ""
 authors = ["Hiram Deng <72371329+dzhsurf@users.noreply.github.com>"]
 license = "MIT"
