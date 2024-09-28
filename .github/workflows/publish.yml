@@ -98,8 +98,8 @@ jobs:
         pip install twine
 
     - name: List contents of artifact directory
-        run: |
-          ls -l ./dist
+      run: |
+        ls -l ./dist
 
     - name: Build and Publish to PyPI
       env:
