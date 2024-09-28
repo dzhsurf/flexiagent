@@ -129,8 +129,11 @@ FlexiAgent utilizes llama-cpp-python, allowing the LLM to support not only OpenA
 The above code example can load a local model using Llama.cpp by changing the configuration.
 
 Parameter Explanation
+
 `repo_id_or_model_path:` If specified as a repo_id, the model will be downloaded to the cache directory (~/.cache/huggingface/...) using huggingface-cli. If it is a local model path (e.g., xxx_model.gguf), it will be loaded directly.
+
 `repo_filename:` This is only effective when repo_id_or_model_path is a repo_id. It selects the specified model based on the filename rules, such as Q4_K_M, Q8_0, etc., and should be set according to the file names in the huggingface repo.
+
 `n_ctx:` Context window size; defaults to 512 if not set.
 
 ```python
