@@ -23,8 +23,8 @@ jobs:
         curl -sSL https://install.python-poetry.org | python3 -
         echo "$HOME/.local/bin" >> $GITHUB_PATH
 
-    - name: Install dependencies
-      run: poetry install
+    # - name: Install dependencies
+    #   run: poetry install
 
     - name: Build sdist
       run: poetry build -f sdist
@@ -88,14 +88,18 @@ jobs:
       with:
         path: ./dist
 
-    - name: Set up Python ${{ matrix.python-version }}
+    - name: Set up Python 3.8
       uses: actions/setup-python@v5
       with:
-        python-version: ${{ matrix.python-version }}
+        python-version: 3.8
 
     - name: Install twine
       run: |
         pip install twine
+
+    - name: List contents of artifact directory
+        run: |
+          ls -l ./dist
 
     - name: Build and Publish to PyPI
       env:
