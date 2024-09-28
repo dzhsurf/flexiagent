@@ -17,7 +17,7 @@ class FxTaskActionLLM(BaseModel):
     instruction: str
 
 
-FxTaskActionFunction = Callable[[Dict[str, Any]], Any]
+FxTaskActionFunction = Callable[[Dict[str, Any], Dict[str, Any]], Any]
 
 
 class FxTaskAction(BaseModel):
@@ -27,6 +27,7 @@ class FxTaskAction(BaseModel):
         FxTaskActionFunction,
         "FxTaskAgent",
     ]
+    addition: Optional[Dict[str, Any]] = None
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
@@ -106,7 +107,10 @@ class FxTaskNode(FxTask):
             fn = _action.act
         else:
             raise TypeError(f"action params type not match. {_action.act}")
-        return fn(_inputs)
+        addition: Dict[str, Any] = {}
+        if _action.addition:
+            addition = {k: v for k, v in _action.addition.items()}
+        return fn(_inputs, addition)
 
     def _process_agent(self, _action: FxTaskAction, _inputs: Dict[str, Any]) -> Any:
         if isinstance(_action.act, FxTaskAgent):

@@ -34,7 +34,9 @@ class _DBRecognitionTaskOutput(FxTaskEntity):
 
 class DBRecognitionAgentLogic:
     @classmethod
-    def generate_all_databases_metainfo_as_text(cls, input: Dict[str, Any]) -> str:
+    def generate_all_databases_metainfo_as_text(
+        cls, input: Dict[str, Any], addition: Dict[str, Any]
+    ) -> str:
         result = ""
         for _, v in input.items():
             if isinstance(v, AllDatabasesMetaInfo):
@@ -47,7 +49,9 @@ class DBRecognitionAgentLogic:
         return result
 
     @classmethod
-    def generate_output(cls, input: Dict[str, Any]) -> DBRecognitionAgentOutput:
+    def generate_output(
+        cls, input: Dict[str, Any], addition: Dict[str, Any]
+    ) -> DBRecognitionAgentOutput:
         if not isinstance(input["database_recognition"], _DBRecognitionTaskOutput):
             raise TypeError(f"input not match: {input}")
         if not isinstance(input["fetch_all_databases_metainfo"], AllDatabasesMetaInfo):
@@ -63,7 +67,9 @@ class DBRecognitionAgentLogic:
 
 def create_db_recognition_agent(
     llm_config: LLMConfig,
-    fetch_all_databases_metainfo_func: Callable[[Any], AllDatabasesMetaInfo],
+    fetch_all_databases_metainfo_func: Callable[
+        [Dict[str, Any], Dict[str, Any]], AllDatabasesMetaInfo
+    ],
     preprocess_hook: Optional[Callable[[Dict[str, Any]], Dict[str, Any]]] = None,
     postprocess_hook: Optional[Callable[[Dict[str, Any]], Dict[str, Any]]] = None,
 ) -> FxTaskAgent:

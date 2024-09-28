@@ -31,7 +31,9 @@ class RawText2SQLAgentOutput(FxTaskEntity):
     sql: str
 
 
-def _sql_format_and_output(input: Dict[str, Any]) -> RawText2SQLAgentOutput:
+def _sql_format_and_output(
+    input: Dict[str, Any], addition: Dict[str, Any]
+) -> RawText2SQLAgentOutput:
     for _, v in input.items():
         if isinstance(v, RawText2SQLAgentOutput):
             sql = v.sql
@@ -134,7 +136,9 @@ DB_Metainfo:
         return input
 
     @classmethod
-    def generate_output(cls, input: Dict[str, Any]) -> Text2SQLOutput:
+    def generate_output(
+        cls, input: Dict[str, Any], addition: Dict[str, Any]
+    ) -> Text2SQLOutput:
         if not isinstance(input["text2sql_agent"], RawText2SQLAgentOutput):
             raise TypeError(f"input not match. {input}")
         if not isinstance(input["db_recognition_agent"], DBRecognitionAgentOutput):
@@ -151,7 +155,9 @@ DB_Metainfo:
 
 def create_text2sql_agent_with_db_recognition(
     llm_config: LLMConfig,
-    fetch_all_databases_metainfo_func: Callable[[Dict[str, Any]], AllDatabasesMetaInfo],
+    fetch_all_databases_metainfo_func: Callable[
+        [Dict[str, Any], Dict[str, Any]], AllDatabasesMetaInfo
+    ],
     preprocess_hook: Optional[Callable[[Dict[str, Any]], Dict[str, Any]]] = None,
     postprocess_hook: Optional[Callable[[Dict[str, Any]], Dict[str, Any]]] = None,
 ) -> FxTaskAgent:

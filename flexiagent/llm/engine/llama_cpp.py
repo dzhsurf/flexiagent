@@ -2,19 +2,12 @@ import logging
 import os
 from typing import Dict, Optional, Type, cast
 
-from llama_cpp import (
-    ChatCompletionRequestMessage,
-    CreateChatCompletionResponse,
-    Llama,
-)
+from llama_cpp import ChatCompletionRequestMessage, CreateChatCompletionResponse, Llama
 from pydantic import ValidationError
 
 from flexiagent.llm.engine.engine_base import LLMEngineConfig, LLMEngineImpl
 from flexiagent.llm.structured_schema import FxLLMStructuredSchema
-from flexiagent.prompts.prompt import (
-    PromptTemplate,
-    PromptValue,
-)
+from flexiagent.prompts.prompt import PromptTemplate, PromptValue
 
 logger = logging.getLogger(__name__)
 
