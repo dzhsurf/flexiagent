@@ -7,12 +7,41 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  build-sdist:
+    runs-on: macos-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install Poetry
+      run: |
+        curl -sSL https://install.python-poetry.org | python3 -
+        echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+    - name: Install dependencies
+      run: poetry install
+
+    - name: Build sdist
+      run: poetry build -f sdist
+
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: sdist-artifact
+        path: dist/*.tar.gz
+
+  build-wheel:
     runs-on: ${{ matrix.os }}
 
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        # os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [macos-latest]
         python-version: ['3.8']
 
     steps:
@@ -55,7 +84,7 @@ jobs:
     - name: Download Wheel Artifacts
       uses: actions/download-artifact@v4
       with:
-        path: ./wheels
+        path: ./dist
 
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v5
@@ -71,4 +100,4 @@ jobs:
         TWINE_USERNAME: __token__
         TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
       run: |
-        twine upload wheels/*
+        twine upload dist/*
