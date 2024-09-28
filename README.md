@@ -122,6 +122,28 @@ output = agent.invoke("Compute: 3 + 5 =")
 # output is Step2Output, result is 8
 ```
 
+Using Local Deployment Model (Llama.cpp)
+------------------------
+
+FlexiAgent utilizes llama-cpp-python, allowing the LLM to support not only OpenAI but also Llama.cpp. 
+The above code example can load a local model using Llama.cpp by changing the configuration.
+
+Parameter Explanation
+`repo_id_or_model_path:` If specified as a repo_id, the model will be downloaded to the cache directory (~/.cache/huggingface/...) using huggingface-cli. If it is a local model path (e.g., xxx_model.gguf), it will be loaded directly.
+`repo_filename:` This is only effective when repo_id_or_model_path is a repo_id. It selects the specified model based on the filename rules, such as Q4_K_M, Q8_0, etc., and should be set according to the file names in the huggingface repo.
+`n_ctx:` Context window size; defaults to 512 if not set.
+
+```python
+llm_config = LLMConfig(
+    engine="LlamaCpp",
+    params={
+        "repo_id_or_model_path": "QuantFactory/Llama-3.2-3B-Instruct-GGUF",
+        "repo_filename": "*Q4_K_M.gguf",
+        "n_ctx": 4096,
+    },
+)
+````
+
 Contributing
 ------------
 
