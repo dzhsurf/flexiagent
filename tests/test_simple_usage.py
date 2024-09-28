@@ -205,12 +205,15 @@ User: {input}
 
     def test_005_simple_agent_dag_2(self):
         context: Dict[str, List[str]] = collections.defaultdict(list)
+        counter: int = 0
 
         def create_trace_step_fn(name: str) -> Callable[[Dict[str, Any]], str]:
             def trace_step(input: Dict[str, Any]) -> str:
+                nonlocal counter
                 for item_k, _ in input.items():
                     context[name].append(item_k)
-
+                context[name + "_call"] = [str(counter)]
+                counter += 1
                 return name
 
             return trace_step
@@ -290,7 +293,11 @@ User: {input}
         output = agent.invoke("Hello")
         self.assertIsInstance(output, str)
         msgs = trace_dag_context(context)
-        logger.info(pretty_log(msgs))
+        logger.info(pretty_log("\n".join(msgs)))
+        self.assertEqual(len(msgs), 3)
+        self.assertEqual(msgs[0], "input -> step_1 (0) -> step_2 (1) -> step_3 (2)")
+        self.assertEqual(msgs[1], "input -> step_1 (0) -> step_2 (1) -> step_4 (3) -> output (5)")
+        self.assertEqual(msgs[2], "input -> step_1 (0) -> step_5 (4) -> output (5)")
 
 
 if __name__ == "__main__":

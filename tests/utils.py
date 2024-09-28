@@ -113,7 +113,7 @@ def pretty_log(msg: str) -> str:
     return msg
 
 
-def trace_dag_context(context: Dict[str, List[str]]) -> str:
+def trace_dag_context(context: Dict[str, List[str]]) -> List[str]:
     # traverse trace path
     results: List[str] = []
 
@@ -123,10 +123,12 @@ def trace_dag_context(context: Dict[str, List[str]]) -> str:
             for neighbor_k in context[node_key]:
                 dfs(neighbor_k, input_paths)
         else:
-            results.append(" -> ".join(input_paths[::-1]))
+            results.append(",".join(input_paths[::-1]))
         input_paths.pop(-1)
 
     for k, _ in context.items():
+        if k.endswith("_call"):
+            continue
         dfs(k, [])
 
     # remove dup
@@ -143,5 +145,18 @@ def trace_dag_context(context: Dict[str, List[str]]) -> str:
     for item in remove_items:
         final_results.remove(item)
 
+    final_list: List[str] = []
+    for item in final_results:
+        arr = item.split(",")
+        items: List[str] = []
+        for arr_item in arr:
+            k = arr_item + "_call"
+            if k in context:
+                call_step = context[k][0]
+                items.append(f"{arr_item} ({call_step})")
+            else:
+                items.append(arr_item)
+        final_list.append(" -> ".join(items))
+
     # output trace path
-    return "\n".join(sorted(list(final_results)))
+    return sorted(final_list)
