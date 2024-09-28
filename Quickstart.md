@@ -38,11 +38,39 @@ Through the configuration of `input_schema`, an agent can use the key of an upst
 
 
 
+**LLMConfig**
+
+```python
+# Use OpenAI API, you must set the OPENAI_API_KEY env.
+llm_config = LLMConfig(
+  engine="OpenAI", params={"openai_model": "gpt-4o-mini"}
+)
+# Use llama.cpp model
+# If repo_id_or_model_path is repo_id, it will download the model from huggingface
+# If repo_id_or_model_path is a model file(e.g. xxx_model.gguf ...), it will load the model directly.
+llm_config = LLMConfig(
+  engine="LlamaCpp",
+  params={
+    "repo_id_or_model_path": "QuantFactory/Llama-3.2-3B-Instruct-GGUF",
+    "repo_filename": "*Q4_K_M.gguf",
+    "n_ctx": 4096,
+  },
+)
+```
+
+
+
+
+
 **Creating an LLM Type Agent**
 
 ```python
 class ChatOutput(FxTaskEntity):
   response: str 
+
+instruction = """You are an expert responsible for answering users' questions.
+User: {input}
+"""
 
 agent = FxTaskAgent(
   task_graph=[
@@ -53,7 +81,7 @@ agent = FxTaskAgent(
       action=FxTaskAction(
         type="llm",
         act=FxTaskActionLLM(
-          llm_config=self.llm_config,
+          llm_config=llm_config,
           instruction=instruction,
         ),
       ),
@@ -97,6 +125,7 @@ output = agent.invoke("Call function")
 instruction = """You are an expert responsible for answering users' questions.
 User: {input}
 """
+
 llm_agent = FxTaskAgent(
   task_graph=[
     FxTaskConfig(
@@ -106,7 +135,7 @@ llm_agent = FxTaskAgent(
       action=FxTaskAction(
         type="llm",
         act=FxTaskActionLLM(
-          llm_config=self.llm_config,
+          llm_config=llm_config,
           instruction=instruction,
         ),
       ),
