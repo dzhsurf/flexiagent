@@ -55,7 +55,7 @@ def create_agent_with_llm_config(llm_config: LLMConfig) -> FxTaskAgent:
 Extract the numbers and operators from mathematical expressions based on the user's questions. 
 Only support +, -, *, / operations with two numbers.
 
-Question: {input}
+Question: {input} 
 """,
                     ),
                 ),
@@ -91,8 +91,8 @@ class TestText2SqlBenchmark(unittest.TestCase):
         llm_config = LLMConfig(
             engine="LlamaCpp",
             params={
-                "repo_id_or_model_path": "QuantFactory/Meta-Llama-3.1-8B-Instruct-GGUF",
-                "repo_filename": "*Q8_0.gguf",
+                "repo_id_or_model_path": "QuantFactory/Llama-3.2-3B-Instruct-GGUF",
+                "repo_filename": "*Q4_K_M.gguf",
                 "n_ctx": 4096,
             },
         )
