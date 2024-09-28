@@ -85,7 +85,7 @@ class FxTaskNode(FxTask):
         llm = LLM(params.llm_config)
         if issubclass(self.config.output_schema, FxTaskEntity):
             prompt = PromptTemplate(
-                prompt="Assist user with the task with structure output",
+                prompt="You are a helpful assistant that assist users in completing tasks and use formatted output.",
                 user_question_prompt=params.instruction,
             )
             response = llm.chat_completion_with_structured_output(
@@ -95,7 +95,7 @@ class FxTaskNode(FxTask):
             )
         elif self.config.output_schema is str:
             prompt = PromptTemplate(
-                prompt="You are a helpful assistant",
+                prompt="You are a helpful assistant.",
                 user_question_prompt=params.instruction,
             )
             response = llm.chat_completion(prompt=prompt, variables=_inputs)
