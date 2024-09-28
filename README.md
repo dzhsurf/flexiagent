@@ -1,7 +1,7 @@
 FlexiAgent
 ----------
 
-FlexiAgent is an open-source project on GitHub that provides a simple and easy-to-use interface for creating agents based on `Directed Acyclic Graphs (DAGs)`. The agent supports structured output and includes built-in practical agents such as a `text2sql` agent, allowing for quick deployment in applications.
+FlexiAgent is a simple and easy-to-use framework for creating LLM agents. The agent supports structured output and includes built-in practical agents such as a text2sql agent, allowing for quick deployment in applications.
 
 
 
