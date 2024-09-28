@@ -1,11 +1,9 @@
-import json
 import logging
 import os
-from typing import Any, Dict, Optional, Type, TypedDict, cast
+from typing import Dict, Optional, Type, cast
 
 from llama_cpp import (
     ChatCompletionRequestMessage,
-    ChatCompletionRequestResponseFormat,
     CreateChatCompletionResponse,
     Llama,
 )
@@ -14,8 +12,6 @@ from pydantic import ValidationError
 from flexiagent.llm.engine.engine_base import LLMEngineConfig, LLMEngineImpl
 from flexiagent.llm.structured_schema import FxLLMStructuredSchema
 from flexiagent.prompts.prompt import (
-    PromptFewshotSample,
-    PromptInstTemplate,
     PromptTemplate,
     PromptValue,
 )
@@ -27,6 +23,7 @@ class LLMConfigLlamaCpp(LLMEngineConfig):
     repo_id_or_model_path: str
     repo_filename: Optional[str] = None
     n_ctx: Optional[int] = None
+    chat_format: Optional[str] = None
     echo: bool = True
 
 
@@ -40,7 +37,7 @@ class LLMEngineLlamaCpp(LLMEngineImpl[LLMConfigLlamaCpp]):
                 model_path,
                 n_ctx=config.n_ctx if config.n_ctx else 512,
                 n_batch=config.n_ctx if config.n_ctx else 512,
-                chat_format="chatml",
+                chat_format=config.chat_format,
                 verbose=False,
             )
         else:
@@ -49,7 +46,7 @@ class LLMEngineLlamaCpp(LLMEngineImpl[LLMConfigLlamaCpp]):
                 config.repo_filename,
                 n_ctx=config.n_ctx if config.n_ctx else 512,
                 n_batch=config.n_ctx if config.n_ctx else 512,
-                chat_format="chatml",
+                chat_format=config.chat_format,
                 verbose=False,
             )
 
