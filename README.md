@@ -3,6 +3,8 @@ FlexiAgent
 
 FlexiAgent is an open-source project on GitHub that provides a simple and easy-to-use interface for creating agents based on Directed Acyclic Graphs (DAGs). The agent supports formatted output and includes built-in practical agents such as a text2sql agent, allowing for quick deployment in applications.
 
+
+
 Features
 --------
 
@@ -11,6 +13,7 @@ Features
 - **Formatted Output**: FlexiAgent supports generating structured and formatted output to meet specific application needs.
 
 - **Built-In Agents**: Includes useful agents like text2sql for fast deployment and reduced development time.
+
 
 
 Installation
@@ -34,6 +37,7 @@ pip install -e .
 # or poetry
 # poetry install
 ```
+
 
 
 Usage
@@ -122,25 +126,23 @@ output = agent.invoke("Compute: 3 + 5 =")
 # output is Step2Output, result is 8
 ```
 
+
+
 Using Local Deployment Model (Llama.cpp)
 ------------------------
 
 FlexiAgent utilizes llama-cpp-python, allowing the LLM to support not only OpenAI but also Llama.cpp. 
 The above code example can load a local model using Llama.cpp by changing the configuration.
 
-Parameter Explanation
+**Parameter Explanation**
 
-```
-repo_id_or_model_path:
-  If specified as a repo_id, the model will be downloaded to the cache directory (~/.cache/huggingface/...) using huggingface-cli. 
-  If it is a local model path (e.g., xxx_model.gguf), it will be loaded directly.
+**repo_id_or_model_path:** 
+If specified as a repo_id, the model will be downloaded to the cache directory `(~/.cache/huggingface/...)` using huggingface-cli. If it is a local model path (e.g., xxx_model.gguf), it will be loaded directly.
 
-repo_filename:
-  This is only effective when repo_id_or_model_path is a repo_id. It selects the specified model based on the filename rules, such as Q4_K_M, Q8_0, etc., and should be set according to the file names in the huggingface repo.
+**repo_filename:** 
+This is only effective when `repo_id_or_model_path` is a repo_id. It selects the specified model based on the filename rules, such as Q4_K_M, Q8_0, etc., and should be set according to the file names in the huggingface repo.
 
-n_ctx:
-  Context window size; defaults to 512 if not set.
-```
+**n_ctx:** Context window size; defaults to 512 if not set.
 
 ```python
 llm_config = LLMConfig(
@@ -153,12 +155,16 @@ llm_config = LLMConfig(
 )
 ````
 
+
+
 Contributing
 ------------
 
 Contributions are welcome! Please fork the repository and use a branch for your feature or bug fix. Submitting a pull request is the best way to see your feature merged.
 
 
+
 License
 -------
+
 This project is licensed under the MIT License - see the LICENSE file for details.
