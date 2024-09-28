@@ -40,7 +40,7 @@ pip install -e .
 # poetry install
 ```
 
-
+If you encounter issues compiling llama-cpp-python during the dependency installation process, please visit https://github.com/abetlen/llama-cpp-python for documentation to help resolve the issue.
 
 Usage
 -----
