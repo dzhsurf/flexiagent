@@ -133,7 +133,7 @@ output = agent.invoke("Compute: 3 + 5 =")
 Quickstart
 ----------
 
-To get started quickly with FlexiAgent, please refer to the [Quickstart](https://github.com/dzhsurf/flexiagent/Quickstart.md) Guide for example usage.
+To get started quickly with FlexiAgent, please refer to the [Quickstart](https://github.com/dzhsurf/flexiagent/blob/master/Quickstart.md) Guide for example usage.
 
 
 
