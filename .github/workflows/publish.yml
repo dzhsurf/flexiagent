@@ -86,7 +86,7 @@ jobs:
     - name: Download Wheel Artifacts
       uses: actions/download-artifact@v4
       with:
-        path: ./dist
+        path: ./artifacts
 
     - name: Set up Python 3.8
       uses: actions/setup-python@v5
@@ -97,8 +97,11 @@ jobs:
       run: |
         pip install twine
 
-    - name: List contents of artifact directory
+    - name: Move files to dist
       run: |
+        mkdir -p ./dist
+        mv ./artifacts/sdist-artifact/* ./dist
+        mv ./artifacts/wheel-macos-latest-py3.8/* ./dist
         ls -l ./dist
 
     - name: Build and Publish to PyPI
