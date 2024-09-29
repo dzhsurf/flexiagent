@@ -28,17 +28,17 @@ class ChatQA(FxTaskEntity):
 
 class TestCustomAgentWithStructuredOutput(unittest.TestCase):
     def setUp(self):
-        self.llm_config = LLMConfig(
-            engine="OpenAI", params={"openai_model": "gpt-4o-mini"}
-        )
         # self.llm_config = LLMConfig(
-        #     engine="LlamaCpp",
-        #     params={
-        #         "repo_id_or_model_path": "QuantFactory/Llama-3.2-3B-Instruct-GGUF",
-        #         "repo_filename": "*Q4_K_M.gguf",
-        #         "n_ctx": 4096,
-        #     },
+        #     engine="OpenAI", params={"openai_model": "gpt-4o-mini"}
         # )
+        self.llm_config = LLMConfig(
+            engine="LlamaCpp",
+            params={
+                "repo_id_or_model_path": "QuantFactory/Llama-3.2-3B-Instruct-GGUF",
+                "repo_filename": "*Q4_K_M.gguf",
+                "n_ctx": 4096,
+            },
+        )
 
     def tearDown(self):
         pass

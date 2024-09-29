@@ -21,7 +21,7 @@ class Step2Output(FxTaskEntity):
     result: float
 
 
-def compute_nums(input: Dict[str, Any]) -> Step2Output:
+def compute_nums(input: Dict[str, Any], addition: Dict[str, Any]) -> Step2Output:
     nums: Step1Output = input["step_1"]
     result = 0.0
     if nums.op == "+":
