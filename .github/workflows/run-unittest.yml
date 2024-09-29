@@ -23,7 +23,7 @@ jobs:
         echo "$HOME/.local/bin" >> $GITHUB_PATH
 
     - name: Configure Poetry to not use virtual environment
-        run: poetry config virtualenvs.create false
+      run: poetry config virtualenvs.create false
 
     - name: Install dependencies
       run: poetry install
