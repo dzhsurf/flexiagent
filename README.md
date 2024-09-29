@@ -55,6 +55,8 @@ export OPENAI_API_KEY='your-api-key-here'
 
 FlexiAgent can be easily integrated into your existing projects. Below is a basic setup to get you started:
 
+![](./docs/simple-agent.jpg)
+
 
 ```python
 from flexiagent.llm.config import LLMConfig
