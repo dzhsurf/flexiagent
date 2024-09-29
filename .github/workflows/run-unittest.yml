@@ -1,0 +1,39 @@
+name: Run Unit Tests
+
+on:
+  push:
+    branches:
+    - master
+  pull_request:
+    branches:
+    - master
+
+jobs:
+  test:
+    runs-on: macos-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python 3.8
+      uses: actions/setup-python@v5
+      with:
+        python-version: 3.8
+
+    - name: Install Poetry on Linux and macOS
+      if: runner.os != 'Windows'
+      run: |
+        curl -sSL https://install.python-poetry.org | python3 -
+        echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+    - name: Install dependencies
+      run: poetry install
+
+    - name: Run Unit Tests
+      env:
+        OPENAI_API_KEY: ${{ secrets.UNITTEST_OPENAI_API_KEY }}
+      run: |
+        python tests/test_builtin_function.py
+        python tests/test_custom_agent.py
+        python tests/test_simple_usage.py
