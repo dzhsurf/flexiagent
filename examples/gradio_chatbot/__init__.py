@@ -8,7 +8,7 @@ class GradioChatbot:
     def __init__(self):
         pass
 
-    def launch(self, port: int = 3000):
+    async def launch(self, port: int = 3000):
         # replace undo, retry btn event
         with HookObjectAsyncMethod(
             gr.ChatInterface,

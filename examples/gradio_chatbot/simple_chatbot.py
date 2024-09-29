@@ -1,5 +1,6 @@
 from typing import Any, AsyncGenerator, Dict, List, Tuple
 
+from gradio_chatbot import GradioChatbot
 from pydantic import BaseModel
 
 from flexiagent.llm.config import LLMConfig
@@ -10,8 +11,6 @@ from flexiagent.task.task_node import (
     FxTaskConfig,
     FxTaskEntity,
 )
-
-from gradio_chatbot import GradioChatbot
 
 
 class ChatBotResponse(FxTaskEntity):
