@@ -1,7 +1,7 @@
 import collections
 import logging
-from typing import Any, Callable, Dict, List, cast
 import unittest
+from typing import Any, Callable, Dict, List, cast
 
 from flexiagent.llm.config import LLMConfig
 from flexiagent.task.task_node import (
@@ -12,7 +12,6 @@ from flexiagent.task.task_node import (
     FxTaskEntity,
 )
 from tests.utils import config_logger_level, pretty_log, trace_dag_context
-
 
 logger = logging.getLogger(__name__)
 config_logger_level()
@@ -206,7 +205,9 @@ User: {input}
         context: Dict[str, List[str]] = collections.defaultdict(list)
         counter: int = 0
 
-        def create_trace_step_fn(name: str) -> Callable[[Dict[str, Any], Dict[str, Any]], str]:
+        def create_trace_step_fn(
+            name: str,
+        ) -> Callable[[Dict[str, Any], Dict[str, Any]], str]:
             def trace_step(input: Dict[str, Any], addition: Dict[str, Any]) -> str:
                 nonlocal counter
                 for item_k, _ in input.items():
@@ -295,7 +296,9 @@ User: {input}
         logger.info(pretty_log("\n".join(msgs)))
         self.assertEqual(len(msgs), 3)
         self.assertEqual(msgs[0], "input -> step_1 (0) -> step_2 (1) -> step_3 (2)")
-        self.assertEqual(msgs[1], "input -> step_1 (0) -> step_2 (1) -> step_4 (3) -> output (5)")
+        self.assertEqual(
+            msgs[1], "input -> step_1 (0) -> step_2 (1) -> step_4 (3) -> output (5)"
+        )
         self.assertEqual(msgs[2], "input -> step_1 (0) -> step_5 (4) -> output (5)")
 
 

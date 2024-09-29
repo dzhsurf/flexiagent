@@ -34,11 +34,11 @@ ruff: ## Run ruff check
 	$(PYTHON) -m ruff check $(PROJECT_NAME)
 
 format: ## Format project code.
-	$(PYTHON) -m ruff format $(PROJECT_NAME)
+	$(PYTHON) -m ruff format $(PROJECT_NAME) examples tests
 
 isort: ## Format imports
-	$(PYTHON) -m isort $(PROJECT_NAME)
-	$(PYTHON) -m ruff format $(PROJECT_NAME)
+	$(PYTHON) -m isort $(PROJECT_NAME) examples tests
+	$(PYTHON) -m ruff format $(PROJECT_NAME) examples tests
 
 clean: ## Clean up build files.
 	@echo "Cleaning up..."

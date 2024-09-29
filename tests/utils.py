@@ -1,6 +1,7 @@
-from abc import ABC, abstractmethod
 import logging
+from abc import ABC, abstractmethod
 from typing import Any, Dict, List, Literal, Tuple
+
 from pydantic import BaseModel
 from sqlalchemy import create_engine, text
 

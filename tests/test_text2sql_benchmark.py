@@ -1,7 +1,7 @@
 import logging
 import os
-from typing import Any, Callable, Dict, List, Literal
 import unittest
+from typing import Any, Callable, Dict, List, Literal
 from unittest import mock
 
 from tqdm import tqdm
@@ -15,8 +15,8 @@ from flexiagent.agents.agent_text2sql import (
     create_text2sql_agent_with_db_recognition,
 )
 from flexiagent.database.db_executor import DBConfig
-from flexiagent.llm.config import LLMConfig
 from flexiagent.indexer import FxIndexer
+from flexiagent.llm.config import LLMConfig
 
 from .bird_utils import BirdDatasetProvider
 from .utils import DatasetItem, SQLExecuteParams, execution_accuracy
