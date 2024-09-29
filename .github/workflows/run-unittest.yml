@@ -1,12 +1,7 @@
 name: Run Unit Tests
 
 on:
-  push:
-    branches:
-    - master
-  pull_request:
-    branches:
-    - master
+  workflow_dispatch:
 
 jobs:
   test:
@@ -27,12 +22,15 @@ jobs:
         curl -sSL https://install.python-poetry.org | python3 -
         echo "$HOME/.local/bin" >> $GITHUB_PATH
 
+    - name: Configure Poetry to not use virtual environment
+        run: poetry config virtualenvs.create false
+
     - name: Install dependencies
       run: poetry install
 
     - name: Run Unit Tests
-      env:
-        OPENAI_API_KEY: ${{ secrets.UNITTEST_OPENAI_API_KEY }}
+      #env:
+      #  OPENAI_API_KEY: ${{ secrets.UNITTEST_OPENAI_API_KEY }}
       run: |
         python tests/test_builtin_function.py
         python tests/test_custom_agent.py
