@@ -1,0 +1,17 @@
+version: '3'
+
+services:
+  gradio-simple-chatbot:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    # env:
+    #   LLM_CONFIG_ENGINE: "" # ["OpenAI", "LlamaCpp"]
+    #   LLM_CONFIG_LLAMACPP_REPO_ID_OR_MODEL_PATH: ""
+    #   LLM_CONFIG_LLAMACPP_REPO_FILENAME: ""
+    #   LLM_CONFIG_LLAMACPP_CTX: ""
+    #   LLM_CONFIG_OPENAI_MODEL: ""
+    #   OPENAI_API_KEY: ""
+    command: ["gradio-simple-chatbot"]
+    ports:
+    - 3000:3000
