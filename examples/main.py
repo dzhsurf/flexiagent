@@ -1,8 +1,11 @@
 import argparse
 import asyncio
+import logging
 from typing import Callable, Dict
 
 from gradio_chatbot.simple_chatbot import SimpleChatBot
+
+logger = logging.getLogger(__name__)
 
 
 async def gradio_simple_chatbot():
@@ -22,7 +25,7 @@ async def main():
     if name in all_examples:
         await all_examples[name]()
     else:
-        print("Example not found. name:", name)
+        logger.info("Example not found. name:", name)
 
 
 if __name__ == "__main__":

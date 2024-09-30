@@ -1,4 +1,7 @@
+import logging
 from functools import wraps
+
+logger = logging.getLogger(__name__)
 
 
 class HookObjectMethod:
@@ -30,7 +33,7 @@ class HookObjectAsyncMethod:
         self.postprocess_hook = postprocess_hook
 
     def __enter__(self):
-        print("HookAsyncMethod", self.method_name)
+        logger.info(f"HookAsyncMethod: {self.method_name}")
 
         @wraps(self.original_method)
         async def new_method(*args, **kwargs):
@@ -42,5 +45,5 @@ class HookObjectAsyncMethod:
         setattr(self.obj, self.method_name, new_method)
 
     def __exit__(self, exc_type, exc_value, traceback):
-        print("HookAsyncMethod recover original method", self.method_name)
+        logger.info(f"HookAsyncMethod recover original method: {self.method_name}")
         setattr(self.obj, self.method_name, self.original_method)
