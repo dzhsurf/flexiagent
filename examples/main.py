@@ -7,6 +7,13 @@ from gradio_chatbot.simple_chatbot import SimpleChatBot
 
 logger = logging.getLogger(__name__)
 
+logging.getLogger("httpx").setLevel(logging.WARNING)
+logging.getLogger("flexiagent").setLevel(logging.WARNING)
+logging.basicConfig(
+    format="%(asctime)s - %(levelname)s - %(funcName)s - %(message)s",
+    level=logging.INFO,
+)
+
 
 async def gradio_simple_chatbot():
     cahtbot = SimpleChatBot()

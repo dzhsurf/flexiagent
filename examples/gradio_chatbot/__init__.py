@@ -44,9 +44,9 @@ class GradioChatbot:
         yield message
 
     async def on_postprocess_delete_message(
-        self, message: str, history: List[Dict[str, Any]]
-    ) -> Tuple[str, List[Dict[str, Any]]]:
-        return (message, history)
+        self, history: List[Dict[str, Any]], message: str
+    ) -> Tuple[List[Dict[str, Any]], str]:
+        return (history, message)
 
     async def on_postprocess_clear_message(self):
         return
