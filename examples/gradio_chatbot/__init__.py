@@ -37,6 +37,7 @@ class GradioChatbot:
                 )
                 # launch webui
                 inst.launch(server_name="0.0.0.0", server_port=port)
+        await self.on_exit()
 
     async def on_process_submit(
         self, message: str, history: List[Dict[str, Any]]
@@ -53,3 +54,6 @@ class GradioChatbot:
 
     async def _on_clear_btn_click(self):
         return ([], [], None)
+
+    async def on_exit(self):
+        return
