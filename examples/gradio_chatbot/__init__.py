@@ -96,16 +96,43 @@ class AgentChatBot(GradioChatBot, Generic[AgentInput, AgentOutput]):
     @classmethod
     @abstractmethod
     def create_agent(cls) -> FxTaskAgent:
+        """
+        This method is responsible for creating and returning an instance of FxTaskAgent.
+
+        You should implement this method to initialize the agent that is used by the chatbot
+        to process inputs and generate responses.
+        """
         pass
 
     @abstractmethod
     def create_agent_input(
         self, message: str, history: List[Dict[str, Any]]
     ) -> AgentInput:
+        """
+        This method converts a received message and its associated history into the
+        appropriate input format for the agent.
+
+        Args:
+            message (str): The current message to process.
+            history (List[Dict[str, Any]]): List of dictionaries containing conversation history.
+
+        Returns:
+            AgentInput: The processed input suitable for the chatbot agent.
+        """
         pass
 
     @abstractmethod
     def process_agent_output(self, response: Optional[AgentOutput]) -> str:
+        """
+        This method processes the output received from the agent into a string format
+        that can be displayed to the user.
+
+        Args:
+            response (Optional[AgentOutput]): The output from the chatbot agent.
+
+        Returns:
+            str: The processed output as a string to display to the user.
+        """
         pass
 
     @classmethod
