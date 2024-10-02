@@ -4,6 +4,7 @@ import logging
 from typing import Callable, Dict
 
 from gradio_chatbot.simple_chatbot import SimpleChatBot
+from gradio_chatbot.text2sql_qa_chatbot import Text2SqlQAChatBot
 
 logger = logging.getLogger(__name__)
 
@@ -16,8 +17,13 @@ logging.basicConfig(
 
 
 async def gradio_simple_chatbot():
-    cahtbot = SimpleChatBot()
-    await cahtbot.launch()
+    chatbot = SimpleChatBot()
+    await chatbot.launch()
+
+
+async def text2sql_qa_chatbot():
+    chatbot = Text2SqlQAChatBot()
+    await chatbot.launch()
 
 
 async def main():
@@ -28,6 +34,7 @@ async def main():
     name: str = args.name
     all_examples: Dict[str, Callable] = {
         "gradio-simple-chatbot": gradio_simple_chatbot,
+        "gradio-text2sql-qa-chatbot": text2sql_qa_chatbot,
     }
     if name in all_examples:
         await all_examples[name]()

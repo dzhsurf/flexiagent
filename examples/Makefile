@@ -1,5 +1,7 @@
 .PHONE: help docker-run docker-build local-run
 
+EXAMPLE ?= "gradio-simple-chatbot"
+
 help: ## show this help.
 	@echo "Usage: make [target]"
 	@echo ""
@@ -14,5 +16,5 @@ docker-run: ## docker-run
 docker-build: ## docker-build
 	docker build -t flexiagent-example -f docker/Dockerfile .
 
-local-run: ## local-run 
-	python main.py gradio-simple-chatbot
+local-run: ## local-run EXAMPLE=<xxx>
+	python main.py $(EXAMPLE)
