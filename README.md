@@ -35,9 +35,9 @@ pip install -e .
 # poetry install
 ```
 
-Ensure you have Python installed and set up a virtual environment(conda recommand):
+Ensure you have Python installed and set up a virtual environment(conda recommended):
 ```shell
-# python3.11 recommendation, support python3.8+
+# python3.11 recommended, support python3.8+
 conda create -n proj python=3.11 
 ```
 
