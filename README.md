@@ -134,6 +134,97 @@ output = agent.invoke("Compute: 3 + 5 =")
 
 
 
+**Text2SqlQA Agent**
+
+![](./docs/text2sql-qa-chatbot.jpg)
+
+For the complete code, please check it out here: https://github.com/dzhsurf/flexiagent/blob/master/examples/gradio_chatbot/text2sql_qa_chatbot.py
+
+```python
+chatbot_agent = FxTaskAgent(
+  task_graph=[
+    # step 1: analyze user intent
+    FxTaskConfig(
+      task_key="user_intent",
+      input_schema={"input": ChatBotInput},
+      output_schema=UserIntent,
+      action=FxTaskAction(
+        type="llm",
+        act=FxTaskActionLLM(
+          llm_config=llm_config,
+          instruction="""Based on the user's question, analyze the user's intent. The classification is as follows:
+- QA: If the question is about student information, grades, class information, etc.
+- Other: Otherwise, it falls under this category.
+
+{input.history_as_text}
+
+Question: {input.input}
+""",
+        ),
+      ),
+    ),
+    # step 2.1: text2sql qa action
+    FxTaskConfig(
+      task_key="text2sql_qa",
+      input_schema={
+        "input": ChatBotInput,
+        "user_intent": UserIntent,
+      },
+      output_schema=str,
+      action=FxTaskAction(
+        type="agent",
+        act=create_text2sql_qa_agent(
+          llm_config,
+          _fetch_database_metainfo,
+          preprocess_hook=_convert_chatbot_input_to_text2sql_qa_input,
+        ),
+        condition=_condition_text2sql_qa,
+      ),
+    ),
+    # step 2.2: fallback action
+    FxTaskConfig(
+      task_key="fallback_action",
+      input_schema={
+        "input": ChatBotInput,
+        "user_intent": UserIntent,
+      },
+      output_schema=str,
+      action=FxTaskAction(
+        type="llm",
+        act=FxTaskActionLLM(
+          llm_config=llm_config,
+          instruction="""You are a chatbot assistant. Assist user and response user's question.
+
+{input.history_as_text}
+
+Question: {input.input}
+""",
+        ),
+        condition=_condition_fallback_action,
+      ),
+    ),
+    # step 3:
+    FxTaskConfig(
+      task_key="output",
+      input_schema={
+        "user_intent": UserIntent,
+        "text2sql_qa": str,
+        "fallback_action": str,
+      },
+      output_schema=ChatBotResponse,
+      action=FxTaskAction(
+        type="function",
+        act=_generate_output,
+      ),
+    ),
+  ]
+)
+```
+
+
+
+
+
 Quickstart
 ----------
 
