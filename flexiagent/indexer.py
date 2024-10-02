@@ -38,11 +38,6 @@ class FxIndexer:
 
         return result
 
-    def retrieve_documents(self, db_name: str, query: str) -> List[str]:
-        if db_name in self.metadbs:
-            return self.metadbs[db_name].query(query)
-        return []
-
     def add_knowledge(self, content: str):
         self.knowledges.append(content)
 

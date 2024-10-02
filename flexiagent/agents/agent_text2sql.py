@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Callable, Dict, Optional
+from typing import Any, Callable, Dict, Optional, Tuple
 
 import sqlparse
 
@@ -52,7 +52,9 @@ def _sql_format_and_output(
 
 def create_raw_text2sql_agent(
     llm_config: LLMConfig,
-    preprocess_hook: Optional[Callable[[Dict[str, Any]], Dict[str, Any]]] = None,
+    preprocess_hook: Optional[
+        Callable[[Dict[str, Any]], Tuple[Dict[str, Any], bool]]
+    ] = None,
     postprocess_hook: Optional[Callable[[Dict[str, Any]], Dict[str, Any]]] = None,
 ) -> FxTaskAgent:
     agent = FxTaskAgent(
@@ -77,7 +79,7 @@ Prefer using JOINs instead of nested queries.
 Only use the following tables:
 {input.db_metainfo}
 
-Question: {input.question}
+{input.question}
 """,
                     ),
                 ),
@@ -108,12 +110,14 @@ class Text2SQLAgentLogic:
     @classmethod
     def convert_db_recognition_agent_input(
         cls, input: Dict[str, Any]
-    ) -> Dict[str, Any]:
+    ) -> Tuple[Dict[str, Any], bool]:
         input["input"] = DBRecognitionAgentInput(question=input["input"])
-        return input
+        return input, False
 
     @classmethod
-    def convert_text2sql_agent_input(cls, input: Dict[str, Any]) -> Dict[str, Any]:
+    def convert_text2sql_agent_input(
+        cls, input: Dict[str, Any]
+    ) -> Tuple[Dict[str, Any], bool]:
         # RawText2SQLAgentInput
         if not isinstance(input["input"], str):
             raise TypeError(f"input not match. {input}")
@@ -133,7 +137,7 @@ DB_Metainfo:
             question=question,
             db_metainfo=metainfo_text,
         )
-        return input
+        return input, False
 
     @classmethod
     def generate_output(
@@ -158,7 +162,9 @@ def create_text2sql_agent_with_db_recognition(
     fetch_all_databases_metainfo_func: Callable[
         [Dict[str, Any], Dict[str, Any]], AllDatabasesMetaInfo
     ],
-    preprocess_hook: Optional[Callable[[Dict[str, Any]], Dict[str, Any]]] = None,
+    preprocess_hook: Optional[
+        Callable[[Dict[str, Any]], Tuple[Dict[str, Any], bool]]
+    ] = None,
     postprocess_hook: Optional[Callable[[Dict[str, Any]], Dict[str, Any]]] = None,
 ) -> FxTaskAgent:
     agent = FxTaskAgent(

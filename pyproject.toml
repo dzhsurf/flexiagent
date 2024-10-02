@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "flexiagent"
-version = "0.1.0a6"
+version = "0.1.0a7"
 description = "FlexiAgent is an open-source framework for creating agents based on Directed Acyclic Graphs (DAGs), featuring a user-friendly interface, built-in practical agents, and high configurability for efficient task management and rapid deployment."
 authors = ["Hiram Deng <72371329+dzhsurf@users.noreply.github.com>"]
 license = "MIT"

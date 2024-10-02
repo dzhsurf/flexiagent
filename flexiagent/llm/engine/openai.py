@@ -41,7 +41,7 @@ class LLMEngineOpenAI(LLMEngineImpl[LLMConfigOpenAI]):
             temperature=0,
             model=self.config.openai_model,
             messages=prompt.to_openai_chat_completion_messages(variables),
-            stop=prompt.stop_prompt,
+            stop=prompt.stop_prompt if len(prompt.stop_prompt) > 0 else None,
             timeout=self.config.timeout,
         )
 
@@ -61,7 +61,7 @@ class LLMEngineOpenAI(LLMEngineImpl[LLMConfigOpenAI]):
             temperature=0,
             model=self.config.openai_model,
             messages=prompt.to_openai_chat_completion_messages(variables),
-            stop=prompt.stop_prompt,
+            stop=prompt.stop_prompt if len(prompt.stop_prompt) > 0 else None,
             timeout=self.config.timeout,
             response_format=response_format,
         )

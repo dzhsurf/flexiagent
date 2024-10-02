@@ -1,5 +1,5 @@
 import logging
-from typing import Any, Callable, Dict, List, Literal, Optional, Set, Type, Union
+from typing import Any, Callable, Dict, List, Literal, Optional, Set, Tuple, Type, Union
 
 from pydantic import BaseModel, ConfigDict
 
@@ -20,6 +20,11 @@ class FxTaskActionLLM(BaseModel):
 FxTaskActionFunction = Callable[[Dict[str, Any], Dict[str, Any]], Any]
 
 
+class FxTaskActionConditionResult(BaseModel):
+    skip_action: bool
+    action_ret_value: Any
+
+
 class FxTaskAction(BaseModel):
     type: Literal["llm", "function", "agent"]
     act: Union[
@@ -28,6 +33,7 @@ class FxTaskAction(BaseModel):
         "FxTaskAgent",
     ]
     addition: Optional[Dict[str, Any]] = None
+    condition: Optional[Callable[[Dict[str, Any]], FxTaskActionConditionResult]] = None
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
@@ -74,7 +80,10 @@ class FxTaskNode(FxTask):
             message = f"task[{self.__class__.__name__}] input must has field {key}"
         assert key in kwargs, message
         if value_type is not None:
-            assert isinstance(kwargs[key], value_type)
+            if not isinstance(kwargs[key], value_type):
+                raise TypeError(
+                    f"_require_input: {kwargs[key]} type not match {value_type}"
+                )
         return kwargs[key]
 
     def _process_llm(self, _action: FxTaskAction, _inputs: Dict[str, Any]) -> Any:
@@ -100,6 +109,8 @@ class FxTaskNode(FxTask):
                 user_question_prompt=params.instruction,
             )
             response = llm.chat_completion(prompt=prompt, variables=_inputs)
+        else:
+            raise TypeError(f"Output schema not support, {self.config.output_schema}")
         return response
 
     def _process_function(self, _action: FxTaskAction, _inputs: Dict[str, Any]) -> Any:
@@ -138,6 +149,12 @@ class FxTaskNode(FxTask):
         for key, _type in self.config.input_schema.items():
             inputs[key] = self._require_input(kwargs=kwds, key=key, value_type=_type)
 
+        # process condition
+        if action.condition:
+            condition_ret = action.condition(inputs)
+            if condition_ret.skip_action:
+                return condition_ret.action_ret_value
+
         # execute task with inputs
         if action.type in processor_mapping:
             response = processor_mapping[action.type](action, inputs)
@@ -152,7 +169,9 @@ class FxTaskAgent:
         self,
         *,
         task_graph: List[Union[FxTaskConfig, FxTaskNode]],
-        preprocess_hook: Optional[Callable[[Dict[str, Any]], Dict[str, Any]]] = None,
+        preprocess_hook: Optional[
+            Callable[[Dict[str, Any]], Tuple[Dict[str, Any], bool]]
+        ] = None,
         postprocess_hook: Optional[Callable[[Dict[str, Any]], Dict[str, Any]]] = None,
     ):
         self.tasks = self._build_task_graph(task_graph)
@@ -215,13 +234,19 @@ class FxTaskAgent:
 
         # preprocess
         if self.preprocess_hook:
-            context = self.preprocess_hook(context)
+            context, stop = self.preprocess_hook(context)
+            if stop and "output" in context:
+                return context["output"]
 
         # run task dag
         for task in self.tasks:
-            logger.debug(f"Step: {task.config.task_key}")
-            output = task.invoke(**context)
-            context[task.config.task_key] = output
+            logger.info(f"Step: {task.config.task_key}")
+            try:
+                output = task.invoke(**context)
+                logger.info(f"Step: {task.config.task_key}\nOutput: {output}")
+                context[task.config.task_key] = output
+            except Exception as e:
+                logger.error(e)
 
         # postprocess
         if self.postprocess_hook:

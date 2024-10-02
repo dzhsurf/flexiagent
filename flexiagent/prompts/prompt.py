@@ -1,6 +1,6 @@
 import re
 from dataclasses import dataclass
-from typing import Any, Dict, Iterable, List, Set, Union
+from typing import Any, Dict, Iterable, List, Set
 
 from openai.types.chat import (
     ChatCompletionAssistantMessageParam,

@@ -1,4 +1,4 @@
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 from flexiagent.llm.config import LLMConfig
 from flexiagent.task.task_node import (
@@ -70,7 +70,9 @@ def create_db_recognition_agent(
     fetch_all_databases_metainfo_func: Callable[
         [Dict[str, Any], Dict[str, Any]], AllDatabasesMetaInfo
     ],
-    preprocess_hook: Optional[Callable[[Dict[str, Any]], Dict[str, Any]]] = None,
+    preprocess_hook: Optional[
+        Callable[[Dict[str, Any]], Tuple[Dict[str, Any], bool]]
+    ] = None,
     postprocess_hook: Optional[Callable[[Dict[str, Any]], Dict[str, Any]]] = None,
 ) -> FxTaskAgent:
     agent = FxTaskAgent(
