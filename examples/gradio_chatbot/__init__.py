@@ -180,7 +180,8 @@ class AgentChatBot(GradioChatBot, Generic[AgentInput, AgentOutput]):
             worker.join()
 
     def _generate_task_id(self) -> str:
-        return f"{len(self.result_dict)+1}"
+        timestamp: int = int(time.time())
+        return f"{timestamp}"
 
     async def _launch_task(self, input: AgentInput) -> Optional[AgentOutput]:
         task_id = self._generate_task_id()
