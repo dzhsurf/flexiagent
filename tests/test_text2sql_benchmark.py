@@ -17,7 +17,6 @@ from flexiagent.agents.agent_text2sql import (
 from flexiagent.database.db_executor import DBConfig
 from flexiagent.indexer import FxIndexer
 from flexiagent.llm.config import LLMConfig
-
 from tests.bird_utils import BirdDatasetProvider
 from tests.utils import DatasetItem, SQLExecuteParams, execution_accuracy
 
