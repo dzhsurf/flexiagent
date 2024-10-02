@@ -1,7 +1,7 @@
 import logging
 import os
 import unittest
-from typing import Any, Callable, Dict, List, Literal
+from typing import Any, Callable, Dict, List, Literal, Tuple
 from unittest import mock
 
 from tqdm import tqdm
@@ -18,8 +18,8 @@ from flexiagent.database.db_executor import DBConfig
 from flexiagent.indexer import FxIndexer
 from flexiagent.llm.config import LLMConfig
 
-from .bird_utils import BirdDatasetProvider
-from .utils import DatasetItem, SQLExecuteParams, execution_accuracy
+from tests.bird_utils import BirdDatasetProvider
+from tests.utils import DatasetItem, SQLExecuteParams, execution_accuracy
 
 # disable some module log
 logging.getLogger("httpx").setLevel(logging.WARNING)
@@ -40,8 +40,8 @@ def get_env_value(key: ENV_KEYS) -> str:
 
 def create_fetch_all_databases_metainfo_func(
     indexer: FxIndexer,
-) -> Callable[[Dict[str, Any]], AllDatabasesMetaInfo]:
-    def func(input: Dict[str, Any]) -> AllDatabasesMetaInfo:
+) -> Callable[[Dict[str, Any], Dict[str, Any]], AllDatabasesMetaInfo]:
+    def func(input: Dict[str, Any], addition: Dict[str, Any]) -> AllDatabasesMetaInfo:
         metainfo_list: List[DatabaseMetaInfo] = []
         for db_name in indexer.get_all_dbnames():
             metainfo_list.append(
