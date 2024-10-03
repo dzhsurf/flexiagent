@@ -14,8 +14,8 @@ logger = logging.getLogger(__name__)
 
 
 class GradioChatBot(ABC):
-    def __init__(self):
-        pass
+    def __init__(self, examples: List[str] = []):
+        self.examples = examples
 
     async def launch(self, port: int = 3000):
         # replace undo, retry btn event
@@ -29,6 +29,7 @@ class GradioChatBot(ABC):
                 type="messages",
                 show_progress="full",
                 multimodal=False,
+                examples=self.examples,
             ) as inst:
                 # replace clear btn click event
                 inst.clear_btn.click(
@@ -73,8 +74,8 @@ AgentOutput = TypeVar("AgentOutput", bound=FxTaskEntity)
 
 
 class AgentChatBot(GradioChatBot, Generic[AgentInput, AgentOutput]):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, examples: List[str] = []):
+        super().__init__(examples)
         self.result_dict: Dict[str, Optional[AgentOutput]] = {}
         self.processing_manager = multiprocessing.Manager()
         self.input_queue: queue.Queue[Optional[Tuple[str, AgentInput]]] = (

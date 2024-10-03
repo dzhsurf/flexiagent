@@ -202,7 +202,11 @@ def _generate_output(
 
 class Text2SqlQAChatBot(AgentChatBot[ChatBotInput, ChatBotResponse]):
     def __init__(self):
-        super().__init__()
+        super().__init__(examples=[
+            "Hi",
+            "Show me all the students info",
+            "Who are the hardest student",
+        ])
         self.session_history_max_limit = 30
         init_db()
 
@@ -222,7 +226,7 @@ class Text2SqlQAChatBot(AgentChatBot[ChatBotInput, ChatBotResponse]):
                         act=FxTaskActionLLM(
                             llm_config=llm_config,
                             instruction="""Based on the user's question, analyze the user's intent. The classification is as follows:
-- QA: If the question is about student information, grades, class information, etc.
+- QA: If the question is about student information, grades, class information, etc. Use this category.
 - Other: Otherwise, it falls under this category.
 
 {input.history_as_text}
