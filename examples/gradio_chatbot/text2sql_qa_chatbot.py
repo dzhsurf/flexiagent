@@ -202,11 +202,13 @@ def _generate_output(
 
 class Text2SqlQAChatBot(AgentChatBot[ChatBotInput, ChatBotResponse]):
     def __init__(self):
-        super().__init__(examples=[
-            "Hi",
-            "Show me all the students info",
-            "Who are the hardest student",
-        ])
+        super().__init__(
+            examples=[
+                "Hi",
+                "Show me all the students info",
+                "Who are the hardest student",
+            ]
+        )
         self.session_history_max_limit = 30
         init_db()
 
