@@ -2,9 +2,9 @@ from typing import Any, Callable, Dict, Optional, Tuple
 
 from flexiagent.agents.agent_db_recognition import DatabaseMetaInfo
 from flexiagent.agents.agent_text2sql import (
-    RawText2SQLAgentInput,
-    RawText2SQLAgentOutput,
-    create_raw_text2sql_agent,
+    Text2SQLAgentInput,
+    Text2SQLAgentOutput,
+    create_text2sql_agent,
 )
 from flexiagent.database.db_executor import DBConfig, DBExecutor
 from flexiagent.llm.config import LLMConfig
@@ -37,7 +37,7 @@ DB_Metainfo:
 {metainfo.db_metainfo}
 
 """
-    input["input"] = RawText2SQLAgentInput(
+    input["input"] = Text2SQLAgentInput(
         question=question,
         db_metainfo=metainfo_text,
     )
@@ -48,12 +48,12 @@ DB_Metainfo:
 def _sql_execute(
     input: Dict[str, Any], addition: Dict[str, Any]
 ) -> _SQLExecutionOutput:
-    if not isinstance(input["text2sql_agent"], RawText2SQLAgentOutput):
+    if not isinstance(input["text2sql_agent"], Text2SQLAgentOutput):
         raise TypeError(f"Input not match. {input}")
     if not isinstance(input["setup_database_metainfo"], DatabaseMetaInfo):
         raise TypeError(f"Input not match. {input}")
 
-    text2sql: RawText2SQLAgentOutput = input["text2sql_agent"]
+    text2sql: Text2SQLAgentOutput = input["text2sql_agent"]
     metainfo: DatabaseMetaInfo = input["setup_database_metainfo"]
 
     db_config = DBConfig(name=metainfo.db_id, db_uri=metainfo.db_uri)
@@ -92,10 +92,10 @@ def create_text2sql_qa_agent(
                     "input": str,
                     "setup_database_metainfo": DatabaseMetaInfo,
                 },
-                output_schema=RawText2SQLAgentOutput,
+                output_schema=Text2SQLAgentOutput,
                 action=FxTaskAction(
                     type="agent",
-                    act=create_raw_text2sql_agent(
+                    act=create_text2sql_agent(
                         llm_config,
                         preprocess_hook=_convert_input_to_text2sql_agent_input,
                     ),
@@ -105,7 +105,7 @@ def create_text2sql_qa_agent(
             FxTaskConfig(
                 task_key="execute_db_query",
                 input_schema={
-                    "text2sql_agent": RawText2SQLAgentOutput,
+                    "text2sql_agent": Text2SQLAgentOutput,
                     "setup_database_metainfo": DatabaseMetaInfo,
                 },
                 output_schema=_SQLExecutionOutput,
