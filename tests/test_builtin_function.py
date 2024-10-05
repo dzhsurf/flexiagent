@@ -27,7 +27,7 @@ class TestBuiltinFunction(unittest.TestCase):
     def tearDown(self):
         pass
 
-    def test_builtin_httpcall(self):
+    def test_builtin_httpcall_output_entity(self):
         agent = FxTaskAgent(
             task_graph=[
                 FxTaskConfig(
@@ -48,7 +48,30 @@ class TestBuiltinFunction(unittest.TestCase):
             ]
         )
         output = agent.invoke()
-        print(output)
+        self.assertIsInstance(output, APISchema)
+
+    def test_builtin_httpcall_output_str(self):
+        agent = FxTaskAgent(
+            task_graph=[
+                FxTaskConfig(
+                    task_key="output",
+                    input_schema={},
+                    output_schema=APISchema,
+                    action=FxTaskAction(
+                        type="function",
+                        act=builtin_httpcall,
+                        addition={
+                            "input": BuiltinHttpcallInput(
+                                endpoint="https://api.restful-api.dev/objects",
+                                output_schema=str,
+                            ),
+                        },
+                    ),
+                ),
+            ]
+        )
+        output = agent.invoke()
+        self.assertIsInstance(output, str)
 
 
 if __name__ == "__main__":
