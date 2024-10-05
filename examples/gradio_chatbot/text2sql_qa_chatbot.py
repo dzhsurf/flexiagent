@@ -7,8 +7,8 @@ from pydantic import BaseModel
 from sqlalchemy import Column, ForeignKey, Integer, MetaData, String, create_engine
 from sqlalchemy.orm import DeclarativeBase, sessionmaker
 
-from flexiagent.agents.agent_db_recognition import DatabaseMetaInfo
-from flexiagent.agents.agent_text2sql_qa import create_text2sql_qa_agent
+from flexiagent.builtin.agents.agent_db_recognition import DatabaseMetaInfo
+from flexiagent.builtin.agents.agent_text2sql_qa import create_text2sql_qa_agent
 from flexiagent.database.db_executor import DBConfig, DBExecutor
 from flexiagent.task.task_node import (
     FxTaskAction,

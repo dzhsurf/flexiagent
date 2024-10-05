@@ -1,17 +1,17 @@
 import logging
 import os
 import unittest
-from typing import Any, Callable, Dict, List, Literal, Tuple
+from typing import Any, Callable, Dict, List, Literal
 from unittest import mock
 
 from tqdm import tqdm
 
-from flexiagent.agents.agent_db_recognition import (
+from flexiagent.builtin.agents.agent_db_recognition import (
     AllDatabasesMetaInfo,
     DatabaseMetaInfo,
 )
-from flexiagent.agents.agent_text2sql import (
-    Text2SQLOutput,
+from flexiagent.builtin.agents.agent_text2sql_with_db_recog import (
+    Text2SQLAgentOutputEx,
     create_text2sql_agent_with_db_recognition,
 )
 from flexiagent.database.db_executor import DBConfig
@@ -103,7 +103,7 @@ class TestText2SqlBenchmark(unittest.TestCase):
         assert True
 
     def _run_predict(self, question: str) -> SQLExecuteParams:
-        result: Text2SQLOutput = self.agent.invoke(question)
+        result: Text2SQLAgentOutputEx = self.agent.invoke(question)
         return SQLExecuteParams(
             db_uri=result.metainfo.db_uri,
             sql=result.sql,

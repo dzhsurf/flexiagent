@@ -1,14 +1,14 @@
 import logging
 from typing import Any, Callable, Dict, Optional, Tuple
 
-from flexiagent.agents.agent_db_recognition import (
+from flexiagent.builtin.agents.agent_db_recognition import (
     AllDatabasesMetaInfo,
     DatabaseMetaInfo,
     DBRecognitionAgentInput,
     DBRecognitionAgentOutput,
     create_db_recognition_agent,
 )
-from flexiagent.agents.agent_text2sql import (
+from flexiagent.builtin.agents.agent_text2sql import (
     Text2SQLAgentInput,
     Text2SQLAgentOutput,
     create_text2sql_agent,

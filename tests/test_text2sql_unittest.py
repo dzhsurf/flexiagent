@@ -3,11 +3,13 @@ import unittest
 from typing import Any, Callable, Dict
 from unittest import mock
 
-from flexiagent.agents.agent_db_recognition import (
+from flexiagent.builtin.agents.agent_db_recognition import (
     AllDatabasesMetaInfo,
     DatabaseMetaInfo,
 )
-from flexiagent.agents.agent_text2sql import create_text2sql_agent_with_db_recognition
+from flexiagent.builtin.agents.agent_text2sql_with_db_recog import (
+    create_text2sql_agent_with_db_recognition,
+)
 from flexiagent.indexer import FxIndexer
 from flexiagent.llm.config import LLMConfig
 
