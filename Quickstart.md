@@ -3,6 +3,8 @@ Quickstart
 
 
 
+## Concept
+
 **Objects to Import**
 
 ```
@@ -60,9 +62,7 @@ llm_config = LLMConfig(
 
 
 
-
-
-**Creating an LLM Type Agent**
+## Creating an LLM type agent
 
 ```python
 class ChatOutput(FxTaskEntity):
@@ -93,7 +93,7 @@ output = agent.invoke("Who are you?")
 
 
 
-**Creating a Function Type Agent**
+## Creating a function type agent
 
 ```python
 def agent_fn(input: Dict[str, Any], addition: Dict[str, Any]) -> str:
@@ -119,7 +119,7 @@ output = agent.invoke("Call function")
 
 
 
-**Creating an Agent Type Agent (Supports Nested Sub-Agents)**
+## Creating an agent type agent (support sub-agent)
 
 ```python
 instruction = """You are an expert responsible for answering users' questions.
@@ -162,7 +162,7 @@ output = agent.invoke("Who are you?")
 
 
 
-**Building a Complex DAG**
+## Building a complex task DAG
 
 ```python
 context: Dict[str, List[str]] = collections.defaultdict(list)
@@ -263,7 +263,9 @@ input -> step_1 (0) -> step_5 (4) -> output (5)
 
 
 
-**Builtin Agent**
+## Builtin Agent / Function
+
+### Builtin Agent
 
 - **text2sql-qa-agent**
 
@@ -290,7 +292,7 @@ input -> step_1 (0) -> step_5 (4) -> output (5)
 
   
 
-**Builtin Function**
+### Builtin Function
 
 - `builtin_httpcall`
 
