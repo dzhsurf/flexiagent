@@ -289,3 +289,41 @@ input -> step_1 (0) -> step_5 (4) -> output (5)
   ```
 
   
+
+**Builtin Function**
+
+- `builtin_httpcall`
+
+  ```python
+  from flexiagent.builtin.function.http_call import (
+  	BuiltinHttpcallInput, 
+    builtin_httpcall,
+  )
+  from pydantic import RootModel
+  
+  # define Restful API JSON Schema
+  class APIItemSchema(RootModel[Dict[str, Any]]):
+      pass
+    
+  class APISchema(FxTaskEntity, RootModel[List[APIItemSchema]]):
+      pass
+  
+  # Config builtin function: httpcall
+  FxTaskConfig(
+    task_key="output",
+    input_schema={},
+    output_schema=APISchema,
+    action=FxTaskAction(
+      type="function",
+      act=builtin_httpcall,
+      addition={
+        "input": BuiltinHttpcallInput(
+          endpoint="https://api.restful-api.dev/objects",
+          output_schema=APISchema,
+        ),
+      },
+    ),
+  )
+  ```
+
+  
