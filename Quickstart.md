@@ -261,3 +261,27 @@ input -> step_1 (0) -> step_2 (1) -> step_4 (3) -> output (5)
 input -> step_1 (0) -> step_5 (4) -> output (5)
 ```
 
+
+
+**Builtin Agent**
+
+- **text2sql-qa-agent**
+
+  ```python
+  def _fetch_database_metainfo(input: Dict[str, Any], addition: Dict[str, Any]
+  ) -> DatabaseMetaInfo:
+    # Add db info here
+    return DatabaseMetaInfo(
+      db_id="db_id",
+      db_uri="sqlite:///xxxx.db",
+      db_metainfo="db schema",
+    )
+  
+  # create text2sql QA agent 
+  agent = create_text2sql_qa_agent(llm_config,
+    _fetch_database_metainfo,
+    preprocess_hook=_convert_chatbot_input_to_text2sql_qa_input,
+  )
+  ```
+
+  
