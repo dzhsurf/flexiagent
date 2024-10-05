@@ -282,6 +282,10 @@ input -> step_1 (0) -> step_5 (4) -> output (5)
     _fetch_database_metainfo,
     preprocess_hook=_convert_chatbot_input_to_text2sql_qa_input,
   )
+  
+  # ask question
+  answer = agent.invoke("What's your name?")
+  # output type is str 
   ```
 
   
