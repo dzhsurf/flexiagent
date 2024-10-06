@@ -40,7 +40,6 @@ class TestBuiltinFunction(unittest.TestCase):
                         addition={
                             "input": BuiltinHttpcallInput(
                                 endpoint="https://api.restful-api.dev/objects",
-                                output_schema=APISchema,
                             ),
                         },
                     ),
@@ -56,14 +55,13 @@ class TestBuiltinFunction(unittest.TestCase):
                 FxTaskConfig(
                     task_key="output",
                     input_schema={},
-                    output_schema=APISchema,
+                    output_schema=str,
                     action=FxTaskAction(
                         type="function",
                         act=builtin_httpcall,
                         addition={
                             "input": BuiltinHttpcallInput(
                                 endpoint="https://api.restful-api.dev/objects",
-                                output_schema=str,
                             ),
                         },
                     ),
