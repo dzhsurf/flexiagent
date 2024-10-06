@@ -12,12 +12,13 @@ from flexiagent.builtin.agents.agent_text2sql_qa import create_text2sql_qa_agent
 from flexiagent.database.db_executor import DBConfig, DBExecutor
 from flexiagent.task.task_node import (
     FxTaskAction,
-    FxTaskActionConditionResult,
     FxTaskActionLLM,
     FxTaskAgent,
     FxTaskConfig,
     FxTaskEntity,
 )
+
+# from flexiagent.task.condition import Condition
 
 logger = logging.getLogger(__name__)
 
@@ -154,32 +155,6 @@ def _convert_chatbot_input_to_text2sql_qa_input(
     return input, False
 
 
-def _condition_text2sql_qa(input: Dict[str, Any]) -> FxTaskActionConditionResult:
-    if not isinstance(input["user_intent"], UserIntent):
-        raise TypeError(f"Input not match, {input}")
-
-    user_intent: UserIntent = input["user_intent"]
-    skip_action = user_intent.intent != "QA"
-
-    return FxTaskActionConditionResult(
-        skip_action=skip_action,
-        action_ret_value="",
-    )
-
-
-def _condition_fallback_action(input: Dict[str, Any]) -> FxTaskActionConditionResult:
-    if not isinstance(input["user_intent"], UserIntent):
-        raise TypeError(f"Input not match, {input}")
-
-    user_intent: UserIntent = input["user_intent"]
-    skip_action = user_intent.intent != "Other"
-
-    return FxTaskActionConditionResult(
-        skip_action=skip_action,
-        action_ret_value="",
-    )
-
-
 def _generate_output(
     input: Dict[str, Any], addition: Dict[str, Any]
 ) -> ChatBotResponse:
@@ -253,7 +228,12 @@ Question: {input.input}
                             _fetch_database_metainfo,
                             preprocess_hook=_convert_chatbot_input_to_text2sql_qa_input,
                         ),
-                        condition=_condition_text2sql_qa,
+                        condition={
+                            "terms": [
+                                ("user_intent.intent", "==", "QA"),
+                            ],
+                            "mode": "match_all",
+                        },
                     ),
                 ),
                 # step 2.2: fallback action
@@ -275,7 +255,12 @@ Question: {input.input}
 Question: {input.input}
 """,
                         ),
-                        condition=_condition_fallback_action,
+                        condition={
+                            "terms": [
+                                ("user_intent.intent", "==", "Other"),
+                            ],
+                            "mode": "match_all",
+                        },
                     ),
                 ),
                 # step 3:
