@@ -1,21 +1,20 @@
 Quickstart
 ----------
 
-
-
 ## Concept
 
 **Objects to Import**
 
 ```
 from flexiagent.llm.config import LLMConfig
-from flexiagent.task.task_node import (
+from flexiagent.task.base import (
     TaskAction,
     TaskActionLLM,
     TaskAgent,
     TaskConfig,
     TaskEntity,
 )
+from flexiagent.task.task_agent import create_task_agent
 ```
 
 
@@ -37,6 +36,41 @@ When the agent is called using `invoke`, the key `"input"` is passed as a parame
 **Input and Output of an Agent's Task**
 
 Through the configuration of `input_schema`, an agent can use the key of an upstream task's `task_key` to obtain the output of the upstream task. The `output_schema` of the upstream task needs to be consistent with the type of the `input_schema` of the downstream task; otherwise, a TypeError will be raised. Tasks can use `input_schema` and `output_schema` to build a task DAG. If the DAG has loops, an exception will be raised.
+
+
+
+```python
+# The task config such as 
+
+agent = create_task_agent(task_graph=[
+  TaskConfig(
+  	task_key="first_task",
+    input_schema={"input": str}, # means: the input param type is str
+    output_schema=str, # means: the task output type is str
+    ...
+  ),
+  TaskConfig(
+  	task_key="second_task",
+    # first_task is the upstream task, use it's output as input param.
+    # The type of the first_task must match the first_task output schema. 
+    input_schema={"first_task": str}, 
+    output_schema=MyTaskResult, # means: the task output type is MyTaskResult
+    ...
+  ),
+  TaskConfig(
+    # When the task_key is "output", 
+    # means this task output schema is also the agent's output schema
+  	task_key="output",
+    input_schema={ "second_task": MyTaskResult },
+    output_schema=FinalResult,
+    ...
+  ),
+])
+
+# use agent, input type is str, output type is FinalResult
+result = agent.invoke("Hi")
+print(isinstance(result, FinalResult), result)
+```
 
 
 
@@ -72,8 +106,7 @@ instruction = """You are an expert responsible for answering users' questions.
 User: {input}
 """
 
-agent = create_task_agent(
-  task_graph=[
+agent = create_task_agent(task_graph=[
     TaskConfig(
       task_key="output",
       input_schema={"input": str},
@@ -88,6 +121,7 @@ agent = create_task_agent(
     ),
   ],
 )
+
 output = agent.invoke("Who are you?")
 ```
 
@@ -100,8 +134,7 @@ def agent_fn(ctx: TaskActionContext, input: Dict[str, Any], addition: Dict[str, 
   result = str(input)
   return result
 
-agent = create_task_agent(
-  task_graph=[
+agent = create_task_agent(task_graph=[
     TaskConfig(
       task_key="output",
       input_schema={"input": str},
@@ -126,8 +159,7 @@ instruction = """You are an expert responsible for answering users' questions.
 User: {input}
 """
 
-llm_agent = create_task_agent(
-  task_graph=[
+llm_agent = create_task_agent(task_graph=[
     TaskConfig(
       task_key="output",
       input_schema={"input": str},
@@ -143,8 +175,7 @@ llm_agent = create_task_agent(
   ],
 )
 
-agent = create_task_agent(
-  task_graph=[
+agent = create_task_agent(task_graph=[
     TaskConfig(
       task_key="output",
       input_schema={"input": str},
@@ -179,8 +210,8 @@ def create_trace_step_fn(name: str) -> Callable[[TaskActionContext, Dict[str, An
         return name
     return trace_step
 
-agent = create_task_agent(
-  task_graph=[
+agent = create_task_agent(task_graph=[
+  	# step 1
     TaskConfig(
       task_key="step_1",
       input_schema={
@@ -192,6 +223,7 @@ agent = create_task_agent(
         act=create_trace_step_fn("step_1"),
       ),
     ),
+  	# step 2
     TaskConfig(
       task_key="step_2",
       input_schema={
@@ -203,6 +235,7 @@ agent = create_task_agent(
         act=create_trace_step_fn("step_2"),
       ),
     ),
+  	# step 3
     TaskConfig(
       task_key="step_3",
       input_schema={
@@ -214,6 +247,7 @@ agent = create_task_agent(
         act=create_trace_step_fn("step_3"),
       ),
     ),
+  	# step 4
     TaskConfig(
       task_key="step_4",
       input_schema={
@@ -225,6 +259,7 @@ agent = create_task_agent(
         act=create_trace_step_fn("step_4"),
       ),
     ),
+  	# step 5
     TaskConfig(
       task_key="step_5",
       input_schema={
@@ -236,6 +271,7 @@ agent = create_task_agent(
         act=create_trace_step_fn("step_5"),
       ),
     ),
+  	# step output
     TaskConfig(
       task_key="output",
       input_schema={
@@ -270,7 +306,10 @@ input -> step_1 (0) -> step_5 (4) -> output (5)
 - **text2sql-qa-agent**
 
   ```python
-  def _fetch_database_metainfo(input: Dict[str, Any], addition: Dict[str, Any]
+  def _fetch_database_metainfo(
+    ctx: TaskActionContext, 
+    input: Dict[str, Any], 
+    addition: Dict[str, Any],
   ) -> DatabaseMetaInfo:
     # Add db info here
     return DatabaseMetaInfo(
@@ -286,10 +325,10 @@ input -> step_1 (0) -> step_5 (4) -> output (5)
   )
   
   # ask question
-  answer = agent.invoke("What's your name?")
+answer = agent.invoke("What's your name?")
   # output type is str 
   ```
-
+  
   
 
 ### Builtin Function
@@ -297,10 +336,7 @@ input -> step_1 (0) -> step_5 (4) -> output (5)
 - `builtin_httpcall`
 
   ```python
-  from flexiagent.builtin.function.http_call import (
-  	BuiltinHttpcallInput, 
-    builtin_httpcall,
-  )
+  from flexiagent.builtin.function.http_call import builtin_http_call
   from pydantic import RootModel
   
   # define Restful API JSON Schema
@@ -310,24 +346,21 @@ input -> step_1 (0) -> step_5 (4) -> output (5)
   class APISchema(TaskEntity, RootModel[List[APIItemSchema]]):
       pass
   
-  # Config builtin function: httpcall
+  # Config builtin function: http_call
   TaskConfig(
     task_key="output",
     input_schema={},
     output_schema=APISchema,
     action=TaskAction(
       type="function",
-      act=builtin_httpcall,
+      act=builtin_http_call,
       addition={
-        "input": BuiltinHttpcallInput(
-          endpoint="https://api.restful-api.dev/objects",
-          output_schema=APISchema,
-        ),
+        "endpoint": "https://api.restful-api.dev/objects",
       },
     ),
   )
   ```
-
+  
   
 
 ## Concurrent agent task
