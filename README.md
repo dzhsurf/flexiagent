@@ -60,13 +60,15 @@ FlexiAgent can be easily integrated into your existing projects. Below is a basi
 
 ```python
 from flexiagent.llm.config import LLMConfig
-from flexiagent.task.task_node import (
+from flexiagent.task.base import (
     TaskAction,
     TaskActionLLM,
+    TaskActionContext,
     TaskAgent,
     TaskConfig,
     TaskEntity,
 )
+from flexiagent.task.task_agent import create_task_agent
 
 llm_config = LLMConfig(engine="OpenAI", params={"openai_model": "gpt-4o-mini"})
 

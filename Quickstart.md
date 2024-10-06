@@ -10,6 +10,7 @@ from flexiagent.llm.config import LLMConfig
 from flexiagent.task.base import (
     TaskAction,
     TaskActionLLM,
+    TaskActionContext,
     TaskAgent,
     TaskConfig,
     TaskEntity,
