@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from typing import Any, Callable, Optional
 
 
-class FxTask(ABC):
+class TaskBase(ABC):
     def __init__(
         self,
         *,
