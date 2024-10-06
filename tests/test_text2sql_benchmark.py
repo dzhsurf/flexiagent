@@ -17,6 +17,7 @@ from flexiagent.builtin.agents.agent_text2sql_with_db_recog import (
 from flexiagent.database.db_executor import DBConfig
 from flexiagent.indexer import FxIndexer
 from flexiagent.llm.config import LLMConfig
+from flexiagent.task.base import TaskActionContext
 from tests.bird_utils import BirdDatasetProvider
 from tests.utils import DatasetItem, SQLExecuteParams, execution_accuracy
 
@@ -39,8 +40,12 @@ def get_env_value(key: ENV_KEYS) -> str:
 
 def create_fetch_all_databases_metainfo_func(
     indexer: FxIndexer,
-) -> Callable[[Dict[str, Any], Dict[str, Any]], AllDatabasesMetaInfo]:
-    def func(input: Dict[str, Any], addition: Dict[str, Any]) -> AllDatabasesMetaInfo:
+) -> Callable[
+    [TaskActionContext, Dict[str, Any], Dict[str, Any]], AllDatabasesMetaInfo
+]:
+    def func(
+        ctx: TaskActionContext, input: Dict[str, Any], addition: Dict[str, Any]
+    ) -> AllDatabasesMetaInfo:
         metainfo_list: List[DatabaseMetaInfo] = []
         for db_name in indexer.get_all_dbnames():
             metainfo_list.append(

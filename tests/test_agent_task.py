@@ -1,3 +1,4 @@
+import os
 import unittest
 from typing import Any, Dict, Literal
 
@@ -79,6 +80,14 @@ Question: {input}
     return agent
 
 
+def ifno_openai_config() -> bool:
+    return os.getenv("OPENAI_API_KEY") is None
+
+
+def ifno_llama_cpp_config() -> bool:
+    return bool(os.getenv("USE_LLAMACPP", "True"))
+
+
 class TestCustomAgentWithStructuredOutput(unittest.TestCase):
     def setUp(self):
         pass
@@ -86,11 +95,13 @@ class TestCustomAgentWithStructuredOutput(unittest.TestCase):
     def tearDown(self):
         pass
 
+    @unittest.skipIf(ifno_openai_config(), "Skipping test if OPENAI_API_KEY not set")
     def test_custom_agent_openai(self):
         llm_config = LLMConfig(engine="OpenAI", params={"openai_model": "gpt-4o-mini"})
         agent = create_agent_with_llm_config(llm_config)
         self._run_testcases(agent)
 
+    @unittest.skipIf(ifno_llama_cpp_config(), "Skipping test if OPENAI_API_KEY not set")
     def test_custom_agent_llamacpp(self):
         llm_config = LLMConfig(
             engine="LlamaCpp",
