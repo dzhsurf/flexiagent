@@ -8,21 +8,29 @@ from flexiagent.llm.llm import LLM
 from flexiagent.llm.structured_schema import FxLLMStructuredSchema
 from flexiagent.prompts.prompt import PromptTemplate
 from flexiagent.task.base import FxTask
+from flexiagent.task.condition import Condition, ConditionExecutor, FxTaskActionAbort
 
 logger = logging.getLogger(__name__)
+
+
+class FxTaskEntity(FxLLMStructuredSchema):
+    def __repr__(self):
+        field_strings = [f"{key}: {value}" for key, value in self.model_dump().items()]
+        return "\n".join(field_strings)
+
+
+FxTaskActionSchemaBaseObject = Union[str, None]
+FxTaskActionSchemaObject = Union[
+    FxTaskEntity, FxTaskActionSchemaBaseObject, FxTaskActionAbort
+]
+FxTaskActionFunction = Callable[
+    [Dict[str, Any], Dict[str, Any]], FxTaskActionSchemaObject
+]
 
 
 class FxTaskActionLLM(BaseModel):
     llm_config: LLMConfig
     instruction: str
-
-
-FxTaskActionFunction = Callable[[Dict[str, Any], Dict[str, Any]], Any]
-
-
-class FxTaskActionConditionResult(BaseModel):
-    skip_action: bool
-    action_ret_value: Any
 
 
 class FxTaskAction(BaseModel):
@@ -33,21 +41,15 @@ class FxTaskAction(BaseModel):
         "FxTaskAgent",
     ]
     addition: Optional[Dict[str, Any]] = None
-    condition: Optional[Callable[[Dict[str, Any]], FxTaskActionConditionResult]] = None
+    condition: Optional[Condition] = None
 
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
 
-class FxTaskEntity(FxLLMStructuredSchema):
-    def __repr__(self):
-        field_strings = [f"{key}: {value}" for key, value in self.model_dump().items()]
-        return "\n".join(field_strings)
-
-
 class FxTaskConfig(BaseModel):
     task_key: str
-    input_schema: Dict[str, Type[Union[FxTaskEntity, str]]]
-    output_schema: Type[Union[FxTaskEntity, str]]
+    input_schema: Dict[str, Type[FxTaskActionSchemaObject]]
+    output_schema: Type[FxTaskActionSchemaObject]
     action: FxTaskAction
 
 
@@ -79,10 +81,16 @@ class FxTaskNode(FxTask):
         if not message:
             message = f"task[{self.__class__.__name__}] input must has field {key}"
         assert key in kwargs, message
-        if value_type is not None:
+        if (value_type is not None) and (
+            not isinstance(kwargs[key], FxTaskActionAbort)
+        ):
             if not isinstance(kwargs[key], value_type):
                 raise TypeError(
-                    f"_require_input: {kwargs[key]} type not match {value_type}"
+                    f"""_require_input:
+key={key} type={type(kwargs[key])} not match {value_type}
+----------
+{kwargs[key]}
+"""
                 )
         return kwargs[key]
 
@@ -121,6 +129,8 @@ class FxTaskNode(FxTask):
         addition: Dict[str, Any] = {}
         if _action.addition:
             addition = {k: v for k, v in _action.addition.items()}
+        if "output_schema" not in addition:
+            addition["output_schema"] = self.config.output_schema
         return fn(_inputs, addition)
 
     def _process_agent(self, _action: FxTaskAction, _inputs: Dict[str, Any]) -> Any:
@@ -151,15 +161,22 @@ class FxTaskNode(FxTask):
 
         # process condition
         if action.condition:
-            condition_ret = action.condition(inputs)
-            if condition_ret.skip_action:
-                return condition_ret.action_ret_value
+            executor = ConditionExecutor(action.condition)
+            is_abort = executor(inputs)
+            if is_abort:
+                return is_abort
 
         # execute task with inputs
         if action.type in processor_mapping:
             response = processor_mapping[action.type](action, inputs)
         else:
             raise ValueError(f"action not support. f{self.config.action}")
+
+        # check the output schema match or not
+        if not isinstance(response, self.config.output_schema):
+            raise TypeError(
+                f"Output type not match, output: {type(response)} schema: {self.config.output_schema}"
+            )
 
         return response
 
@@ -218,6 +235,7 @@ class FxTaskAgent:
     def _build_task_graph(
         self, config_items: List[Union[FxTaskConfig, FxTaskNode]]
     ) -> List[FxTaskNode]:
+        # check input paramaters
         node_graph = self._build_graph(config_items)
         sorted_nodes = self._topo_sort(node_graph)
         logger.info([(idx, n.config.task_key) for idx, n in enumerate(sorted_nodes)])
