@@ -72,7 +72,7 @@ instruction = """You are an expert responsible for answering users' questions.
 User: {input}
 """
 
-agent = TaskAgent(
+agent = create_task_agent(
   task_graph=[
     TaskConfig(
       task_key="output",
@@ -100,7 +100,7 @@ def agent_fn(ctx: TaskActionContext, input: Dict[str, Any], addition: Dict[str, 
   result = str(input)
   return result
 
-agent = TaskAgent(
+agent = create_task_agent(
   task_graph=[
     TaskConfig(
       task_key="output",
@@ -126,7 +126,7 @@ instruction = """You are an expert responsible for answering users' questions.
 User: {input}
 """
 
-llm_agent = TaskAgent(
+llm_agent = create_task_agent(
   task_graph=[
     TaskConfig(
       task_key="output",
@@ -143,7 +143,7 @@ llm_agent = TaskAgent(
   ],
 )
 
-agent = TaskAgent(
+agent = create_task_agent(
   task_graph=[
     TaskConfig(
       task_key="output",
@@ -179,7 +179,7 @@ def create_trace_step_fn(name: str) -> Callable[[TaskActionContext, Dict[str, An
         return name
     return trace_step
 
-agent = TaskAgent(
+agent = create_task_agent(
   task_graph=[
     TaskConfig(
       task_key="step_1",

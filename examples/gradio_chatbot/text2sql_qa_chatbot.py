@@ -10,7 +10,7 @@ from sqlalchemy.orm import DeclarativeBase, sessionmaker
 from flexiagent.builtin.agents.agent_db_recognition import DatabaseMetaInfo
 from flexiagent.builtin.agents.agent_text2sql_qa import create_text2sql_qa_agent
 from flexiagent.database.db_executor import DBConfig, DBExecutor
-from flexiagent.task.task_node import (
+from flexiagent.task.base import (
     TaskAction,
     TaskActionContext,
     TaskActionLLM,
@@ -18,6 +18,7 @@ from flexiagent.task.task_node import (
     TaskConfig,
     TaskEntity,
 )
+from flexiagent.task.task_agent import create_task_agent
 
 # from flexiagent.task.condition import Condition
 
@@ -129,7 +130,7 @@ class UserIntent(TaskEntity):
 
 
 def _fetch_database_metainfo(
-    input: Dict[str, Any], addition: Dict[str, Any]
+    ctx: TaskActionContext, input: Dict[str, Any], addition: Dict[str, Any]
 ) -> DatabaseMetaInfo:
     db_id = "school"
     db_uri = "sqlite:///school.db"
@@ -192,7 +193,7 @@ class Text2SqlQAChatBot(AgentChatBot[ChatBotInput, ChatBotResponse]):
     def create_agent(cls) -> TaskAgent:
         llm_config = get_llm_config()
 
-        chatbot_agent = TaskAgent(
+        chatbot_agent = create_task_agent(
             task_graph=[
                 # step 1: analyze user intent
                 TaskConfig(

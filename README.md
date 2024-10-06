@@ -95,7 +95,7 @@ def compute_nums(ctx: TaskActionContext, input: Dict[str, Any], addition: Dict[s
         result=result,
     )
 
-agent = TaskAgent(
+agent = create_task_agent(
     task_graph=[
         # step 1: llm extract data
         TaskConfig(
@@ -141,7 +141,7 @@ output = agent.invoke("Compute: 3 + 5 =")
 For the complete code, please check it out here: https://github.com/dzhsurf/flexiagent/blob/master/examples/gradio_chatbot/text2sql_qa_chatbot.py
 
 ```python
-chatbot_agent = TaskAgent(
+chatbot_agent = create_task_agent(
   task_graph=[
     # step 1: analyze user intent
     TaskConfig(

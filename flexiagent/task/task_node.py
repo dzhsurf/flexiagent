@@ -8,12 +8,12 @@ from flexiagent.task.base import (
     TaskAction,
     TaskActionContext,
     TaskActionLLM,
-    TaskAgentBase,
+    TaskAgent,
     TaskBase,
     TaskConfig,
     TaskEntity,
 )
-from flexiagent.task.condition import Condition, ConditionExecutor, TaskActionAbort
+from flexiagent.task.condition import ConditionExecutor, TaskActionAbort
 
 logger = logging.getLogger(__name__)
 
@@ -102,7 +102,7 @@ key={key} type={type(kwargs[key])} not match {value_type}
         return fn(ctx, _inputs, addition)
 
     def _process_agent(self, _action: TaskAction, _inputs: Dict[str, Any]) -> Any:
-        if isinstance(_action.act, TaskAgentBase):
+        if isinstance(_action.act, TaskAgent):
             agent = _action.act
         elif isinstance(_action.act, str):
             agent = ActionLoader.load_agent(_action.act)

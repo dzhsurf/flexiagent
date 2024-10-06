@@ -65,7 +65,7 @@ class TaskActionLLM(BaseModel):
     instruction: str
 
 
-class TaskAgentBase(ABC):
+class TaskAgent(ABC):
     @abstractmethod
     def invoke(self, *args: Any, **kwds: Any) -> Any:
         pass
@@ -76,7 +76,7 @@ class TaskAction(BaseModel):
     act: Union[
         TaskActionLLM,
         TaskActionFunction,
-        TaskAgentBase,
+        TaskAgent,
         str,
     ]
     addition: Optional[Dict[str, Any]] = None

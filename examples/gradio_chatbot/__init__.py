@@ -8,7 +8,7 @@ from typing import Any, AsyncGenerator, Dict, Generic, List, Optional, Tuple, Ty
 import gradio as gr
 from gradio_chatbot.utils import HookObjectAsyncMethod
 
-from flexiagent.task.task_node import TaskAgent, TaskEntity
+from flexiagent.task.base import TaskAgent, TaskEntity
 
 logger = logging.getLogger(__name__)
 

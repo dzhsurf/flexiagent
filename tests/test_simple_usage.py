@@ -11,7 +11,7 @@ from flexiagent.task.base import (
     TaskConfig,
     TaskEntity,
 )
-from flexiagent.task.task_agent import TaskAgent
+from flexiagent.task.task_agent import create_task_agent
 from tests.utils import config_logger_level, pretty_log, trace_dag_context
 
 logger = logging.getLogger(__name__)
@@ -49,7 +49,7 @@ class TestCustomAgentWithStructuredOutput(unittest.TestCase):
 User: {input}
 """
 
-        agent = TaskAgent(
+        agent = create_task_agent(
             task_graph=[
                 TaskConfig(
                     task_key="output",
@@ -77,7 +77,7 @@ User: {input}
             result = str(input)
             return result
 
-        agent = TaskAgent(
+        agent = create_task_agent(
             task_graph=[
                 TaskConfig(
                     task_key="output",
@@ -101,7 +101,7 @@ User: {input}
 User: {input}
 """
 
-        llm_agent = TaskAgent(
+        llm_agent = create_task_agent(
             task_graph=[
                 TaskConfig(
                     task_key="output",
@@ -118,7 +118,7 @@ User: {input}
             ],
         )
 
-        agent = TaskAgent(
+        agent = create_task_agent(
             task_graph=[
                 TaskConfig(
                     task_key="output",
@@ -141,7 +141,7 @@ User: {input}
 User: {input}
 """
 
-        llm_agent = TaskAgent(
+        llm_agent = create_task_agent(
             task_graph=[
                 TaskConfig(
                     task_key="output",
@@ -172,7 +172,7 @@ User: {input}
                 answer=llm_chat.response,
             )
 
-        agent = TaskAgent(
+        agent = create_task_agent(
             task_graph=[
                 # step 1: define task_key: llm_chat
                 TaskConfig(
@@ -227,7 +227,7 @@ User: {input}
 
             return trace_step
 
-        agent = TaskAgent(
+        agent = create_task_agent(
             task_graph=[
                 TaskConfig(
                     task_key="step_1",

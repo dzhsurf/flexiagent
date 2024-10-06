@@ -1,5 +1,5 @@
 from flexiagent.builtin.function.http_call import builtin_http_call
-from flexiagent.task.base import TaskActionFunction, TaskActionLLM, TaskAgentBase
+from flexiagent.task.base import TaskActionFunction, TaskActionLLM, TaskAgent
 
 
 class ActionLoader:
@@ -10,7 +10,7 @@ class ActionLoader:
         raise ValueError(f"Unsupport function name, {name}")
 
     @classmethod
-    def load_agent(cls, name: str) -> TaskAgentBase:
+    def load_agent(cls, name: str) -> TaskAgent:
         raise ValueError(f"Unsupport agent name, {name}")
 
     @classmethod

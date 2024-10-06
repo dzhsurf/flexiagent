@@ -5,6 +5,7 @@ from gradio_chatbot import AgentChatBot
 from gradio_chatbot.utils import get_llm_config
 from pydantic import BaseModel
 
+from flexiagent.task.task_agent import create_task_agent
 from flexiagent.task.task_node import (
     TaskAction,
     TaskActionLLM,
@@ -45,7 +46,7 @@ class SimpleChatBot(AgentChatBot[ChatBotInput, ChatBotResponse]):
 
 Question: {input.input}
 """
-        chatbot_agent = TaskAgent(
+        chatbot_agent = create_task_agent(
             task_graph=[
                 TaskConfig(
                     task_key="output",

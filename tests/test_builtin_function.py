@@ -5,7 +5,7 @@ from pydantic import RootModel
 
 from flexiagent.builtin.function.http_call import builtin_http_call
 from flexiagent.task.base import TaskAction, TaskConfig, TaskEntity
-from flexiagent.task.task_agent import TaskAgent
+from flexiagent.task.task_agent import create_task_agent
 
 
 class APIItemSchema(RootModel[Dict[str, Any]]):
@@ -24,7 +24,7 @@ class TestBuiltinFunction(unittest.TestCase):
         pass
 
     def test_builtin_httpcal_by_str_config(self):
-        agent = TaskAgent(
+        agent = create_task_agent(
             task_graph=[
                 TaskConfig(
                     task_key="output",
@@ -44,7 +44,7 @@ class TestBuiltinFunction(unittest.TestCase):
         self.assertIsInstance(output, APISchema)
 
     def test_builtin_httpcall_output_entity(self):
-        agent = TaskAgent(
+        agent = create_task_agent(
             task_graph=[
                 TaskConfig(
                     task_key="output",
@@ -64,7 +64,7 @@ class TestBuiltinFunction(unittest.TestCase):
         self.assertIsInstance(output, APISchema)
 
     def test_builtin_httpcall_output_str(self):
-        agent = TaskAgent(
+        agent = create_task_agent(
             task_graph=[
                 TaskConfig(
                     task_key="output",

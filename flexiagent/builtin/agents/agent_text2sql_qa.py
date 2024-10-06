@@ -12,10 +12,11 @@ from flexiagent.task.base import (
     TaskAction,
     TaskActionContext,
     TaskActionLLM,
+    TaskAgent,
     TaskConfig,
     TaskEntity,
 )
-from flexiagent.task.task_agent import TaskAgent
+from flexiagent.task.task_agent import create_task_agent
 
 
 class _SQLExecutionOutput(TaskEntity):
@@ -74,7 +75,7 @@ def create_text2sql_qa_agent(
     ] = None,
     postprocess_hook: Optional[Callable[[Dict[str, Any]], Dict[str, Any]]] = None,
 ) -> TaskAgent:
-    agent = TaskAgent(
+    agent = create_task_agent(
         task_graph=[
             # step 1: setup database metainfo
             TaskConfig(

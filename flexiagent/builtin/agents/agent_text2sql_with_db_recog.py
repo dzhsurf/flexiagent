@@ -14,8 +14,8 @@ from flexiagent.builtin.agents.agent_text2sql import (
     create_text2sql_agent,
 )
 from flexiagent.llm.config import LLMConfig
-from flexiagent.task.base import TaskAction, TaskActionContext, TaskConfig
-from flexiagent.task.task_agent import TaskAgent
+from flexiagent.task.base import TaskAction, TaskActionContext, TaskAgent, TaskConfig
+from flexiagent.task.task_agent import create_task_agent
 
 logger = logging.getLogger(__name__)
 
@@ -82,7 +82,7 @@ def create_text2sql_agent_with_db_recognition(
     postprocess_hook: Optional[Callable[[Dict[str, Any]], Dict[str, Any]]] = None,
     custom_text2sql_instruction: Optional[str] = None,
 ) -> TaskAgent:
-    agent = TaskAgent(
+    agent = create_task_agent(
         task_graph=[
             # step 1: llm db recognition agent
             TaskConfig(

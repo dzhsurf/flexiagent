@@ -1,13 +1,13 @@
 import logging
 from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Union
 
-from flexiagent.task.base import TaskAgentBase, TaskConfig, TaskEntity
+from flexiagent.task.base import TaskAgent, TaskConfig, TaskEntity
 from flexiagent.task.task_node import TaskNode
 
 logger = logging.getLogger(__name__)
 
 
-class TaskAgent(TaskAgentBase):
+class TaskAgentImpl(TaskAgent):
     def __init__(
         self,
         *,
@@ -98,3 +98,17 @@ class TaskAgent(TaskAgentBase):
 
         if "output" in context:
             return context["output"]
+
+
+def create_task_agent(
+    task_graph: List[Union[TaskConfig, TaskNode]],
+    preprocess_hook: Optional[
+        Callable[[Dict[str, Any]], Tuple[Dict[str, Any], bool]]
+    ] = None,
+    postprocess_hook: Optional[Callable[[Dict[str, Any]], Dict[str, Any]]] = None,
+) -> TaskAgent:
+    return TaskAgentImpl(
+        task_graph=task_graph,
+        preprocess_hook=preprocess_hook,
+        postprocess_hook=postprocess_hook,
+    )

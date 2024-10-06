@@ -6,10 +6,11 @@ from flexiagent.task.base import (
     TaskAction,
     TaskActionContext,
     TaskActionLLM,
+    TaskAgent,
     TaskConfig,
     TaskEntity,
 )
-from flexiagent.task.task_agent import TaskAgent
+from flexiagent.task.task_agent import create_task_agent
 
 
 class Step1Output(TaskEntity):
@@ -43,7 +44,7 @@ def compute_nums(
 
 
 def create_agent_with_llm_config(llm_config: LLMConfig) -> TaskAgent:
-    agent = TaskAgent(
+    agent = create_task_agent(
         task_graph=[
             # step 1: llm extract data
             TaskConfig(
