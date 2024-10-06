@@ -8,13 +8,14 @@ from flexiagent.builtin.agents.agent_text2sql import (
 )
 from flexiagent.database.db_executor import DBConfig, DBExecutor
 from flexiagent.llm.config import LLMConfig
-from flexiagent.task.task_node import (
+from flexiagent.task.base import (
     TaskAction,
+    TaskActionContext,
     TaskActionLLM,
-    TaskAgent,
     TaskConfig,
     TaskEntity,
 )
+from flexiagent.task.task_agent import TaskAgent
 
 
 class _SQLExecutionOutput(TaskEntity):
@@ -46,7 +47,7 @@ DB_Metainfo:
 
 
 def _sql_execute(
-    input: Dict[str, Any], addition: Dict[str, Any]
+    ctx: TaskActionContext, input: Dict[str, Any], addition: Dict[str, Any]
 ) -> _SQLExecutionOutput:
     if not isinstance(input["text2sql_agent"], Text2SQLAgentOutput):
         raise TypeError(f"Input not match. {input}")
@@ -66,7 +67,7 @@ def _sql_execute(
 def create_text2sql_qa_agent(
     llm_config: LLMConfig,
     fetch_databases_metainfo_func: Callable[
-        [Dict[str, Any], Dict[str, Any]], DatabaseMetaInfo
+        [TaskActionContext, Dict[str, Any], Dict[str, Any]], DatabaseMetaInfo
     ],
     preprocess_hook: Optional[
         Callable[[Dict[str, Any]], Tuple[Dict[str, Any], bool]]

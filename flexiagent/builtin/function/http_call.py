@@ -1,9 +1,9 @@
 import json
-from typing import Any, Dict, Type, Union
+from typing import Any, Dict, Union
 
 import httpx
 
-from flexiagent.task.task_node import TaskEntity
+from flexiagent.task.base import TaskActionContext, TaskEntity
 
 
 class BuiltinHttpcallInput(TaskEntity):
@@ -12,29 +12,19 @@ class BuiltinHttpcallInput(TaskEntity):
     http_response_encoding: str = "utf-8"
 
 
-def builtin_httpcall(
-    input: Dict[str, Any], addition: Dict[str, Any]
+def builtin_http_call(
+    ctx: TaskActionContext, input: Dict[str, Any], addition: Dict[str, Any]
 ) -> Union[TaskEntity, str]:
-    if "input" in input:
-        if not isinstance(input["input"], BuiltinHttpcallInput):
-            raise TypeError(f"input not match. {input}")
-        params = input["input"]
-    elif "input" in addition:
-        if not isinstance(addition["input"], BuiltinHttpcallInput):
-            raise TypeError(f"addition not match. {addition}")
-        params = addition["input"]
-    else:
-        raise TypeError(f"no input variable. input: {input} addition: {addition}")
+    input_param = BuiltinHttpcallInput(**addition)
+    output_schema = ctx["config"].output_schema
 
-    output_schema: Type[Union[TaskEntity, str, None]] = addition["output_schema"]
-
-    timeout = httpx.Timeout(params.timeout)
-    response = httpx.get(params.endpoint, timeout=timeout)
+    timeout = httpx.Timeout(input_param.timeout)
+    response = httpx.get(input_param.endpoint, timeout=timeout)
     if response.status_code == 200:
         if output_schema is None:
             return
         elif output_schema is str:
-            body = response.content.decode(encoding=params.http_response_encoding)
+            body = response.content.decode(encoding=input_param.http_response_encoding)
             return body
         elif issubclass(output_schema, TaskEntity):
             body = response.json()

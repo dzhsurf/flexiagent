@@ -4,13 +4,14 @@ import unittest
 from typing import Any, Callable, Dict, List, cast
 
 from flexiagent.llm.config import LLMConfig
-from flexiagent.task.task_node import (
+from flexiagent.task.base import (
     TaskAction,
+    TaskActionContext,
     TaskActionLLM,
-    TaskAgent,
     TaskConfig,
     TaskEntity,
 )
+from flexiagent.task.task_agent import TaskAgent
 from tests.utils import config_logger_level, pretty_log, trace_dag_context
 
 logger = logging.getLogger(__name__)
@@ -70,7 +71,9 @@ User: {input}
         logger.info(pretty_log(output))
 
     def test_002_simple_function_agent(self):
-        def agent_fn(input: Dict[str, Any], addition: Dict[str, Any]) -> str:
+        def agent_fn(
+            ctx: TaskActionContext, input: Dict[str, Any], addition: Dict[str, Any]
+        ) -> str:
             result = str(input)
             return result
 
@@ -155,7 +158,9 @@ User: {input}
             ],
         )
 
-        def generate_output(input: Dict[str, Any], addition: Dict[str, Any]) -> ChatQA:
+        def generate_output(
+            ctx: TaskActionContext, input: Dict[str, Any], addition: Dict[str, Any]
+        ) -> ChatQA:
             if not isinstance(input["input"], str):
                 raise TypeError(f"input not match, {input}")
             if not isinstance(input["llm_chat"], ChatOutput):
@@ -207,8 +212,12 @@ User: {input}
 
         def create_trace_step_fn(
             name: str,
-        ) -> Callable[[Dict[str, Any], Dict[str, Any]], str]:
-            def trace_step(input: Dict[str, Any], addition: Dict[str, Any]) -> str:
+        ) -> Callable[[TaskActionContext, Dict[str, Any], Dict[str, Any]], str]:
+            def trace_step(
+                ctx: TaskActionContext,
+                input: Dict[str, Any],
+                addition: Dict[str, Any],
+            ) -> str:
                 nonlocal counter
                 for item_k, _ in input.items():
                     context[name].append(item_k)

@@ -12,12 +12,17 @@ from flexiagent.builtin.agents.agent_text2sql_with_db_recog import (
 )
 from flexiagent.indexer import FxIndexer
 from flexiagent.llm.config import LLMConfig
+from flexiagent.task.base import TaskActionContext
 
 
 def create_fetch_all_databases_metainfo_func(
     indexer: FxIndexer,
-) -> Callable[[Dict[str, Any], Dict[str, Any]], AllDatabasesMetaInfo]:
-    def fn(context: Dict[str, Any], addition: Dict[str, Any]) -> AllDatabasesMetaInfo:
+) -> Callable[
+    [TaskActionContext, Dict[str, Any], Dict[str, Any]], AllDatabasesMetaInfo
+]:
+    def fn(
+        ctx: TaskActionContext, input: Dict[str, Any], addition: Dict[str, Any]
+    ) -> AllDatabasesMetaInfo:
         result = AllDatabasesMetaInfo(db_metainfo_list=[])
         for db_name in indexer.get_all_dbnames():
             metainfo = DatabaseMetaInfo(

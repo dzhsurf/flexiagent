@@ -1,13 +1,14 @@
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
 from flexiagent.llm.config import LLMConfig
-from flexiagent.task.task_node import (
+from flexiagent.task.base import (
     TaskAction,
+    TaskActionContext,
     TaskActionLLM,
-    TaskAgent,
     TaskConfig,
     TaskEntity,
 )
+from flexiagent.task.task_agent import TaskAgent
 
 
 class DatabaseMetaInfo(TaskEntity):
@@ -35,7 +36,7 @@ class _DBRecognitionTaskOutput(TaskEntity):
 class DBRecognitionAgentLogic:
     @classmethod
     def generate_all_databases_metainfo_as_text(
-        cls, input: Dict[str, Any], addition: Dict[str, Any]
+        cls, ctx: TaskActionContext, input: Dict[str, Any], addition: Dict[str, Any]
     ) -> str:
         result = ""
         for _, v in input.items():
@@ -50,7 +51,7 @@ class DBRecognitionAgentLogic:
 
     @classmethod
     def generate_output(
-        cls, input: Dict[str, Any], addition: Dict[str, Any]
+        cls, ctx: TaskActionContext, input: Dict[str, Any], addition: Dict[str, Any]
     ) -> DBRecognitionAgentOutput:
         if not isinstance(input["database_recognition"], _DBRecognitionTaskOutput):
             raise TypeError(f"input not match: {input}")
@@ -68,7 +69,7 @@ class DBRecognitionAgentLogic:
 def create_db_recognition_agent(
     llm_config: LLMConfig,
     fetch_all_databases_metainfo_func: Callable[
-        [Dict[str, Any], Dict[str, Any]], AllDatabasesMetaInfo
+        [TaskActionContext, Dict[str, Any], Dict[str, Any]], AllDatabasesMetaInfo
     ],
     preprocess_hook: Optional[
         Callable[[Dict[str, Any]], Tuple[Dict[str, Any], bool]]

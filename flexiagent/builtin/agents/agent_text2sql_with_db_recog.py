@@ -14,7 +14,8 @@ from flexiagent.builtin.agents.agent_text2sql import (
     create_text2sql_agent,
 )
 from flexiagent.llm.config import LLMConfig
-from flexiagent.task.task_node import TaskAction, TaskAgent, TaskConfig
+from flexiagent.task.base import TaskAction, TaskActionContext, TaskConfig
+from flexiagent.task.task_agent import TaskAgent
 
 logger = logging.getLogger(__name__)
 
@@ -52,7 +53,7 @@ class Text2SQLAgentOutputEx(Text2SQLAgentOutput):
 
 
 def _text2sql_agent_with_db_recog_output(
-    input: Dict[str, Any], addition: Dict[str, Any]
+    ctx: TaskActionContext, input: Dict[str, Any], addition: Dict[str, Any]
 ) -> Text2SQLAgentOutputEx:
     if not isinstance(input["text2sql_agent"], Text2SQLAgentOutput):
         raise TypeError(f"input not match. {input}")
@@ -73,7 +74,7 @@ def _text2sql_agent_with_db_recog_output(
 def create_text2sql_agent_with_db_recognition(
     llm_config: LLMConfig,
     fetch_all_databases_metainfo_func: Callable[
-        [Dict[str, Any], Dict[str, Any]], AllDatabasesMetaInfo
+        [TaskActionContext, Dict[str, Any], Dict[str, Any]], AllDatabasesMetaInfo
     ],
     preprocess_hook: Optional[
         Callable[[Dict[str, Any]], Tuple[Dict[str, Any], bool]]

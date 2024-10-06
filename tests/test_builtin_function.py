@@ -3,8 +3,9 @@ from typing import Any, Dict, List
 
 from pydantic import RootModel
 
-from flexiagent.builtin.function.http_call import BuiltinHttpcallInput, builtin_httpcall
-from flexiagent.task.task_node import TaskAction, TaskAgent, TaskConfig, TaskEntity
+from flexiagent.builtin.function.http_call import builtin_http_call
+from flexiagent.task.base import TaskAction, TaskConfig, TaskEntity
+from flexiagent.task.task_agent import TaskAgent
 
 
 class APIItemSchema(RootModel[Dict[str, Any]]):
@@ -22,6 +23,26 @@ class TestBuiltinFunction(unittest.TestCase):
     def tearDown(self):
         pass
 
+    def test_builtin_httpcal_by_str_config(self):
+        agent = TaskAgent(
+            task_graph=[
+                TaskConfig(
+                    task_key="output",
+                    input_schema={},
+                    output_schema=APISchema,
+                    action=TaskAction(
+                        type="function",
+                        act="builtin.http_call",
+                        addition={
+                            "endpoint": "https://api.restful-api.dev/objects",
+                        },
+                    ),
+                ),
+            ]
+        )
+        output = agent.invoke()
+        self.assertIsInstance(output, APISchema)
+
     def test_builtin_httpcall_output_entity(self):
         agent = TaskAgent(
             task_graph=[
@@ -31,11 +52,9 @@ class TestBuiltinFunction(unittest.TestCase):
                     output_schema=APISchema,
                     action=TaskAction(
                         type="function",
-                        act=builtin_httpcall,
+                        act=builtin_http_call,
                         addition={
-                            "input": BuiltinHttpcallInput(
-                                endpoint="https://api.restful-api.dev/objects",
-                            ),
+                            "endpoint": "https://api.restful-api.dev/objects",
                         },
                     ),
                 ),
@@ -53,11 +72,9 @@ class TestBuiltinFunction(unittest.TestCase):
                     output_schema=str,
                     action=TaskAction(
                         type="function",
-                        act=builtin_httpcall,
+                        act=builtin_http_call,
                         addition={
-                            "input": BuiltinHttpcallInput(
-                                endpoint="https://api.restful-api.dev/objects",
-                            ),
+                            "endpoint": "https://api.restful-api.dev/objects",
                         },
                     ),
                 ),

@@ -2,13 +2,14 @@ import unittest
 from typing import Any, Dict, Literal
 
 from flexiagent.llm.config import LLMConfig
-from flexiagent.task.task_node import (
+from flexiagent.task.base import (
     TaskAction,
+    TaskActionContext,
     TaskActionLLM,
-    TaskAgent,
     TaskConfig,
     TaskEntity,
 )
+from flexiagent.task.task_agent import TaskAgent
 
 
 class Step1Output(TaskEntity):
@@ -21,7 +22,9 @@ class Step2Output(TaskEntity):
     result: float
 
 
-def compute_nums(input: Dict[str, Any], addition: Dict[str, Any]) -> Step2Output:
+def compute_nums(
+    ctx: TaskActionContext, input: Dict[str, Any], addition: Dict[str, Any]
+) -> Step2Output:
     nums: Step1Output = input["step_1"]
     result = 0.0
     if nums.op == "+":

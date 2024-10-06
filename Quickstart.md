@@ -96,7 +96,7 @@ output = agent.invoke("Who are you?")
 ## Creating a function type agent
 
 ```python
-def agent_fn(input: Dict[str, Any], addition: Dict[str, Any]) -> str:
+def agent_fn(ctx: TaskActionContext, input: Dict[str, Any], addition: Dict[str, Any]) -> str:
   result = str(input)
   return result
 
@@ -169,8 +169,8 @@ context: Dict[str, List[str]] = collections.defaultdict(list)
 counter: int = 0
   
 # Record the call stack to trace the DAG path
-def create_trace_step_fn(name: str) -> Callable[[Dict[str, Any], Dict[str, Any]], str]:
-    def trace_step(input: Dict[str, Any], addition: Dict[str, Any]) -> str:
+def create_trace_step_fn(name: str) -> Callable[[TaskActionContext, Dict[str, Any], Dict[str, Any]], str]:
+    def trace_step(ctx: TaskActionContext, input: Dict[str, Any], addition: Dict[str, Any]) -> str:
       global counter
       for item_k, _ in input.items():
         context[name].append(item_k)

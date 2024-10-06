@@ -78,7 +78,7 @@ class Step1Output(TaskEntity):
 class Step2Output(TaskEntity):
     result: float
 
-def compute_nums(input: Dict[str, Any], addition: Dict[str, Any]) -> Step2Output:
+def compute_nums(ctx: TaskActionContext, input: Dict[str, Any], addition: Dict[str, Any]) -> Step2Output:
     nums: Step1Output = input["step_1"]
     result = 0.0
     if nums.op == "+":

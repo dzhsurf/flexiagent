@@ -12,6 +12,7 @@ from flexiagent.builtin.agents.agent_text2sql_qa import create_text2sql_qa_agent
 from flexiagent.database.db_executor import DBConfig, DBExecutor
 from flexiagent.task.task_node import (
     TaskAction,
+    TaskActionContext,
     TaskActionLLM,
     TaskAgent,
     TaskConfig,
@@ -156,7 +157,7 @@ def _convert_chatbot_input_to_text2sql_qa_input(
 
 
 def _generate_output(
-    input: Dict[str, Any], addition: Dict[str, Any]
+    ctx: TaskActionContext, input: Dict[str, Any], addition: Dict[str, Any]
 ) -> ChatBotResponse:
     if not isinstance(input["user_intent"], UserIntent):
         raise TypeError(f"Input not match, {input}")

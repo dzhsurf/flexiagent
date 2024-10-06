@@ -4,13 +4,14 @@ from typing import Any, Callable, Dict, Optional, Tuple
 import sqlparse
 
 from flexiagent.llm.config import LLMConfig
-from flexiagent.task.task_node import (
+from flexiagent.task.base import (
     TaskAction,
+    TaskActionContext,
     TaskActionLLM,
-    TaskAgent,
     TaskConfig,
     TaskEntity,
 )
+from flexiagent.task.task_agent import TaskAgent
 
 logger = logging.getLogger(__name__)
 
@@ -25,7 +26,7 @@ class Text2SQLAgentOutput(TaskEntity):
 
 
 def _sql_format_and_output(
-    input: Dict[str, Any], addition: Dict[str, Any]
+    ctx: TaskActionContext, input: Dict[str, Any], addition: Dict[str, Any]
 ) -> Text2SQLAgentOutput:
     for _, v in input.items():
         if isinstance(v, Text2SQLAgentOutput):
