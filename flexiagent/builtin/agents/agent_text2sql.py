@@ -5,22 +5,22 @@ import sqlparse
 
 from flexiagent.llm.config import LLMConfig
 from flexiagent.task.task_node import (
-    FxTaskAction,
-    FxTaskActionLLM,
-    FxTaskAgent,
-    FxTaskConfig,
-    FxTaskEntity,
+    TaskAction,
+    TaskActionLLM,
+    TaskAgent,
+    TaskConfig,
+    TaskEntity,
 )
 
 logger = logging.getLogger(__name__)
 
 
-class Text2SQLAgentInput(FxTaskEntity):
+class Text2SQLAgentInput(TaskEntity):
     question: str
     db_metainfo: str
 
 
-class Text2SQLAgentOutput(FxTaskEntity):
+class Text2SQLAgentOutput(TaskEntity):
     sql: str
 
 
@@ -50,7 +50,7 @@ def create_text2sql_agent(
     ] = None,
     postprocess_hook: Optional[Callable[[Dict[str, Any]], Dict[str, Any]]] = None,
     custom_llm_instruction: Optional[str] = None,
-) -> FxTaskAgent:
+) -> TaskAgent:
     # llm instruction
     if custom_llm_instruction:
         instruction = custom_llm_instruction
@@ -69,27 +69,27 @@ Only use the following tables:
 {input.question}
 """
     # create agent task DAG
-    agent = FxTaskAgent(
+    agent = TaskAgent(
         task_graph=[
             # step 1: llm text2sql
-            FxTaskConfig(
+            TaskConfig(
                 task_key="text2sql",
                 input_schema={"input": Text2SQLAgentInput},
                 output_schema=Text2SQLAgentOutput,
-                action=FxTaskAction(
+                action=TaskAction(
                     type="llm",
-                    act=FxTaskActionLLM(
+                    act=TaskActionLLM(
                         llm_config=llm_config,
                         instruction=instruction,
                     ),
                 ),
             ),
             # step 2: sql formater and combine everything
-            FxTaskConfig(
+            TaskConfig(
                 task_key="output",
                 input_schema={"text2sql": Text2SQLAgentOutput},
                 output_schema=Text2SQLAgentOutput,
-                action=FxTaskAction(
+                action=TaskAction(
                     type="function",
                     act=_sql_format_and_output,
                 ),

@@ -5,11 +5,11 @@ from typing import Any, Callable, Dict, List, cast
 
 from flexiagent.llm.config import LLMConfig
 from flexiagent.task.task_node import (
-    FxTaskAction,
-    FxTaskActionLLM,
-    FxTaskAgent,
-    FxTaskConfig,
-    FxTaskEntity,
+    TaskAction,
+    TaskActionLLM,
+    TaskAgent,
+    TaskConfig,
+    TaskEntity,
 )
 from tests.utils import config_logger_level, pretty_log, trace_dag_context
 
@@ -17,11 +17,11 @@ logger = logging.getLogger(__name__)
 config_logger_level()
 
 
-class ChatOutput(FxTaskEntity):
+class ChatOutput(TaskEntity):
     response: str
 
 
-class ChatQA(FxTaskEntity):
+class ChatQA(TaskEntity):
     question: str
     answer: str
 
@@ -48,15 +48,15 @@ class TestCustomAgentWithStructuredOutput(unittest.TestCase):
 User: {input}
 """
 
-        agent = FxTaskAgent(
+        agent = TaskAgent(
             task_graph=[
-                FxTaskConfig(
+                TaskConfig(
                     task_key="output",
                     input_schema={"input": str},
                     output_schema=ChatOutput,
-                    action=FxTaskAction(
+                    action=TaskAction(
                         type="llm",
-                        act=FxTaskActionLLM(
+                        act=TaskActionLLM(
                             llm_config=self.llm_config,
                             instruction=instruction,
                         ),
@@ -74,13 +74,13 @@ User: {input}
             result = str(input)
             return result
 
-        agent = FxTaskAgent(
+        agent = TaskAgent(
             task_graph=[
-                FxTaskConfig(
+                TaskConfig(
                     task_key="output",
                     input_schema={"input": str},
                     output_schema=str,
-                    action=FxTaskAction(
+                    action=TaskAction(
                         type="function",
                         act=agent_fn,
                     ),
@@ -98,15 +98,15 @@ User: {input}
 User: {input}
 """
 
-        llm_agent = FxTaskAgent(
+        llm_agent = TaskAgent(
             task_graph=[
-                FxTaskConfig(
+                TaskConfig(
                     task_key="output",
                     input_schema={"input": str},
                     output_schema=ChatOutput,
-                    action=FxTaskAction(
+                    action=TaskAction(
                         type="llm",
-                        act=FxTaskActionLLM(
+                        act=TaskActionLLM(
                             llm_config=self.llm_config,
                             instruction=instruction,
                         ),
@@ -115,13 +115,13 @@ User: {input}
             ],
         )
 
-        agent = FxTaskAgent(
+        agent = TaskAgent(
             task_graph=[
-                FxTaskConfig(
+                TaskConfig(
                     task_key="output",
                     input_schema={"input": str},
                     output_schema=ChatOutput,
-                    action=FxTaskAction(
+                    action=TaskAction(
                         type="agent",
                         act=llm_agent,
                     ),
@@ -138,15 +138,15 @@ User: {input}
 User: {input}
 """
 
-        llm_agent = FxTaskAgent(
+        llm_agent = TaskAgent(
             task_graph=[
-                FxTaskConfig(
+                TaskConfig(
                     task_key="output",
                     input_schema={"input": str},
                     output_schema=ChatOutput,
-                    action=FxTaskAction(
+                    action=TaskAction(
                         type="llm",
-                        act=FxTaskActionLLM(
+                        act=TaskActionLLM(
                             llm_config=self.llm_config,
                             instruction=instruction,
                         ),
@@ -167,27 +167,27 @@ User: {input}
                 answer=llm_chat.response,
             )
 
-        agent = FxTaskAgent(
+        agent = TaskAgent(
             task_graph=[
                 # step 1: define task_key: llm_chat
-                FxTaskConfig(
+                TaskConfig(
                     task_key="llm_chat",
                     input_schema={"input": str},
                     output_schema=ChatOutput,
-                    action=FxTaskAction(
+                    action=TaskAction(
                         type="agent",
                         act=llm_agent,
                     ),
                 ),
                 # step 2: combine everything to output
-                FxTaskConfig(
+                TaskConfig(
                     task_key="output",
                     input_schema={
                         "input": str,
                         "llm_chat": ChatOutput,  # upstream require llm_chat task
                     },
                     output_schema=ChatQA,
-                    action=FxTaskAction(
+                    action=TaskAction(
                         type="function",
                         act=generate_output,
                     ),
@@ -218,71 +218,71 @@ User: {input}
 
             return trace_step
 
-        agent = FxTaskAgent(
+        agent = TaskAgent(
             task_graph=[
-                FxTaskConfig(
+                TaskConfig(
                     task_key="step_1",
                     input_schema={
                         "input": str,
                     },
                     output_schema=str,
-                    action=FxTaskAction(
+                    action=TaskAction(
                         type="function",
                         act=create_trace_step_fn("step_1"),
                     ),
                 ),
-                FxTaskConfig(
+                TaskConfig(
                     task_key="step_2",
                     input_schema={
                         "step_1": str,
                     },
                     output_schema=str,
-                    action=FxTaskAction(
+                    action=TaskAction(
                         type="function",
                         act=create_trace_step_fn("step_2"),
                     ),
                 ),
-                FxTaskConfig(
+                TaskConfig(
                     task_key="step_3",
                     input_schema={
                         "step_2": str,
                     },
                     output_schema=str,
-                    action=FxTaskAction(
+                    action=TaskAction(
                         type="function",
                         act=create_trace_step_fn("step_3"),
                     ),
                 ),
-                FxTaskConfig(
+                TaskConfig(
                     task_key="step_4",
                     input_schema={
                         "step_2": str,
                     },
                     output_schema=str,
-                    action=FxTaskAction(
+                    action=TaskAction(
                         type="function",
                         act=create_trace_step_fn("step_4"),
                     ),
                 ),
-                FxTaskConfig(
+                TaskConfig(
                     task_key="step_5",
                     input_schema={
                         "step_1": str,
                     },
                     output_schema=str,
-                    action=FxTaskAction(
+                    action=TaskAction(
                         type="function",
                         act=create_trace_step_fn("step_5"),
                     ),
                 ),
-                FxTaskConfig(
+                TaskConfig(
                     task_key="output",
                     input_schema={
                         "step_4": str,
                         "step_5": str,
                     },
                     output_schema=str,
-                    action=FxTaskAction(
+                    action=TaskAction(
                         type="function",
                         act=create_trace_step_fn("output"),
                     ),

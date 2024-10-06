@@ -6,7 +6,7 @@ from llama_cpp import ChatCompletionRequestMessage, CreateChatCompletionResponse
 from pydantic import ValidationError
 
 from flexiagent.llm.engine.engine_base import LLMEngineConfig, LLMEngineImpl
-from flexiagent.llm.structured_schema import FxLLMStructuredSchema
+from flexiagent.llm.structured_schema import StructuredSchema
 from flexiagent.prompts.prompt import PromptTemplate, PromptValue
 
 logger = logging.getLogger(__name__)
@@ -80,8 +80,8 @@ class LLMEngineLlamaCpp(LLMEngineImpl[LLMConfigLlamaCpp]):
         prompt: PromptTemplate,
         *,
         variables: Dict[str, PromptValue] = {},
-        response_format: Type[FxLLMStructuredSchema] = FxLLMStructuredSchema,
-    ) -> FxLLMStructuredSchema:
+        response_format: Type[StructuredSchema] = StructuredSchema,
+    ) -> StructuredSchema:
         messages = [
             cast(ChatCompletionRequestMessage, msg)
             for msg in prompt.to_openai_chat_completion_messages(variables)

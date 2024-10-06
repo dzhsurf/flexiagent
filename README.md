@@ -61,21 +61,21 @@ FlexiAgent can be easily integrated into your existing projects. Below is a basi
 ```python
 from flexiagent.llm.config import LLMConfig
 from flexiagent.task.task_node import (
-    FxTaskAction,
-    FxTaskActionLLM,
-    FxTaskAgent,
-    FxTaskConfig,
-    FxTaskEntity,
+    TaskAction,
+    TaskActionLLM,
+    TaskAgent,
+    TaskConfig,
+    TaskEntity,
 )
 
 llm_config = LLMConfig(engine="OpenAI", params={"openai_model": "gpt-4o-mini"})
 
-class Step1Output(FxTaskEntity):
+class Step1Output(TaskEntity):
     num1: float 
     num2: float 
     op: str 
 
-class Step2Output(FxTaskEntity):
+class Step2Output(TaskEntity):
     result: float
 
 def compute_nums(input: Dict[str, Any], addition: Dict[str, Any]) -> Step2Output:
@@ -95,16 +95,16 @@ def compute_nums(input: Dict[str, Any], addition: Dict[str, Any]) -> Step2Output
         result=result,
     )
 
-agent = FxTaskAgent(
+agent = TaskAgent(
     task_graph=[
         # step 1: llm extract data
-        FxTaskConfig(
+        TaskConfig(
             task_key="step_1",
             input_schema={"input": str},
             output_schema=Step1Output,
-            action=FxTaskAction(
+            action=TaskAction(
                 type="llm",
-                act=FxTaskActionLLM(
+                act=TaskActionLLM(
                     llm_config=llm_config,
                     instruction="""
 Extract the numbers and operators from mathematical expressions based on the user's questions. 
@@ -116,11 +116,11 @@ Question: {input}
             ),
         ),
         # step 2: compute
-        FxTaskConfig(
+        TaskConfig(
             task_key="output",
             input_schema={"step_1": Step1Output},
             output_schema=Step2Output,
-            action=FxTaskAction(
+            action=TaskAction(
                 type="function",
                 act=compute_nums,
             ),
@@ -141,16 +141,16 @@ output = agent.invoke("Compute: 3 + 5 =")
 For the complete code, please check it out here: https://github.com/dzhsurf/flexiagent/blob/master/examples/gradio_chatbot/text2sql_qa_chatbot.py
 
 ```python
-chatbot_agent = FxTaskAgent(
+chatbot_agent = TaskAgent(
   task_graph=[
     # step 1: analyze user intent
-    FxTaskConfig(
+    TaskConfig(
       task_key="user_intent",
       input_schema={"input": ChatBotInput},
       output_schema=UserIntent,
-      action=FxTaskAction(
+      action=TaskAction(
         type="llm",
-        act=FxTaskActionLLM(
+        act=TaskActionLLM(
           llm_config=llm_config,
           instruction="""Based on the user's question, analyze the user's intent. The classification is as follows:
 - QA: If the question is about student information, grades, class information, etc.
@@ -164,14 +164,14 @@ Question: {input.input}
       ),
     ),
     # step 2.1: text2sql qa action
-    FxTaskConfig(
+    TaskConfig(
       task_key="text2sql_qa",
       input_schema={
         "input": ChatBotInput,
         "user_intent": UserIntent,
       },
       output_schema=str,
-      action=FxTaskAction(
+      action=TaskAction(
         type="agent",
         act=create_text2sql_qa_agent(
           llm_config,
@@ -182,16 +182,16 @@ Question: {input.input}
       ),
     ),
     # step 2.2: fallback action
-    FxTaskConfig(
+    TaskConfig(
       task_key="fallback_action",
       input_schema={
         "input": ChatBotInput,
         "user_intent": UserIntent,
       },
       output_schema=str,
-      action=FxTaskAction(
+      action=TaskAction(
         type="llm",
-        act=FxTaskActionLLM(
+        act=TaskActionLLM(
           llm_config=llm_config,
           instruction="""You are a chatbot assistant. Assist user and response user's question.
 
@@ -204,7 +204,7 @@ Question: {input.input}
       ),
     ),
     # step 3:
-    FxTaskConfig(
+    TaskConfig(
       task_key="output",
       input_schema={
         "user_intent": UserIntent,
@@ -212,7 +212,7 @@ Question: {input.input}
         "fallback_action": str,
       },
       output_schema=ChatBotResponse,
-      action=FxTaskAction(
+      action=TaskAction(
         type="function",
         act=_generate_output,
       ),

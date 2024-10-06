@@ -11,11 +11,11 @@ from flexiagent.builtin.agents.agent_db_recognition import DatabaseMetaInfo
 from flexiagent.builtin.agents.agent_text2sql_qa import create_text2sql_qa_agent
 from flexiagent.database.db_executor import DBConfig, DBExecutor
 from flexiagent.task.task_node import (
-    FxTaskAction,
-    FxTaskActionLLM,
-    FxTaskAgent,
-    FxTaskConfig,
-    FxTaskEntity,
+    TaskAction,
+    TaskActionLLM,
+    TaskAgent,
+    TaskConfig,
+    TaskEntity,
 )
 
 # from flexiagent.task.condition import Condition
@@ -108,12 +108,12 @@ def init_db():
     session.close()
 
 
-class ChatBotInput(FxTaskEntity):
+class ChatBotInput(TaskEntity):
     input: str
     history_as_text: str
 
 
-class ChatBotResponse(FxTaskEntity):
+class ChatBotResponse(TaskEntity):
     response: str
 
 
@@ -123,7 +123,7 @@ class ChatMessage(BaseModel):
     content: str
 
 
-class UserIntent(FxTaskEntity):
+class UserIntent(TaskEntity):
     intent: Literal["QA", "Other"]
 
 
@@ -188,19 +188,19 @@ class Text2SqlQAChatBot(AgentChatBot[ChatBotInput, ChatBotResponse]):
         init_db()
 
     @classmethod
-    def create_agent(cls) -> FxTaskAgent:
+    def create_agent(cls) -> TaskAgent:
         llm_config = get_llm_config()
 
-        chatbot_agent = FxTaskAgent(
+        chatbot_agent = TaskAgent(
             task_graph=[
                 # step 1: analyze user intent
-                FxTaskConfig(
+                TaskConfig(
                     task_key="user_intent",
                     input_schema={"input": ChatBotInput},
                     output_schema=UserIntent,
-                    action=FxTaskAction(
+                    action=TaskAction(
                         type="llm",
-                        act=FxTaskActionLLM(
+                        act=TaskActionLLM(
                             llm_config=llm_config,
                             instruction="""Based on the user's question, analyze the user's intent. The classification is as follows:
 - QA: If the question is about student information, grades, class information, etc. Use this category.
@@ -214,14 +214,14 @@ Question: {input.input}
                     ),
                 ),
                 # step 2.1: text2sql qa action
-                FxTaskConfig(
+                TaskConfig(
                     task_key="text2sql_qa",
                     input_schema={
                         "input": ChatBotInput,
                         "user_intent": UserIntent,
                     },
                     output_schema=str,
-                    action=FxTaskAction(
+                    action=TaskAction(
                         type="agent",
                         act=create_text2sql_qa_agent(
                             llm_config,
@@ -237,16 +237,16 @@ Question: {input.input}
                     ),
                 ),
                 # step 2.2: fallback action
-                FxTaskConfig(
+                TaskConfig(
                     task_key="fallback_action",
                     input_schema={
                         "input": ChatBotInput,
                         "user_intent": UserIntent,
                     },
                     output_schema=str,
-                    action=FxTaskAction(
+                    action=TaskAction(
                         type="llm",
-                        act=FxTaskActionLLM(
+                        act=TaskActionLLM(
                             llm_config=llm_config,
                             instruction="""You are a chatbot assistant. Assist user and response user's question.
 
@@ -264,7 +264,7 @@ Question: {input.input}
                     ),
                 ),
                 # step 3:
-                FxTaskConfig(
+                TaskConfig(
                     task_key="output",
                     input_schema={
                         "user_intent": UserIntent,
@@ -272,7 +272,7 @@ Question: {input.input}
                         "fallback_action": str,
                     },
                     output_schema=ChatBotResponse,
-                    action=FxTaskAction(
+                    action=TaskAction(
                         type="function",
                         act=_generate_output,
                     ),

@@ -9,15 +9,15 @@ from flexiagent.builtin.agents.agent_text2sql import (
 from flexiagent.database.db_executor import DBConfig, DBExecutor
 from flexiagent.llm.config import LLMConfig
 from flexiagent.task.task_node import (
-    FxTaskAction,
-    FxTaskActionLLM,
-    FxTaskAgent,
-    FxTaskConfig,
-    FxTaskEntity,
+    TaskAction,
+    TaskActionLLM,
+    TaskAgent,
+    TaskConfig,
+    TaskEntity,
 )
 
 
-class _SQLExecutionOutput(FxTaskEntity):
+class _SQLExecutionOutput(TaskEntity):
     result: str
 
 
@@ -72,28 +72,28 @@ def create_text2sql_qa_agent(
         Callable[[Dict[str, Any]], Tuple[Dict[str, Any], bool]]
     ] = None,
     postprocess_hook: Optional[Callable[[Dict[str, Any]], Dict[str, Any]]] = None,
-) -> FxTaskAgent:
-    agent = FxTaskAgent(
+) -> TaskAgent:
+    agent = TaskAgent(
         task_graph=[
             # step 1: setup database metainfo
-            FxTaskConfig(
+            TaskConfig(
                 task_key="setup_database_metainfo",
                 input_schema={},
                 output_schema=DatabaseMetaInfo,
-                action=FxTaskAction(
+                action=TaskAction(
                     type="function",
                     act=fetch_databases_metainfo_func,
                 ),
             ),
             # step 2: llm text2sql agent
-            FxTaskConfig(
+            TaskConfig(
                 task_key="text2sql_agent",
                 input_schema={
                     "input": str,
                     "setup_database_metainfo": DatabaseMetaInfo,
                 },
                 output_schema=Text2SQLAgentOutput,
-                action=FxTaskAction(
+                action=TaskAction(
                     type="agent",
                     act=create_text2sql_agent(
                         llm_config,
@@ -102,29 +102,29 @@ def create_text2sql_qa_agent(
                 ),
             ),
             # step 3: execute db query
-            FxTaskConfig(
+            TaskConfig(
                 task_key="execute_db_query",
                 input_schema={
                     "text2sql_agent": Text2SQLAgentOutput,
                     "setup_database_metainfo": DatabaseMetaInfo,
                 },
                 output_schema=_SQLExecutionOutput,
-                action=FxTaskAction(
+                action=TaskAction(
                     type="function",
                     act=_sql_execute,
                 ),
             ),
             # step 4: llm response with context
-            FxTaskConfig(
+            TaskConfig(
                 task_key="output",
                 input_schema={
                     "input": str,
                     "execute_db_query": _SQLExecutionOutput,
                 },
                 output_schema=str,
-                action=FxTaskAction(
+                action=TaskAction(
                     type="llm",
-                    act=FxTaskActionLLM(
+                    act=TaskActionLLM(
                         llm_config=llm_config,
                         instruction="""You are a helpful assistant, follow the instructure and response the question below.
 

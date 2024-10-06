@@ -5,7 +5,7 @@ from typing import Dict, Generic, Optional, Type, TypeVar
 from pydantic import BaseModel, Field
 
 from flexiagent.config_keys import LLM_HTTP_API_TIMEOUT
-from flexiagent.llm.structured_schema import FxLLMStructuredSchema
+from flexiagent.llm.structured_schema import StructuredSchema
 from flexiagent.prompts.prompt import PromptTemplate, PromptValue
 
 
@@ -51,8 +51,8 @@ class LLMEngine(ABC, Generic[T]):
         prompt: PromptTemplate,
         *,
         variables: Dict[str, PromptValue] = {},
-        response_format: Type[FxLLMStructuredSchema] = FxLLMStructuredSchema,
-    ) -> FxLLMStructuredSchema:
+        response_format: Type[StructuredSchema] = StructuredSchema,
+    ) -> StructuredSchema:
         pass
 
 

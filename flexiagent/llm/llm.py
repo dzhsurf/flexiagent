@@ -3,7 +3,7 @@ from typing import Dict, Type
 
 from flexiagent.llm.config import LLMConfig
 from flexiagent.llm.engine_factory import LLMEngineLoader
-from flexiagent.llm.structured_schema import FxLLMStructuredSchema
+from flexiagent.llm.structured_schema import StructuredSchema
 from flexiagent.prompts.prompt import PromptTemplate, PromptValue
 
 logger = logging.getLogger(__name__)
@@ -26,8 +26,8 @@ class LLM:
         prompt: PromptTemplate,
         *,
         variables: Dict[str, PromptValue] = {},
-        response_format: Type[FxLLMStructuredSchema] = FxLLMStructuredSchema,
-    ) -> FxLLMStructuredSchema:
+        response_format: Type[StructuredSchema] = StructuredSchema,
+    ) -> StructuredSchema:
         return self.engine.chat_completion_with_structured_output(
             prompt,
             variables=variables,

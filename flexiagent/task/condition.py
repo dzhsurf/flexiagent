@@ -2,11 +2,11 @@ from typing import Any, Dict, List, Literal, Optional, Tuple, Union
 
 from typing_extensions import TypedDict
 
-from flexiagent.llm.structured_schema import FxLLMStructuredSchema
+from flexiagent.llm.structured_schema import StructuredSchema
 
 
 # special action output schema, when the result type is this, abort the action.
-class FxTaskActionAbort(FxLLMStructuredSchema):
+class TaskActionAbort(StructuredSchema):
     def __repr__(self):
         return str(type(self))
 
@@ -81,7 +81,7 @@ class ConditionExecutor:
         # no one match
         return False
 
-    def __call__(self, inputs: Dict[str, Any]) -> Optional[FxTaskActionAbort]:
+    def __call__(self, inputs: Dict[str, Any]) -> Optional[TaskActionAbort]:
         mode = self.condition["mode"]
         terms: List[ConditionOp] = []
         for term in self.condition["terms"]:
@@ -94,10 +94,10 @@ class ConditionExecutor:
         if mode == "match_all":
             if self._match_all(terms, inputs):
                 return None
-            return FxTaskActionAbort()
+            return TaskActionAbort()
         elif mode == "match_one":
             if self._match_one(terms, inputs):
                 return None
-            return FxTaskActionAbort()
+            return TaskActionAbort()
         else:
             raise ValueError(f"Unsupport match mode, {mode}")

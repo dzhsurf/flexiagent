@@ -10,11 +10,11 @@ Quickstart
 ```
 from flexiagent.llm.config import LLMConfig
 from flexiagent.task.task_node import (
-    FxTaskAction,
-    FxTaskActionLLM,
-    FxTaskAgent,
-    FxTaskConfig,
-    FxTaskEntity,
+    TaskAction,
+    TaskActionLLM,
+    TaskAgent,
+    TaskConfig,
+    TaskEntity,
 )
 ```
 
@@ -65,22 +65,22 @@ llm_config = LLMConfig(
 ## Creating an LLM type agent
 
 ```python
-class ChatOutput(FxTaskEntity):
+class ChatOutput(TaskEntity):
   response: str 
 
 instruction = """You are an expert responsible for answering users' questions.
 User: {input}
 """
 
-agent = FxTaskAgent(
+agent = TaskAgent(
   task_graph=[
-    FxTaskConfig(
+    TaskConfig(
       task_key="output",
       input_schema={"input": str},
       output_schema=ChatOutput,
-      action=FxTaskAction(
+      action=TaskAction(
         type="llm",
-        act=FxTaskActionLLM(
+        act=TaskActionLLM(
           llm_config=llm_config,
           instruction=instruction,
         ),
@@ -100,13 +100,13 @@ def agent_fn(input: Dict[str, Any], addition: Dict[str, Any]) -> str:
   result = str(input)
   return result
 
-agent = FxTaskAgent(
+agent = TaskAgent(
   task_graph=[
-    FxTaskConfig(
+    TaskConfig(
       task_key="output",
       input_schema={"input": str},
       output_schema=str,
-      action=FxTaskAction(
+      action=TaskAction(
         type="function",
         act=agent_fn,
       ),
@@ -126,15 +126,15 @@ instruction = """You are an expert responsible for answering users' questions.
 User: {input}
 """
 
-llm_agent = FxTaskAgent(
+llm_agent = TaskAgent(
   task_graph=[
-    FxTaskConfig(
+    TaskConfig(
       task_key="output",
       input_schema={"input": str},
       output_schema=ChatOutput,
-      action=FxTaskAction(
+      action=TaskAction(
         type="llm",
-        act=FxTaskActionLLM(
+        act=TaskActionLLM(
           llm_config=llm_config,
           instruction=instruction,
         ),
@@ -143,13 +143,13 @@ llm_agent = FxTaskAgent(
   ],
 )
 
-agent = FxTaskAgent(
+agent = TaskAgent(
   task_graph=[
-    FxTaskConfig(
+    TaskConfig(
       task_key="output",
       input_schema={"input": str},
       output_schema=ChatOutput,
-      action=FxTaskAction(
+      action=TaskAction(
         type="agent",
         act=llm_agent,
       ),
@@ -179,71 +179,71 @@ def create_trace_step_fn(name: str) -> Callable[[Dict[str, Any], Dict[str, Any]]
         return name
     return trace_step
 
-agent = FxTaskAgent(
+agent = TaskAgent(
   task_graph=[
-    FxTaskConfig(
+    TaskConfig(
       task_key="step_1",
       input_schema={
         "input": str,
       },
       output_schema=str,
-      action=FxTaskAction(
+      action=TaskAction(
         type="function",
         act=create_trace_step_fn("step_1"),
       ),
     ),
-    FxTaskConfig(
+    TaskConfig(
       task_key="step_2",
       input_schema={
         "step_1": str,
       },
       output_schema=str,
-      action=FxTaskAction(
+      action=TaskAction(
         type="function",
         act=create_trace_step_fn("step_2"),
       ),
     ),
-    FxTaskConfig(
+    TaskConfig(
       task_key="step_3",
       input_schema={
         "step_2": str,
       },
       output_schema=str,
-      action=FxTaskAction(
+      action=TaskAction(
         type="function",
         act=create_trace_step_fn("step_3"),
       ),
     ),
-    FxTaskConfig(
+    TaskConfig(
       task_key="step_4",
       input_schema={
         "step_2": str,
       },
       output_schema=str,
-      action=FxTaskAction(
+      action=TaskAction(
         type="function",
         act=create_trace_step_fn("step_4"),
       ),
     ),
-    FxTaskConfig(
+    TaskConfig(
       task_key="step_5",
       input_schema={
         "step_1": str,
       },
       output_schema=str,
-      action=FxTaskAction(
+      action=TaskAction(
         type="function",
         act=create_trace_step_fn("step_5"),
       ),
     ),
-    FxTaskConfig(
+    TaskConfig(
       task_key="output",
       input_schema={
         "step_4": str,
         "step_5": str,
       },
       output_schema=str,
-      action=FxTaskAction(
+      action=TaskAction(
         type="function",
         act=create_trace_step_fn("output"),
       ),
@@ -307,15 +307,15 @@ input -> step_1 (0) -> step_5 (4) -> output (5)
   class APIItemSchema(RootModel[Dict[str, Any]]):
       pass
     
-  class APISchema(FxTaskEntity, RootModel[List[APIItemSchema]]):
+  class APISchema(TaskEntity, RootModel[List[APIItemSchema]]):
       pass
   
   # Config builtin function: httpcall
-  FxTaskConfig(
+  TaskConfig(
     task_key="output",
     input_schema={},
     output_schema=APISchema,
-    action=FxTaskAction(
+    action=TaskAction(
       type="function",
       act=builtin_httpcall,
       addition={

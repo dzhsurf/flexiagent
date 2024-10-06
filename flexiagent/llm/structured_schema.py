@@ -1,5 +1,5 @@
 from pydantic import BaseModel
 
 
-class FxLLMStructuredSchema(BaseModel):
+class StructuredSchema(BaseModel):
     pass

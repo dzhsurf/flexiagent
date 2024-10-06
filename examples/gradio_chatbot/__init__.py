@@ -8,7 +8,7 @@ from typing import Any, AsyncGenerator, Dict, Generic, List, Optional, Tuple, Ty
 import gradio as gr
 from gradio_chatbot.utils import HookObjectAsyncMethod
 
-from flexiagent.task.task_node import FxTaskAgent, FxTaskEntity
+from flexiagent.task.task_node import TaskAgent, TaskEntity
 
 logger = logging.getLogger(__name__)
 
@@ -69,8 +69,8 @@ class GradioChatBot(ABC):
         return
 
 
-AgentInput = TypeVar("AgentInput", bound=FxTaskEntity)
-AgentOutput = TypeVar("AgentOutput", bound=FxTaskEntity)
+AgentInput = TypeVar("AgentInput", bound=TaskEntity)
+AgentOutput = TypeVar("AgentOutput", bound=TaskEntity)
 
 
 class AgentChatBot(GradioChatBot, Generic[AgentInput, AgentOutput]):
@@ -96,9 +96,9 @@ class AgentChatBot(GradioChatBot, Generic[AgentInput, AgentOutput]):
 
     @classmethod
     @abstractmethod
-    def create_agent(cls) -> FxTaskAgent:
+    def create_agent(cls) -> TaskAgent:
         """
-        This method is responsible for creating and returning an instance of FxTaskAgent.
+        This method is responsible for creating and returning an instance of TaskAgent.
 
         You should implement this method to initialize the agent that is used by the chatbot
         to process inputs and generate responses.
@@ -150,7 +150,7 @@ class AgentChatBot(GradioChatBot, Generic[AgentInput, AgentOutput]):
                 if (
                     isinstance(input, tuple)
                     and isinstance(input[0], str)
-                    and isinstance(input[1], FxTaskEntity)
+                    and isinstance(input[1], TaskEntity)
                 ):
                     session_id = input[0]
                     try:
@@ -199,7 +199,7 @@ class AgentChatBot(GradioChatBot, Generic[AgentInput, AgentOutput]):
                     output
                     and isinstance(output, tuple)
                     and isinstance(output[0], str)
-                    and ((output[1] is None) or isinstance(output[1], FxTaskEntity))
+                    and ((output[1] is None) or isinstance(output[1], TaskEntity))
                 ):
                     output_task_id = output[0]
                     output_response = output[1]

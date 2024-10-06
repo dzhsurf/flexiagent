@@ -6,22 +6,22 @@ from gradio_chatbot.utils import get_llm_config
 from pydantic import BaseModel
 
 from flexiagent.task.task_node import (
-    FxTaskAction,
-    FxTaskActionLLM,
-    FxTaskAgent,
-    FxTaskConfig,
-    FxTaskEntity,
+    TaskAction,
+    TaskActionLLM,
+    TaskAgent,
+    TaskConfig,
+    TaskEntity,
 )
 
 logger = logging.getLogger(__name__)
 
 
-class ChatBotInput(FxTaskEntity):
+class ChatBotInput(TaskEntity):
     input: str
     history_as_text: str
 
 
-class ChatBotResponse(FxTaskEntity):
+class ChatBotResponse(TaskEntity):
     response: str
 
 
@@ -37,7 +37,7 @@ class SimpleChatBot(AgentChatBot[ChatBotInput, ChatBotResponse]):
         self.session_history_max_limit = 30
 
     @classmethod
-    def create_agent(cls) -> FxTaskAgent:
+    def create_agent(cls) -> TaskAgent:
         llm_config = get_llm_config()
         instruction = """You are a chatbot assistant. Assist user and response user's question.
 
@@ -45,15 +45,15 @@ class SimpleChatBot(AgentChatBot[ChatBotInput, ChatBotResponse]):
 
 Question: {input.input}
 """
-        chatbot_agent = FxTaskAgent(
+        chatbot_agent = TaskAgent(
             task_graph=[
-                FxTaskConfig(
+                TaskConfig(
                     task_key="output",
                     input_schema={"input": ChatBotInput},
                     output_schema=ChatBotResponse,
-                    action=FxTaskAction(
+                    action=TaskAction(
                         type="llm",
-                        act=FxTaskActionLLM(
+                        act=TaskActionLLM(
                             llm_config=llm_config,
                             instruction=instruction,
                         ),

@@ -14,7 +14,7 @@ from flexiagent.builtin.agents.agent_text2sql import (
     create_text2sql_agent,
 )
 from flexiagent.llm.config import LLMConfig
-from flexiagent.task.task_node import FxTaskAction, FxTaskAgent, FxTaskConfig
+from flexiagent.task.task_node import TaskAction, TaskAgent, TaskConfig
 
 logger = logging.getLogger(__name__)
 
@@ -80,15 +80,15 @@ def create_text2sql_agent_with_db_recognition(
     ] = None,
     postprocess_hook: Optional[Callable[[Dict[str, Any]], Dict[str, Any]]] = None,
     custom_text2sql_instruction: Optional[str] = None,
-) -> FxTaskAgent:
-    agent = FxTaskAgent(
+) -> TaskAgent:
+    agent = TaskAgent(
         task_graph=[
             # step 1: llm db recognition agent
-            FxTaskConfig(
+            TaskConfig(
                 task_key="db_recognition_agent",
                 input_schema={"input": str},
                 output_schema=DBRecognitionAgentOutput,
-                action=FxTaskAction(
+                action=TaskAction(
                     type="agent",
                     act=create_db_recognition_agent(
                         llm_config,
@@ -98,14 +98,14 @@ def create_text2sql_agent_with_db_recognition(
                 ),
             ),
             # step 2: llm text2sql agent
-            FxTaskConfig(
+            TaskConfig(
                 task_key="text2sql_agent",
                 input_schema={
                     "input": str,
                     "db_recognition_agent": DBRecognitionAgentOutput,
                 },
                 output_schema=Text2SQLAgentOutput,
-                action=FxTaskAction(
+                action=TaskAction(
                     type="agent",
                     act=create_text2sql_agent(
                         llm_config,
@@ -115,14 +115,14 @@ def create_text2sql_agent_with_db_recognition(
                 ),
             ),
             # step 3: output
-            FxTaskConfig(
+            TaskConfig(
                 task_key="output",
                 input_schema={
                     "text2sql_agent": Text2SQLAgentOutput,
                     "db_recognition_agent": DBRecognitionAgentOutput,
                 },
                 output_schema=Text2SQLAgentOutputEx,
-                action=FxTaskAction(
+                action=TaskAction(
                     type="function",
                     act=_text2sql_agent_with_db_recog_output,
                 ),

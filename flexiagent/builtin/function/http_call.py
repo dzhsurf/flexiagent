@@ -3,10 +3,10 @@ from typing import Any, Dict, Type, Union
 
 import httpx
 
-from flexiagent.task.task_node import FxTaskEntity
+from flexiagent.task.task_node import TaskEntity
 
 
-class BuiltinHttpcallInput(FxTaskEntity):
+class BuiltinHttpcallInput(TaskEntity):
     endpoint: str
     timeout: float = 30
     http_response_encoding: str = "utf-8"
@@ -14,7 +14,7 @@ class BuiltinHttpcallInput(FxTaskEntity):
 
 def builtin_httpcall(
     input: Dict[str, Any], addition: Dict[str, Any]
-) -> Union[FxTaskEntity, str]:
+) -> Union[TaskEntity, str]:
     if "input" in input:
         if not isinstance(input["input"], BuiltinHttpcallInput):
             raise TypeError(f"input not match. {input}")
@@ -26,7 +26,7 @@ def builtin_httpcall(
     else:
         raise TypeError(f"no input variable. input: {input} addition: {addition}")
 
-    output_schema: Type[Union[FxTaskEntity, str, None]] = addition["output_schema"]
+    output_schema: Type[Union[TaskEntity, str, None]] = addition["output_schema"]
 
     timeout = httpx.Timeout(params.timeout)
     response = httpx.get(params.endpoint, timeout=timeout)
@@ -36,7 +36,7 @@ def builtin_httpcall(
         elif output_schema is str:
             body = response.content.decode(encoding=params.http_response_encoding)
             return body
-        elif issubclass(output_schema, FxTaskEntity):
+        elif issubclass(output_schema, TaskEntity):
             body = response.json()
             return output_schema.model_validate_json(json.dumps(body))
         else:

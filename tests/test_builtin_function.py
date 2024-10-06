@@ -4,19 +4,14 @@ from typing import Any, Dict, List
 from pydantic import RootModel
 
 from flexiagent.builtin.function.http_call import BuiltinHttpcallInput, builtin_httpcall
-from flexiagent.task.task_node import (
-    FxTaskAction,
-    FxTaskAgent,
-    FxTaskConfig,
-    FxTaskEntity,
-)
+from flexiagent.task.task_node import TaskAction, TaskAgent, TaskConfig, TaskEntity
 
 
 class APIItemSchema(RootModel[Dict[str, Any]]):
     pass
 
 
-class APISchema(FxTaskEntity, RootModel[List[APIItemSchema]]):
+class APISchema(TaskEntity, RootModel[List[APIItemSchema]]):
     pass
 
 
@@ -28,13 +23,13 @@ class TestBuiltinFunction(unittest.TestCase):
         pass
 
     def test_builtin_httpcall_output_entity(self):
-        agent = FxTaskAgent(
+        agent = TaskAgent(
             task_graph=[
-                FxTaskConfig(
+                TaskConfig(
                     task_key="output",
                     input_schema={},
                     output_schema=APISchema,
-                    action=FxTaskAction(
+                    action=TaskAction(
                         type="function",
                         act=builtin_httpcall,
                         addition={
@@ -50,13 +45,13 @@ class TestBuiltinFunction(unittest.TestCase):
         self.assertIsInstance(output, APISchema)
 
     def test_builtin_httpcall_output_str(self):
-        agent = FxTaskAgent(
+        agent = TaskAgent(
             task_graph=[
-                FxTaskConfig(
+                TaskConfig(
                     task_key="output",
                     input_schema={},
                     output_schema=str,
-                    action=FxTaskAction(
+                    action=TaskAction(
                         type="function",
                         act=builtin_httpcall,
                         addition={

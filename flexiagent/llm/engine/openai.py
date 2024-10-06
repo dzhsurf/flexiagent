@@ -5,7 +5,7 @@ from llama_cpp import Dict
 from openai import OpenAI
 
 from flexiagent.llm.engine.engine_base import LLMEngineConfig, LLMEngineImpl
-from flexiagent.llm.structured_schema import FxLLMStructuredSchema
+from flexiagent.llm.structured_schema import StructuredSchema
 from flexiagent.prompts.prompt import PromptTemplate, PromptValue
 
 # from openai.types.chat import ChatCompletion
@@ -55,8 +55,8 @@ class LLMEngineOpenAI(LLMEngineImpl[LLMConfigOpenAI]):
         prompt: PromptTemplate,
         *,
         variables: Dict[str, PromptValue] = {},
-        response_format: Type[FxLLMStructuredSchema] = FxLLMStructuredSchema,
-    ) -> FxLLMStructuredSchema:
+        response_format: Type[StructuredSchema] = StructuredSchema,
+    ) -> StructuredSchema:
         response = self.client.beta.chat.completions.parse(
             temperature=0,
             model=self.config.openai_model,

@@ -2,33 +2,33 @@ from typing import Any, Callable, Dict, List, Optional, Tuple
 
 from flexiagent.llm.config import LLMConfig
 from flexiagent.task.task_node import (
-    FxTaskAction,
-    FxTaskActionLLM,
-    FxTaskAgent,
-    FxTaskConfig,
-    FxTaskEntity,
+    TaskAction,
+    TaskActionLLM,
+    TaskAgent,
+    TaskConfig,
+    TaskEntity,
 )
 
 
-class DatabaseMetaInfo(FxTaskEntity):
+class DatabaseMetaInfo(TaskEntity):
     db_id: str
     db_uri: str
     db_metainfo: str
 
 
-class AllDatabasesMetaInfo(FxTaskEntity):
+class AllDatabasesMetaInfo(TaskEntity):
     db_metainfo_list: List[DatabaseMetaInfo]
 
 
-class DBRecognitionAgentInput(FxTaskEntity):
+class DBRecognitionAgentInput(TaskEntity):
     question: str
 
 
-class DBRecognitionAgentOutput(FxTaskEntity):
+class DBRecognitionAgentOutput(TaskEntity):
     metainfo: DatabaseMetaInfo
 
 
-class _DBRecognitionTaskOutput(FxTaskEntity):
+class _DBRecognitionTaskOutput(TaskEntity):
     db_id: str
 
 
@@ -74,40 +74,40 @@ def create_db_recognition_agent(
         Callable[[Dict[str, Any]], Tuple[Dict[str, Any], bool]]
     ] = None,
     postprocess_hook: Optional[Callable[[Dict[str, Any]], Dict[str, Any]]] = None,
-) -> FxTaskAgent:
-    agent = FxTaskAgent(
+) -> TaskAgent:
+    agent = TaskAgent(
         task_graph=[
             # step 1: fetch all database metainfo
-            FxTaskConfig(
+            TaskConfig(
                 task_key="fetch_all_databases_metainfo",
                 input_schema={},
                 output_schema=AllDatabasesMetaInfo,
-                action=FxTaskAction(
+                action=TaskAction(
                     type="function",
                     act=fetch_all_databases_metainfo_func,
                 ),
             ),
             # step 2: generate metainfo into text
-            FxTaskConfig(
+            TaskConfig(
                 task_key="generate_all_databases_metainfo_as_text",
                 input_schema={"fetch_all_databases_metainfo": AllDatabasesMetaInfo},
                 output_schema=str,
-                action=FxTaskAction(
+                action=TaskAction(
                     type="function",
                     act=DBRecognitionAgentLogic.generate_all_databases_metainfo_as_text,
                 ),
             ),
             # step 3: llm recognition
-            FxTaskConfig(
+            TaskConfig(
                 task_key="database_recognition",
                 input_schema={
                     "input": DBRecognitionAgentInput,
                     "generate_all_databases_metainfo_as_text": str,
                 },
                 output_schema=_DBRecognitionTaskOutput,
-                action=FxTaskAction(
+                action=TaskAction(
                     type="llm",
-                    act=FxTaskActionLLM(
+                    act=TaskActionLLM(
                         llm_config=llm_config,
                         instruction="""
 Match the user's questions with the corresponding database from the knowledge base based on the user's inquiries.
@@ -120,14 +120,14 @@ Databases metainfo:
                 ),
             ),
             # step 4: combine everything
-            FxTaskConfig(
+            TaskConfig(
                 task_key="output",
                 input_schema={
                     "database_recognition": _DBRecognitionTaskOutput,
                     "fetch_all_databases_metainfo": AllDatabasesMetaInfo,
                 },
                 output_schema=DBRecognitionAgentOutput,
-                action=FxTaskAction(
+                action=TaskAction(
                     type="function",
                     act=DBRecognitionAgentLogic.generate_output,
                 ),

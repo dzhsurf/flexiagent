@@ -5,40 +5,36 @@ from pydantic import BaseModel, ConfigDict
 
 from flexiagent.llm.config import LLMConfig
 from flexiagent.llm.llm import LLM
-from flexiagent.llm.structured_schema import FxLLMStructuredSchema
+from flexiagent.llm.structured_schema import StructuredSchema
 from flexiagent.prompts.prompt import PromptTemplate
-from flexiagent.task.base import FxTask
-from flexiagent.task.condition import Condition, ConditionExecutor, FxTaskActionAbort
+from flexiagent.task.base import TaskBase
+from flexiagent.task.condition import Condition, ConditionExecutor, TaskActionAbort
 
 logger = logging.getLogger(__name__)
 
 
-class FxTaskEntity(FxLLMStructuredSchema):
+class TaskEntity(StructuredSchema):
     def __repr__(self):
         field_strings = [f"{key}: {value}" for key, value in self.model_dump().items()]
         return "\n".join(field_strings)
 
 
-FxTaskActionSchemaBaseObject = Union[str, None]
-FxTaskActionSchemaObject = Union[
-    FxTaskEntity, FxTaskActionSchemaBaseObject, FxTaskActionAbort
-]
-FxTaskActionFunction = Callable[
-    [Dict[str, Any], Dict[str, Any]], FxTaskActionSchemaObject
-]
+TaskActionSchemaBaseObject = Union[str, None]
+TaskActionSchemaObject = Union[TaskEntity, TaskActionSchemaBaseObject, TaskActionAbort]
+TaskActionFunction = Callable[[Dict[str, Any], Dict[str, Any]], TaskActionSchemaObject]
 
 
-class FxTaskActionLLM(BaseModel):
+class TaskActionLLM(BaseModel):
     llm_config: LLMConfig
     instruction: str
 
 
-class FxTaskAction(BaseModel):
+class TaskAction(BaseModel):
     type: Literal["llm", "function", "agent"]
     act: Union[
-        FxTaskActionLLM,
-        FxTaskActionFunction,
-        "FxTaskAgent",
+        TaskActionLLM,
+        TaskActionFunction,
+        "TaskAgent",
     ]
     addition: Optional[Dict[str, Any]] = None
     condition: Optional[Condition] = None
@@ -46,17 +42,17 @@ class FxTaskAction(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
 
-class FxTaskConfig(BaseModel):
+class TaskConfig(BaseModel):
     task_key: str
-    input_schema: Dict[str, Type[FxTaskActionSchemaObject]]
-    output_schema: Type[FxTaskActionSchemaObject]
-    action: FxTaskAction
+    input_schema: Dict[str, Type[TaskActionSchemaObject]]
+    output_schema: Type[TaskActionSchemaObject]
+    action: TaskAction
 
 
-class FxTaskNode(FxTask):
+class TaskNode(TaskBase):
     def __init__(
         self,
-        config: FxTaskConfig,
+        config: TaskConfig,
         *,
         preprocess_hook: Optional[Callable] = None,
         postprocess_hook: Optional[Callable] = None,
@@ -68,7 +64,7 @@ class FxTaskNode(FxTask):
         self._config = config
 
     @property
-    def config(self) -> FxTaskConfig:
+    def config(self) -> TaskConfig:
         return self._config
 
     def _require_input(
@@ -81,9 +77,7 @@ class FxTaskNode(FxTask):
         if not message:
             message = f"task[{self.__class__.__name__}] input must has field {key}"
         assert key in kwargs, message
-        if (value_type is not None) and (
-            not isinstance(kwargs[key], FxTaskActionAbort)
-        ):
+        if (value_type is not None) and (not isinstance(kwargs[key], TaskActionAbort)):
             if not isinstance(kwargs[key], value_type):
                 raise TypeError(
                     f"""_require_input:
@@ -94,14 +88,14 @@ key={key} type={type(kwargs[key])} not match {value_type}
                 )
         return kwargs[key]
 
-    def _process_llm(self, _action: FxTaskAction, _inputs: Dict[str, Any]) -> Any:
-        if isinstance(_action.act, FxTaskActionLLM):
+    def _process_llm(self, _action: TaskAction, _inputs: Dict[str, Any]) -> Any:
+        if isinstance(_action.act, TaskActionLLM):
             params = _action.act
         else:
             raise TypeError(f"action params type not match. {_action.act}")
 
         llm = LLM(params.llm_config)
-        if issubclass(self.config.output_schema, FxTaskEntity):
+        if issubclass(self.config.output_schema, TaskEntity):
             prompt = PromptTemplate(
                 prompt="You are a helpful assistant that assist users in completing tasks and use formatted output.",
                 user_question_prompt=params.instruction,
@@ -121,7 +115,7 @@ key={key} type={type(kwargs[key])} not match {value_type}
             raise TypeError(f"Output schema not support, {self.config.output_schema}")
         return response
 
-    def _process_function(self, _action: FxTaskAction, _inputs: Dict[str, Any]) -> Any:
+    def _process_function(self, _action: TaskAction, _inputs: Dict[str, Any]) -> Any:
         if callable(_action.act):
             fn = _action.act
         else:
@@ -133,8 +127,8 @@ key={key} type={type(kwargs[key])} not match {value_type}
             addition["output_schema"] = self.config.output_schema
         return fn(_inputs, addition)
 
-    def _process_agent(self, _action: FxTaskAction, _inputs: Dict[str, Any]) -> Any:
-        if isinstance(_action.act, FxTaskAgent):
+    def _process_agent(self, _action: TaskAction, _inputs: Dict[str, Any]) -> Any:
+        if isinstance(_action.act, TaskAgent):
             agent = _action.act
         else:
             raise TypeError(f"action params type not match. {_action.act}")
@@ -148,8 +142,8 @@ key={key} type={type(kwargs[key])} not match {value_type}
         }
         action = self.config.action
         if isinstance(action, dict):
-            action = FxTaskAction(**action)
-        elif isinstance(action, FxTaskAction):
+            action = TaskAction(**action)
+        elif isinstance(action, TaskAction):
             pass
         else:
             raise TypeError(f"action type not match. {action}")
@@ -181,11 +175,11 @@ key={key} type={type(kwargs[key])} not match {value_type}
         return response
 
 
-class FxTaskAgent:
+class TaskAgent:
     def __init__(
         self,
         *,
-        task_graph: List[Union[FxTaskConfig, FxTaskNode]],
+        task_graph: List[Union[TaskConfig, TaskNode]],
         preprocess_hook: Optional[
             Callable[[Dict[str, Any]], Tuple[Dict[str, Any], bool]]
         ] = None,
@@ -196,22 +190,22 @@ class FxTaskAgent:
         self.postprocess_hook = postprocess_hook
 
     def _build_graph(
-        self, item_list: List[Union[FxTaskConfig, FxTaskNode]]
-    ) -> Dict[str, FxTaskNode]:
-        graph_dict: Dict[str, FxTaskNode] = {}
+        self, item_list: List[Union[TaskConfig, TaskNode]]
+    ) -> Dict[str, TaskNode]:
+        graph_dict: Dict[str, TaskNode] = {}
         for item in item_list:
-            if isinstance(item, FxTaskConfig):
-                graph_dict[item.task_key] = FxTaskNode(item)
-            elif isinstance(item, FxTaskNode):
+            if isinstance(item, TaskConfig):
+                graph_dict[item.task_key] = TaskNode(item)
+            elif isinstance(item, TaskNode):
                 graph_dict[item.config.task_key] = item
         return graph_dict
 
-    def _topo_sort(self, node_graph: Dict[str, FxTaskNode]) -> List[FxTaskNode]:
+    def _topo_sort(self, node_graph: Dict[str, TaskNode]) -> List[TaskNode]:
         visited: Set[str] = set()
         temp_marked: Set[str] = set()
-        stack: List[FxTaskNode] = []
+        stack: List[TaskNode] = []
 
-        def dfs(node: FxTaskNode):
+        def dfs(node: TaskNode):
             if node.config.task_key in temp_marked:
                 raise ValueError("Graph is not a DAG")
 
@@ -233,8 +227,8 @@ class FxTaskAgent:
         return stack
 
     def _build_task_graph(
-        self, config_items: List[Union[FxTaskConfig, FxTaskNode]]
-    ) -> List[FxTaskNode]:
+        self, config_items: List[Union[TaskConfig, TaskNode]]
+    ) -> List[TaskNode]:
         # check input paramaters
         node_graph = self._build_graph(config_items)
         sorted_nodes = self._topo_sort(node_graph)
@@ -242,10 +236,10 @@ class FxTaskAgent:
         return sorted_nodes
 
     def invoke(self, *args: Any, **kwds: Any) -> Any:
-        context: Dict[str, Union[FxTaskEntity, str]] = {}
+        context: Dict[str, Union[TaskEntity, str]] = {}
         if "input" not in kwds:
             for arg in args:
-                if isinstance(arg, (FxTaskEntity, str)):
+                if isinstance(arg, (TaskEntity, str)):
                     context["input"] = arg
         for key, value in kwds.items():
             context[key] = value
