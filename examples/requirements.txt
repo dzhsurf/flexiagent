@@ -1,2 +1,2 @@
 gradio
-flexiagent
+flexiagent==0.1.0a8
