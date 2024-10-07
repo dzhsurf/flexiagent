@@ -6,6 +6,7 @@ from typing import Any, Callable, Dict, List, cast
 from flexiagent.llm.config import LLMConfig
 from flexiagent.task.base import (
     TaskAction,
+    TaskActionAgent,
     TaskActionContext,
     TaskActionLLM,
     TaskConfig,
@@ -29,17 +30,17 @@ class ChatQA(TaskEntity):
 
 class TestCustomAgentWithStructuredOutput(unittest.TestCase):
     def setUp(self):
-        # self.llm_config = LLMConfig(
-        #     engine="OpenAI", params={"openai_model": "gpt-4o-mini"}
-        # )
         self.llm_config = LLMConfig(
-            engine="LlamaCpp",
-            params={
-                "repo_id_or_model_path": "QuantFactory/Llama-3.2-3B-Instruct-GGUF",
-                "repo_filename": "*Q4_K_M.gguf",
-                "n_ctx": 4096,
-            },
+            engine="OpenAI", params={"openai_model": "gpt-4o-mini"}
         )
+        # self.llm_config = LLMConfig(
+        #     engine="LlamaCpp",
+        #     params={
+        #         "repo_id_or_model_path": "QuantFactory/Llama-3.2-3B-Instruct-GGUF",
+        #         "repo_filename": "*Q4_K_M.gguf",
+        #         "n_ctx": 4096,
+        #     },
+        # )
 
     def tearDown(self):
         pass
@@ -126,7 +127,9 @@ User: {input}
                     output_schema=ChatOutput,
                     action=TaskAction(
                         type="agent",
-                        act=llm_agent,
+                        act=TaskActionAgent(
+                            fn=lambda: llm_agent,
+                        ),
                     ),
                 ),
             ],
@@ -181,7 +184,9 @@ User: {input}
                     output_schema=ChatOutput,
                     action=TaskAction(
                         type="agent",
-                        act=llm_agent,
+                        act=TaskActionAgent(
+                            fn=lambda: llm_agent,
+                        ),
                     ),
                 ),
                 # step 2: combine everything to output

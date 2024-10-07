@@ -5,14 +5,14 @@ from gradio_chatbot import AgentChatBot
 from gradio_chatbot.utils import get_llm_config
 from pydantic import BaseModel
 
-from flexiagent.task.task_agent import create_task_agent
-from flexiagent.task.task_node import (
+from flexiagent.task.base import (
     TaskAction,
     TaskActionLLM,
     TaskAgent,
     TaskConfig,
     TaskEntity,
 )
+from flexiagent.task.task_agent import create_task_agent
 
 logger = logging.getLogger(__name__)
 

@@ -1,6 +1,6 @@
 from typing import Any, Dict, List, Literal, Optional, Tuple, Union
 
-from typing_extensions import TypedDict
+from pydantic import BaseModel
 
 from flexiagent.llm.structured_schema import StructuredSchema
 
@@ -14,15 +14,15 @@ class TaskActionAbort(StructuredSchema):
 ConditionSupportOp = Literal["==", "!="]
 
 
-class ConditionOp(TypedDict):
+class ConditionOp(BaseModel):
     path: str
-    op: ConditionSupportOp
     expected: Any
+    op: ConditionSupportOp = "=="
 
 
-class Condition(TypedDict):
+class Condition(BaseModel):
     terms: List[Union[ConditionOp, Tuple[str, ConditionSupportOp, Any]]]
-    mode: Literal["match_all", "match_one"]
+    mode: Literal["match_all", "match_one"] = "match_all"
 
 
 class ConditionExecutor:
@@ -39,9 +39,9 @@ class ConditionExecutor:
 
     def _match_all(self, terms: List[ConditionOp], inputs: Dict[str, Any]) -> bool:
         for term in terms:
-            path = term["path"]
-            op = term["op"]
-            expected = term["expected"]
+            path = term.path
+            op = term.op
+            expected = term.expected
             target_object = inputs
             path_arr = path.split(".")
             try:
@@ -61,9 +61,9 @@ class ConditionExecutor:
 
     def _match_one(self, terms: List[ConditionOp], inputs: Dict[str, Any]) -> bool:
         for term in terms:
-            path = term["path"]
-            op = term["op"]
-            expected = term["expected"]
+            path = term.path
+            op = term.op
+            expected = term.expected
             target_object = inputs
             path_arr = path.split(".")
             try:
@@ -82,9 +82,9 @@ class ConditionExecutor:
         return False
 
     def __call__(self, inputs: Dict[str, Any]) -> Optional[TaskActionAbort]:
-        mode = self.condition["mode"]
+        mode = self.condition.mode
         terms: List[ConditionOp] = []
-        for term in self.condition["terms"]:
+        for term in self.condition.terms:
             if type(term) is ConditionOp:
                 terms.append(term)
             elif isinstance(term, tuple):

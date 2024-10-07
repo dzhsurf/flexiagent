@@ -11,7 +11,7 @@ class TaskAgentImpl(TaskAgent):
     def __init__(
         self,
         *,
-        task_graph: List[Union[TaskConfig, TaskNode]],
+        task_graph: List[TaskConfig],
         preprocess_hook: Optional[
             Callable[[Dict[str, Any]], Tuple[Dict[str, Any], bool]]
         ] = None,
@@ -21,15 +21,13 @@ class TaskAgentImpl(TaskAgent):
         self.preprocess_hook = preprocess_hook
         self.postprocess_hook = postprocess_hook
 
-    def _build_graph(
-        self, item_list: List[Union[TaskConfig, TaskNode]]
-    ) -> Dict[str, TaskNode]:
+    def _build_graph(self, item_list: List[TaskConfig]) -> Dict[str, TaskNode]:
         graph_dict: Dict[str, TaskNode] = {}
         for item in item_list:
             if isinstance(item, TaskConfig):
                 graph_dict[item.task_key] = TaskNode(item)
-            elif isinstance(item, TaskNode):
-                graph_dict[item.config.task_key] = item
+            else:
+                raise TypeError(f"Invalid task config, {item}")
         return graph_dict
 
     def _topo_sort(self, node_graph: Dict[str, TaskNode]) -> List[TaskNode]:
@@ -58,9 +56,7 @@ class TaskAgentImpl(TaskAgent):
 
         return stack
 
-    def _build_task_graph(
-        self, config_items: List[Union[TaskConfig, TaskNode]]
-    ) -> List[TaskNode]:
+    def _build_task_graph(self, config_items: List[TaskConfig]) -> List[TaskNode]:
         # check input paramaters
         node_graph = self._build_graph(config_items)
         sorted_nodes = self._topo_sort(node_graph)
@@ -101,7 +97,7 @@ class TaskAgentImpl(TaskAgent):
 
 
 def create_task_agent(
-    task_graph: List[Union[TaskConfig, TaskNode]],
+    task_graph: List[TaskConfig],
     preprocess_hook: Optional[
         Callable[[Dict[str, Any]], Tuple[Dict[str, Any], bool]]
     ] = None,

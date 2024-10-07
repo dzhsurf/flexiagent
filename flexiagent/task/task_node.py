@@ -1,14 +1,14 @@
 import logging
-from typing import Any, Callable, Dict, List, Optional, Set, Tuple, Type, Union
+from typing import Any, Callable, Dict, Optional, Type
 
 from flexiagent.llm.llm import LLM
 from flexiagent.prompts.prompt import PromptTemplate
 from flexiagent.task.action_loader import ActionLoader
 from flexiagent.task.base import (
     TaskAction,
+    TaskActionAgent,
     TaskActionContext,
     TaskActionLLM,
-    TaskAgent,
     TaskBase,
     TaskConfig,
     TaskEntity,
@@ -102,8 +102,8 @@ key={key} type={type(kwargs[key])} not match {value_type}
         return fn(ctx, _inputs, addition)
 
     def _process_agent(self, _action: TaskAction, _inputs: Dict[str, Any]) -> Any:
-        if isinstance(_action.act, TaskAgent):
-            agent = _action.act
+        if isinstance(_action.act, TaskActionAgent):
+            agent = _action.act.fn()
         elif isinstance(_action.act, str):
             agent = ActionLoader.load_agent(_action.act)
         else:

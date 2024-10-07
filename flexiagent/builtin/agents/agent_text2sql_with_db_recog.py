@@ -14,7 +14,13 @@ from flexiagent.builtin.agents.agent_text2sql import (
     create_text2sql_agent,
 )
 from flexiagent.llm.config import LLMConfig
-from flexiagent.task.base import TaskAction, TaskActionContext, TaskAgent, TaskConfig
+from flexiagent.task.base import (
+    TaskAction,
+    TaskActionAgent,
+    TaskActionContext,
+    TaskAgent,
+    TaskConfig,
+)
 from flexiagent.task.task_agent import create_task_agent
 
 logger = logging.getLogger(__name__)
@@ -91,10 +97,12 @@ def create_text2sql_agent_with_db_recognition(
                 output_schema=DBRecognitionAgentOutput,
                 action=TaskAction(
                     type="agent",
-                    act=create_db_recognition_agent(
-                        llm_config,
-                        fetch_all_databases_metainfo_func,
-                        preprocess_hook=_convert_str_to_dbrecog_input,
+                    act=TaskActionAgent(
+                        fn=lambda: create_db_recognition_agent(
+                            llm_config,
+                            fetch_all_databases_metainfo_func,
+                            preprocess_hook=_convert_str_to_dbrecog_input,
+                        ),
                     ),
                 ),
             ),
@@ -108,10 +116,12 @@ def create_text2sql_agent_with_db_recognition(
                 output_schema=Text2SQLAgentOutput,
                 action=TaskAction(
                     type="agent",
-                    act=create_text2sql_agent(
-                        llm_config,
-                        preprocess_hook=_convert_str_dbrecog_to_text2sql_input,
-                        custom_llm_instruction=custom_text2sql_instruction,
+                    act=TaskActionAgent(
+                        fn=lambda: create_text2sql_agent(
+                            llm_config,
+                            preprocess_hook=_convert_str_dbrecog_to_text2sql_input,
+                            custom_llm_instruction=custom_text2sql_instruction,
+                        ),
                     ),
                 ),
             ),

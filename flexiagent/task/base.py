@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Any, Callable, Dict, Literal, Optional, Type, Union
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel
 from typing_extensions import TypedDict
 
 from flexiagent.llm.config import LLMConfig
@@ -71,18 +71,22 @@ class TaskAgent(ABC):
         pass
 
 
+class TaskActionAgent(BaseModel):
+    fn: Callable[..., TaskAgent]
+
+
 class TaskAction(BaseModel):
     type: Literal["llm", "function", "agent"]
     act: Union[
         TaskActionLLM,
         TaskActionFunction,
-        TaskAgent,
+        TaskActionAgent,
         str,
     ]
     addition: Optional[Dict[str, Any]] = None
     condition: Optional[Condition] = None
 
-    model_config = ConfigDict(arbitrary_types_allowed=True)
+    # model_config = ConfigDict(arbitrary_types_allowed=True)
 
 
 class TaskConfig(BaseModel):

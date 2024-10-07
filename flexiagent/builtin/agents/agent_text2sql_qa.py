@@ -10,6 +10,7 @@ from flexiagent.database.db_executor import DBConfig, DBExecutor
 from flexiagent.llm.config import LLMConfig
 from flexiagent.task.base import (
     TaskAction,
+    TaskActionAgent,
     TaskActionContext,
     TaskActionLLM,
     TaskAgent,
@@ -97,9 +98,11 @@ def create_text2sql_qa_agent(
                 output_schema=Text2SQLAgentOutput,
                 action=TaskAction(
                     type="agent",
-                    act=create_text2sql_agent(
-                        llm_config,
-                        preprocess_hook=_convert_input_to_text2sql_agent_input,
+                    act=TaskActionAgent(
+                        fn=lambda: create_text2sql_agent(
+                            llm_config,
+                            preprocess_hook=_convert_input_to_text2sql_agent_input,
+                        ),
                     ),
                 ),
             ),

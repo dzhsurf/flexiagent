@@ -12,12 +12,14 @@ from flexiagent.builtin.agents.agent_text2sql_qa import create_text2sql_qa_agent
 from flexiagent.database.db_executor import DBConfig, DBExecutor
 from flexiagent.task.base import (
     TaskAction,
+    TaskActionAgent,
     TaskActionContext,
     TaskActionLLM,
     TaskAgent,
     TaskConfig,
     TaskEntity,
 )
+from flexiagent.task.condition import Condition
 from flexiagent.task.task_agent import create_task_agent
 
 # from flexiagent.task.condition import Condition
@@ -225,17 +227,16 @@ Question: {input.input}
                     output_schema=str,
                     action=TaskAction(
                         type="agent",
-                        act=create_text2sql_qa_agent(
-                            llm_config,
-                            _fetch_database_metainfo,
-                            preprocess_hook=_convert_chatbot_input_to_text2sql_qa_input,
+                        act=TaskActionAgent(
+                            fn=lambda: create_text2sql_qa_agent(
+                                llm_config,
+                                _fetch_database_metainfo,
+                                preprocess_hook=_convert_chatbot_input_to_text2sql_qa_input,
+                            )
                         ),
-                        condition={
-                            "terms": [
-                                ("user_intent.intent", "==", "QA"),
-                            ],
-                            "mode": "match_all",
-                        },
+                        condition=Condition(
+                            terms=[("user_intent.intent", "==", "QA")],
+                        ),
                     ),
                 ),
                 # step 2.2: fallback action
@@ -257,12 +258,9 @@ Question: {input.input}
 Question: {input.input}
 """,
                         ),
-                        condition={
-                            "terms": [
-                                ("user_intent.intent", "==", "Other"),
-                            ],
-                            "mode": "match_all",
-                        },
+                        condition=Condition(
+                            terms=[("user_intent.intent", "==", "Other")],
+                        ),
                     ),
                 ),
                 # step 3:
