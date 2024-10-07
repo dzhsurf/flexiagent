@@ -7,7 +7,6 @@ license = "MIT"
 readme = "README.md"
 classifiers = ["Typing :: Typed",
     "Intended Audience :: Developers",
-    "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
@@ -23,13 +22,14 @@ homepage = "https://github.com/dzhsurf/flexiagent"
 repository = "https://github.com/dzhsurf/flexiagent"
 
 [tool.poetry.dependencies]
-python = ">=3.8,<4"
+python = ">=3.9,<4"
 sqlparse = "^0.5.1"
 openai = "^1.43.0"
 pydantic = "^2.9.0"
 sqlalchemy = "^2.0.34"
 llama-cpp-python = "^0.3.0"
 huggingface-hub = "^0.24.6"
+ray = "^2.37.0"
 
 [tool.poetry.group.dev.dependencies]
 mypy = "^1.11.2"
